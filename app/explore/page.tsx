@@ -1,8 +1,8 @@
-export default function Home() {
+export default function Explore() {
   return (
     <main className="">
       <div className="">
-        <h1>Aeko Main Feed Section</h1>
+        <h1>Aeko Explore Section</h1>
         <p>
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate
           accusamus ipsam nobis amet officiis excepturi debitis necessitatibus
