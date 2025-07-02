@@ -121,29 +121,36 @@ export const NavIcons = [
   {
     name: "Home",
     icon: HomeIcon,
+    path: "/"
   },
   {
     name: "Search",
     icon: SearchIcon,
+    path: ""
   },
   {
     name: "Notifications",
     icon: NotificationsIcon,
+    path: ""
   },
   {
     name: "Messages",
     icon: MessageIcon,
+    path: ""
   },
   {
     name: "Bookmarks",
     icon: BookmarkIcon,
+    path: "/bookmarks"
   },
   {
     name: "Profile",
     icon: ProfileIcon,
+    path: "/profile"
   },
   {
     name: "More",
     icon: MoreIcon,
+    path: "/settings"
   },
 ];

@@ -3,9 +3,21 @@
 import Image from "next/image";
 import { NavIcons } from "../icons";
 import { useTheme } from "../theme-provider";
-import { MoonStar, SunDim } from "lucide-react";
+import {
+  BellIcon,
+  BookmarkIcon,
+  HomeIcon,
+  MessageCircle,
+  MoonStar,
+  MoreHorizontalIcon,
+  SearchIcon,
+  SunDim,
+  UserIcon,
+} from "lucide-react";
 import { useReducer } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 // Dialog state and actions
 
@@ -23,16 +35,35 @@ type DialogAction =
   | { type: "TOGGLE_SEARCH" }
   | { type: "CLOSE_ALL" };
 
-const dialogReducer = (state: DialogState, action: DialogAction): DialogState => {
+const dialogReducer = (
+  state: DialogState,
+  action: DialogAction
+): DialogState => {
   switch (action.type) {
     case "TOGGLE_MESSAGES":
-      return { isMessagesOpen: !state.isMessagesOpen, isNotificationsOpen: false, isSearchOpen: false };
+      return {
+        isMessagesOpen: !state.isMessagesOpen,
+        isNotificationsOpen: false,
+        isSearchOpen: false,
+      };
     case "TOGGLE_NOTIFICATIONS":
-      return { isMessagesOpen: false, isNotificationsOpen: !state.isNotificationsOpen, isSearchOpen: false };
+      return {
+        isMessagesOpen: false,
+        isNotificationsOpen: !state.isNotificationsOpen,
+        isSearchOpen: false,
+      };
     case "TOGGLE_SEARCH":
-      return { isMessagesOpen: false, isNotificationsOpen: false, isSearchOpen: !state.isSearchOpen };
+      return {
+        isMessagesOpen: false,
+        isNotificationsOpen: false,
+        isSearchOpen: !state.isSearchOpen,
+      };
     case "CLOSE_ALL":
-      return { isMessagesOpen: false, isNotificationsOpen: false, isSearchOpen: false };
+      return {
+        isMessagesOpen: false,
+        isNotificationsOpen: false,
+        isSearchOpen: false,
+      };
     default:
       return state;
   }
@@ -44,7 +75,15 @@ const dialogActionMap: Record<DialogName, DialogAction["type"]> = {
   Search: "TOGGLE_SEARCH",
 };
 
-function ThemeToggle({ theme, toggleTheme, isDialogOpen }: { theme: string; toggleTheme: () => void; isDialogOpen: boolean }) {
+function ThemeToggle({
+  theme,
+  toggleTheme,
+  isDialogOpen,
+}: {
+  theme: string;
+  toggleTheme: () => void;
+  isDialogOpen: boolean;
+}) {
   const Icon = theme === "dark" ? SunDim : MoonStar;
   const label = theme === "dark" ? "Light" : "Dark";
   return (
@@ -54,14 +93,30 @@ function ThemeToggle({ theme, toggleTheme, isDialogOpen }: { theme: string; togg
       title="Toggle Theme"
     >
       <Icon className="size-6 m-0 text-primary hover:text-accent transition-colors" />
-      <h2 className={`hidden xl:block text-secondary-foreground ${isDialogOpen ? "xl:hidden" : ""}`}>{label}</h2>
+      <h2
+        className={`hidden xl:block text-secondary-foreground ${
+          isDialogOpen ? "xl:hidden" : ""
+        }`}
+      >
+        {label}
+      </h2>
     </button>
   );
 }
 
-function SidebarLogo({ theme, isDialogOpen }: { theme: string; isDialogOpen: boolean }) {
+function SidebarLogo({
+  theme,
+  isDialogOpen,
+}: {
+  theme: string;
+  isDialogOpen: boolean;
+}) {
   return (
-    <div className={`w-full p-3 flex items-center justify-center ${isDialogOpen ? "xl:justify-center" : "xl:justify-start"}`}>
+    <div
+      className={`w-full p-3 flex items-center justify-center ${
+        isDialogOpen ? "xl:justify-center" : "xl:justify-start"
+      }`}
+    >
       <Image
         src={theme === "dark" ? "/aeko-dark.png" : "/aeko-light.png"}
         alt="aeko logo"
@@ -77,81 +132,171 @@ function DialogPanel({ label }: { label: DialogName }) {
   return (
     <motion.div
       id={`${label.toLowerCase()}-dialog`}
-      className="hidden md:flex flex-col w-[320px] h-screen border-r border-secondary-foreground glass py-2 px-2.5 z-10"
-      initial={{ x: -320, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      exit={{ x: -320, opacity: 0 }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      className="h-screen border-r border-secondary-foreground bg-glass py-2 px-2.5 z-10 overflow-hidden"
+      initial={{ width: 0, opacity: 0 }}
+      animate={{ width: 320, opacity: 1 }}
+      exit={{ width: 0, opacity: 0 }}
+      transition={{ type: "tween", stiffness: 300, damping: 30, duration: 0.2 }}
     >
-      <h2>{label}</h2>
+      <h2 className="text-foreground font-semibold text-lg">{label}</h2>
     </motion.div>
   );
 }
 
+const routes = [
+  {
+    name: "Home",
+    icon: HomeIcon,
+    path: "/",
+  },
+  {
+    name: "Search",
+    icon: SearchIcon,
+    path: "",
+  },
+  {
+    name: "Notifications",
+    icon: BellIcon,
+    path: "",
+  },
+  {
+    name: "Messages",
+    icon: MessageCircle,
+    path: "",
+  },
+  {
+    name: "Bookmarks",
+    icon: BookmarkIcon,
+    path: "/bookmarks",
+  },
+  {
+    name: "Profile",
+    icon: UserIcon,
+    path: "/profile",
+  },
+  {
+    name: "More",
+    icon: MoreHorizontalIcon,
+    path: "/settings",
+  },
+];
+
 export default function LeftSidebar() {
   const { theme, toggleTheme } = useTheme();
+  const pathname = usePathname();
   const [dialogState, dispatch] = useReducer(dialogReducer, {
     isMessagesOpen: false,
     isNotificationsOpen: false,
     isSearchOpen: false,
   });
 
-  const isDialogOpen = dialogState.isMessagesOpen || dialogState.isNotificationsOpen || dialogState.isSearchOpen;
+  const isDialogOpen =
+    dialogState.isMessagesOpen ||
+    dialogState.isNotificationsOpen ||
+    dialogState.isSearchOpen;
 
   const handleClick = (name: DialogName) => {
     dispatch({ type: dialogActionMap[name] });
   };
 
   return (
-    <div className={`hidden md:flex fixed left-0 h-screen bg-glass z-10 ${
-        isDialogOpen ? "xl:w-[320px]" : ""
-      }`}>
+    <div
+      className={`hidden md:flex fixed left-0 h-screen glass z-10 ${
+        isDialogOpen ? "" : ""
+      }`}
+    >
       <div
         className={`hidden md:flex flex-col w-[72px] transition-all duration-300 ease-in-out ${
-          isDialogOpen ? "xl:w-[72px] border-r border-secondary-foreground" : "xl:w-[200px]"
-        } h-screen bg-glass py-2  px-2.5`}
+          isDialogOpen ? "xl:w-[72px]" : "xl:w-[200px]"
+        } h-screen py-2  px-2.5`}
       >
         <div className="flex-1 flex flex-col justify-start items-center gap-4 py-4">
           <SidebarLogo theme={theme} isDialogOpen={isDialogOpen} />
 
           <nav className="flex-1 w-full flex flex-col items-center gap-4">
-            {NavIcons.map((item) => (
-              <button
-                key={item.name}
-                className={`w-full p-3 flex items-center justify-center xl:justify-start hover:bg-accent hover:text-muted transition-colors group relative gap-3 rounded-md ${
+            {routes.map((item) => {
+              const isDialogItem = [
+                "Messages",
+                "Notifications",
+                "Search",
+              ].includes(item.name);
+
+              const commonProps = {
+                className: `w-full p-3 flex items-center justify-center xl:justify-start hover:bg-accent-foreground hover:text-background transition-colors group relative gap-3 rounded-full ${
                   isDialogOpen ? "xl:justify-center" : ""
-                }`}
-                onClick={() => handleClick(item.name as DialogName)}
-                aria-expanded={dialogState[`is${item.name}Open` as keyof DialogState] as boolean}
-                aria-controls={`${item.name.toLowerCase()}-dialog`}
-                title={`Open ${item.name}`}
-              >
-                <item.icon />
-                <motion.h2 
-                  initial={{ opacity: 1, x: 0 }}
-                  animate={{ 
-                    opacity: isDialogOpen ? 0 : 1,
-                    x: isDialogOpen ? -20 : 0
-                  }}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  className={`hidden xl:block text-secondary-foreground ${isDialogOpen ? "xl:hidden" : ""}`}
-                >
-                  {item.name}
-                </motion.h2>
-              </button>
-            ))}
+                }`,
+                onClick: isDialogItem
+                  ? () => handleClick(item.name as DialogName)
+                  : undefined,
+                "aria-expanded": isDialogItem
+                  ? (dialogState[
+                      `is${item.name}Open` as keyof DialogState
+                    ] as boolean)
+                  : undefined,
+                "aria-controls": isDialogItem
+                  ? `${item.name.toLowerCase()}-dialog`
+                  : undefined,
+                title: isDialogItem ? `Open ${item.name}` : item.name,
+              };
+
+              return isDialogItem ? (
+                <button key={item.name} {...commonProps}>
+                  <item.icon />
+                  <motion.h2
+                    initial={{ opacity: 1, x: 0 }}
+                    animate={{
+                      opacity: isDialogOpen ? 0 : 1,
+                      x: isDialogOpen ? -20 : 0,
+                    }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    className={`hidden xl:block ${
+                      isDialogOpen ? "xl:hidden" : ""
+                    }`}
+                  >
+                    {item.name}
+                  </motion.h2>
+                </button>
+              ) : (
+                <Link key={item.name} href={item.path} replace {...commonProps}>
+                  <item.icon />
+                  <motion.h2
+                    initial={{ opacity: 1, x: 0 }}
+                    animate={{
+                      opacity: isDialogOpen ? 0 : 1,
+                      x: isDialogOpen ? -20 : 0,
+                    }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    className={`hidden xl:block ${
+                      isDialogOpen ? "xl:hidden" : ""
+                    }`}
+                  >
+                    {item.name}
+                  </motion.h2>
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="flex-1 w-full flex flex-col justify-end gap-4 mt-auto pb-4">
-            <ThemeToggle theme={theme} toggleTheme={toggleTheme} isDialogOpen={isDialogOpen} />
+            <ThemeToggle
+              theme={theme}
+              toggleTheme={toggleTheme}
+              isDialogOpen={isDialogOpen}
+            />
           </div>
         </div>
       </div>
 
       <AnimatePresence>
-        {dialogState.isMessagesOpen && <DialogPanel label="Messages" />}
-        {dialogState.isNotificationsOpen && <DialogPanel label="Notifications" />}
-        {dialogState.isSearchOpen && <DialogPanel label="Search" />}
+        {dialogState.isMessagesOpen && (
+          <DialogPanel label="Messages" key="messages" />
+        )}
+        {dialogState.isNotificationsOpen && (
+          <DialogPanel label="Notifications" key="notifications" />
+        )}
+        {dialogState.isSearchOpen && (
+          <DialogPanel label="Search" key="search" />
+        )}
       </AnimatePresence>
     </div>
   );
