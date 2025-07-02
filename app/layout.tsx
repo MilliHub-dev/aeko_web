@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import LeftSidebar from "@/components/shared/left-sidebar";
+import Header from "@/components/shared/header";
+import RightSidebar from "@/components/shared/right-sidebar";
+import MobileNavbar from "@/components/shared/mobile-navbar";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,26 +32,25 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-background`}
       >
-        {/* Main container */}
-        <div className="flex mx-auto">
-          {/* Left sidebar */}
-          <div className="hidden w-[90px] md:flex fixed left-0  lg:w-[280px] h-[100vh] bg-background border-r border-gray-700 justify-center items-center">
-            <h1>Left Sidebar</h1>
-          </div>
+        <ThemeProvider defaultTheme="dark" storageKey="aeko-theme">
+          {/* Main container */}
+          <div className="flex mx-auto">
+            {/* Left sidebar */}
+            <LeftSidebar />
 
-          {/* Main content */}
-          <main className="md:pl-[90px] lg:pl-[280px] lg:pr-[320px] flex-1 min-h-screen">
-            <div className="max-w-[600px] mx-auto py-4 px-6">{children}</div>
-          </main>
-          {/* Right sidebar */}
-          <div className="hidden lg:flex fixed right-0 w-[320px] h-[100vh] bg-background border-l border-gray-700 justify-center items-center">
-            <h1>Right Sidebar</h1>
+            {/* Main content */}
+            <main className="md:pl-[90px] xl:pl-[200px] xl:pr-[320px] flex-1 min-h-screen min-w-[600px] snap-y snap-mandatory">
+              <Header />
+              <div className="max-w-[600px] mx-auto py-4 px-6 snap-center">
+                {children}
+              </div>
+            </main>
+            {/* Right sidebar */}
+            <RightSidebar />
           </div>
-        </div>
-        {/* Mobile navbar */}
-        <div className="flex md:hidden fixed bottom-0 z-10 w-full h-14 bg-blue-500 border-b border-gray-700 justify-center items-center">
-          <h1>Mobile Nav Bar</h1>
-        </div>
+          {/* Mobile navbar */}
+          <MobileNavbar />
+        </ThemeProvider>
       </body>
     </html>
   );
