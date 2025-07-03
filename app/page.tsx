@@ -2,11 +2,10 @@
 
 import { Post as PostType } from "@/lib/types";
 import { Post } from "@/components/post";
-import { useState } from "react";
 
 export default function Home() {
-  const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
-  const [savedPosts, setSavedPosts] = useState<Set<number>>(new Set());
+ const likedPosts = new Set<number>();
+ const savedPosts = new Set<number>();
 
   const samplePosts: PostType[] = [
     {
@@ -88,17 +87,6 @@ export default function Home() {
     },
   ];
 
-  const toggleLike = (postId: number) => {
-    const newLiked = new Set(likedPosts);
-    newLiked.has(postId) ? newLiked.delete(postId) : newLiked.add(postId);
-    setLikedPosts(newLiked);
-  };
-
-  const toggleSave = (postId: number) => {
-    const newSaved = new Set(savedPosts);
-    newSaved.has(postId) ? newSaved.delete(postId) : newSaved.add(postId);
-    setSavedPosts(newSaved);
-  };
   return (
     <main className="">
       <div className="space-y-6">
