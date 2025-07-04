@@ -1,4 +1,4 @@
-import { Image, Link2, MapPin, Smile, Video } from "lucide-react";
+import { Image as ImageIcon, Link2, MapPin, Smile, Video } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 
@@ -7,7 +7,7 @@ export default function CreatePost() {
     <div className="w-full max-w-3xl bg-accent-foreground/80 backdrop-blur-md  mx-auto p-4 space-y-4 rounded-2xl">
       <div className="flex items-start gap-3">
         <Avatar className="w-10 h-10">
-          <AvatarImage src="/placeholder.svg" />
+          <AvatarImage src="/placeholder.svg" alt="user-profile" />
           <AvatarFallback>U</AvatarFallback>
         </Avatar>
         
@@ -23,7 +23,7 @@ export default function CreatePost() {
               size="icon"
               className="rounded-full hover:bg-primary/10 hover:text-primary"
             >
-              <Image className="w-5 h-5" />
+              <ImageIcon className="w-5 h-5" />
             </Button>
             <Button
               variant="ghost"

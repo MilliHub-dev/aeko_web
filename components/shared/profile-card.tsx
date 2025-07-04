@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { Badge } from "../ui/badge";
 
 export default function ProfileCard({
   isDialogOpen,

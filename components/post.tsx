@@ -1,3 +1,4 @@
+import Image from "next/image";
 import {
   MapPin,
   MoreHorizontal,
@@ -115,10 +116,12 @@ export function Post({
                 </div>
               </>
             ) : (
-              <img
+              <Image
                 src={item.url}
                 alt={`Post content ${index + 1}`}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
             )}
           </div>

@@ -1,6 +1,4 @@
-import { Star, Flame as Fire } from "lucide-react";
-import { Button } from "../ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Flame as Fire } from "lucide-react";
 import { Badge } from "../ui/badge";
 
 export default function RightSidebar() {
