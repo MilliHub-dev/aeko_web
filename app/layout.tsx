@@ -34,7 +34,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-purple-50`}
       >
-        <ThemeProvider defaultTheme="dark" storageKey="aeko-theme">
+        <ThemeProvider defaultTheme="light" storageKey="aeko-theme">
           {/* Main container */}
           <Header />
           <div className="flex max-w-7xl mx-auto mt-5 relative">
