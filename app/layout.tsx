@@ -6,6 +6,8 @@ import Header from "@/components/shared/header";
 import RightSidebar from "@/components/shared/right-sidebar";
 import MobileNavbar from "@/components/shared/mobile-navbar";
 import { ThemeProvider } from "@/components/theme-provider";
+import Stories from "@/components/stories";
+import CreatePost from "@/components/create-post";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,17 +32,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-background`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-purple-50`}
       >
         <ThemeProvider defaultTheme="dark" storageKey="aeko-theme">
           {/* Main container */}
-          <div className="flex mx-auto">
+          <Header />
+          <div className="flex max-w-7xl mx-auto mt-5 relative">
             {/* Left sidebar */}
             <LeftSidebar />
 
             {/* Main content */}
-            <main className="md:pl-[90px] xl:pl-[200px] xl:pr-[320px] flex-1 min-h-screen min-w-[600px] snap-y snap-mandatory">
-              <Header />
+            <main className="md:pl-[80px] xl:pl-[220px] xl:pr-[320px] flex-1 min-h-screen min-w-[600px] snap-y snap-mandatory space-y-5">
+              <Stories />
+              <CreatePost />
               <div className="max-w-[600px] mx-auto py-4 px-6 snap-center">
                 {children}
               </div>

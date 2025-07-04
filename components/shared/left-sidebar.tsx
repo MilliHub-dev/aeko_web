@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { NavIcons } from "../icons";
 import { useTheme } from "../theme-provider";
 import {
   BellIcon,
@@ -17,10 +16,9 @@ import {
 import { useReducer } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import ProfileCard from "./profile-card";
 
 // Dialog state and actions
-
 type DialogState = {
   isMessagesOpen: boolean;
   isNotificationsOpen: boolean;
@@ -104,39 +102,15 @@ function ThemeToggle({
   );
 }
 
-function SidebarLogo({
-  theme,
-  isDialogOpen,
-}: {
-  theme: string;
-  isDialogOpen: boolean;
-}) {
-  return (
-    <div
-      className={`w-full p-3 flex items-center justify-center ${
-        isDialogOpen ? "xl:justify-center" : "xl:justify-start"
-      }`}
-    >
-      <Image
-        src={theme === "dark" ? "/aeko-dark.png" : "/aeko-light.png"}
-        alt="aeko logo"
-        width={70}
-        height={70}
-        className="object-contain ml-1"
-      />
-    </div>
-  );
-}
-
 function DialogPanel({ label }: { label: DialogName }) {
   return (
     <motion.div
       id={`${label.toLowerCase()}-dialog`}
-      className="h-screen border-r border-secondary-foreground bg-glass py-2 px-2.5 z-10 overflow-hidden"
+      className="h-screen border-r border-secondary-foreground bg-glass py-4 px-4 z-10 overflow-hidden"
       initial={{ width: 0, opacity: 0 }}
-      animate={{ width: 320, opacity: 1 }}
+      animate={{ width: 280, opacity: 1 }}
       exit={{ width: 0, opacity: 0 }}
-      transition={{ type: "tween", stiffness: 300, damping: 30, duration: 0.2 }}
+      transition={{ type: "tween", duration: 0.25 }}
     >
       <h2 className="text-foreground font-semibold text-lg">{label}</h2>
     </motion.div>
@@ -183,7 +157,6 @@ const routes = [
 
 export default function LeftSidebar() {
   const { theme, toggleTheme } = useTheme();
-  const pathname = usePathname();
   const [dialogState, dispatch] = useReducer(dialogReducer, {
     isMessagesOpen: false,
     isNotificationsOpen: false,
@@ -200,31 +173,28 @@ export default function LeftSidebar() {
   };
 
   return (
-    <div
-      className={`hidden md:flex fixed left-0 h-screen glass z-10 ${
-        isDialogOpen ? "" : ""
-      }`}
-    >
+    <div className={`hidden md:flex fixed  left-[max(0px,calc(42%-640px))] h-screen z-10 ${isDialogOpen && "glass"}`}>
+      {/* Static sidebar - fixed widths */}
       <div
-        className={`hidden md:flex flex-col w-[72px] transition-all duration-300 ease-in-out ${
-          isDialogOpen ? "xl:w-[72px]" : "xl:w-[200px]"
-        } h-screen py-2  px-2.5`}
+        className={`hidden md:flex flex-col py-6 transition-all duration-300 ease-in-out ${
+          isDialogOpen ? "w-20" : "w-64"
+        } h-screen`}
       >
-        <div className="flex-1 flex flex-col justify-start items-center gap-4 py-4">
-          <SidebarLogo theme={theme} isDialogOpen={isDialogOpen} />
-
-          <nav className="flex-1 w-full flex flex-col items-center gap-4">
+        <div className="flex flex-col gap-5 h-full">
+          <ProfileCard isDialogOpen={isDialogOpen} />
+          
+           <nav className="flex-2 w-full flex flex-col items-center gap-2 bg-accent-foreground/80 backdrop-blur-md rounded-xl px-4 py-6">
             {routes.map((item) => {
               const isDialogItem = [
                 "Messages",
-                "Notifications",
+                "Notifications", 
                 "Search",
               ].includes(item.name);
 
               const commonProps = {
-                className: `w-full p-3 flex items-center justify-center xl:justify-start hover:bg-accent-foreground hover:text-background transition-colors group relative gap-3 rounded-full ${
+                className: `w-full py-2.5 px-3 flex items-center justify-center xl:justify-start hover:bg-accent-foreground hover:text-background transition-colors group relative gap-3 rounded-full ${
                   isDialogOpen ? "xl:justify-center" : ""
-                }`,
+                }` as string,
                 onClick: isDialogItem
                   ? () => handleClick(item.name as DialogName)
                   : undefined,
@@ -277,7 +247,7 @@ export default function LeftSidebar() {
             })}
           </nav>
 
-          <div className="flex-1 w-full flex flex-col justify-end gap-4 mt-auto pb-4">
+          <div className="flex-1 w-full flex flex-col pb-5">
             <ThemeToggle
               theme={theme}
               toggleTheme={toggleTheme}

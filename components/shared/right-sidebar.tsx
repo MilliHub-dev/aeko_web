@@ -5,7 +5,7 @@ import { Badge } from "../ui/badge";
 
 export default function RightSidebar() {
   return (
-    <div className="hidden xl:flex flex-col fixed right-0 w-[320px] h-screen glass justify-start">
+    <div className="hidden xl:flex flex-col fixed right-[max(0px,calc(42%-640px))] w-[320px] h-screen glass justify-start">
       {/* Trending Hashtags - Fixed Height */}
         <div className="p-6 pb-4">
           <h3 className="font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">

@@ -47,7 +47,7 @@ export function Post({
     setSavedPosts(newSaved);
   };
   return (
-    <div className="bg-white dark:bg-gray-900/50 backdrop-blur-sm rounded-2xl overflow-hidden border border-gray-200 dark:border-transparent shadow-lg dark:shadow-none max-w-lg mx-auto">
+    <div className="glass dark:bg-gray-900/50 backdrop-blur-sm rounded-2xl overflow-hidden border border-gray-200 dark:border-transparent shadow-lg dark:shadow-none max-w-xl mx-auto">
       {/* Post Header */}
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center gap-3">
