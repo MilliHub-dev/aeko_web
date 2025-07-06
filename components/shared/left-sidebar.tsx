@@ -172,11 +172,11 @@ export default function LeftSidebar() {
   };
 
   return (
-    <div className={`hidden md:flex fixed  left-[max(0px,calc(42%-640px))] h-screen z-10 ${isDialogOpen && "glass"}`}>
+    <div className={`hidden md:flex fixed left-[max(0px,calc(42%-640px))] h-screen z-10 md:px-4 lg:px-6 ${isDialogOpen && "glass"}`}>
       {/* Static sidebar - fixed widths */}
       <div
-        className={`hidden md:flex flex-col py-6 transition-all duration-300 ease-in-out ${
-          isDialogOpen ? "w-20" : "w-64"
+        className={`hidden md:flex flex-col transition-all duration-300 ease-in-out ${
+          isDialogOpen ? "w-20" : "xl:w-64"
         } h-screen`}
       >
         <div className="flex flex-col gap-5 h-full">

@@ -4,7 +4,7 @@ import { Button } from "./ui/button";
 
 export default function CreatePost() {
   return (
-    <div className="w-full max-w-3xl bg-accent-foreground/80 backdrop-blur-md  mx-auto p-4 space-y-4 rounded-2xl">
+    <div className="w-full bg-accent-foreground/80 backdrop-blur-md  mx-auto p-4 space-y-4 rounded-2xl">
       <div className="flex items-start gap-3">
         <Avatar className="w-10 h-10">
           <AvatarImage src="/placeholder.svg" alt="user-profile" />

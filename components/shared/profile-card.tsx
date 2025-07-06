@@ -7,7 +7,7 @@ export default function ProfileCard({
 }) {
   return (
     <div
-      className={`w-full mx-auto rounded-2xl text-center border border-border/50 transition-all duration-300 ${
+      className={`w-full mx-auto rounded-2xl text-center xl:border xl:border-border/50 transition-all duration-300 ${
         isDialogOpen ? "w-16 h-16 p-2 rounded-full" : "max-w-[250px] p-6"
       }`}
     >
@@ -32,7 +32,7 @@ export default function ProfileCard({
 
       {/* User Info - Hidden when dialog is open */}
       {!isDialogOpen && (
-        <div className="mb-4">
+        <div className="mb-4 md:hidden xl:block">
           <div className="flex items-center justify-center gap-2 mb-1">
             <h3 className="text-lg font-semibold text-foreground">
               Alexis Wells
@@ -57,7 +57,7 @@ export default function ProfileCard({
 
       {/* Stats - Hidden when dialog is open */}
       {!isDialogOpen && (
-        <div className="flex justify-between text-center">
+        <div className="md:hidden xl:flex justify-between text-center ">
           <div className="flex-1">
             <div className="text-lg font-semibold text-foreground">4.6k</div>
             <div className="text-xs text-muted-foreground">Followers</div>

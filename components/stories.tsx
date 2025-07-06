@@ -2,7 +2,7 @@ import { Button } from "./ui/button";
 
 export default function Stories() {
   return (
-    <div className="w-full max-w-3xl px-3 py-3 mx-auto bg-accent-foreground/80 backdrop-blur-md rounded-lg">
+    <div className="w-full px-3 py-3 mx-auto bg-accent-foreground/80 backdrop-blur-md rounded-lg">
       <div className="max-w-screen-md mx-auto overflow-x-scroll no-scrollbar snap-x snap-mandatory">
         <div className="flex gap-4 w-max px-1">
           {/* Add Story Button */}

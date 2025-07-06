@@ -37,12 +37,12 @@ export default function RootLayout({
         <ThemeProvider defaultTheme="light" storageKey="aeko-theme">
           {/* Main container */}
           <Header />
-          <div className="flex max-w-7xl mx-auto mt-5 relative">
+          <div className="flex md:max-w-2xl lg:max-w-7xl mx-auto mt-5 relative">
             {/* Left sidebar */}
             <LeftSidebar />
 
             {/* Main content */}
-            <main className="md:pl-[80px] xl:pl-[220px] xl:pr-[320px] flex-1 min-h-screen min-w-[600px] snap-y snap-mandatory space-y-5">
+            <main className="md:pl-[120px] md:pr-5 xl:pl-[220px] xl:pr-[320px] flex-1 min-h-screen min-w-[600px] snap-y snap-mandatory space-y-5">
               <Stories />
               <CreatePost />
               <div className="max-w-[600px] mx-auto py-4 px-6 snap-center">
