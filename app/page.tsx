@@ -1,103 +1,140 @@
-import Image from "next/image";
-
-export default function Home() {
+export default function SocialMediaLayout() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen bg-gray-50">
+      {/* Desktop Header - Hidden on mobile */}
+      <header className="hidden md:block fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 z-50">
+        <div className="max-w-7xl mx-auto flex items-center justify-center h-full">
+          <div className="bg-blue-100 border-2 border-dashed border-blue-300 rounded-lg px-6 py-2">
+            <span className="text-blue-600 font-medium">Header / Top Navigation</span>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </header>
+
+      {/* Main Layout Container with max-width */}
+      <div className="max-w-7xl mx-auto flex md:pt-16">
+        {/* Left Sidebar - Compact on tablet, full width on desktop */}
+        <aside className="hidden md:block fixed left-[max(0px,calc(50%-640px))] top-16 bottom-0 w-16 lg:w-64 bg-white border-r border-gray-200 overflow-y-auto">
+          <div className="p-2 lg:p-4 h-full">
+            <div className="bg-green-100 border-2 border-dashed border-green-300 rounded-lg p-2 lg:p-4 h-full flex items-center justify-center">
+              <div className="text-center">
+                <span className="text-green-600 font-medium block text-xs lg:text-base">
+                  <span className="lg:hidden">Nav</span>
+                  <span className="hidden lg:block">Left Sidebar</span>
+                </span>
+                <span className="text-green-500 text-xs hidden lg:block">Navigation Menu</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        {/* Main Content Area */}
+        <main className="flex-1 md:ml-16 lg:ml-64 xl:mr-80">
+          <div className="max-w-2xl mx-auto px-4 py-6 md:py-8">
+            <div className="space-y-6">
+              {/* Main Content Placeholder */}
+              <div className="bg-purple-100 border-2 border-dashed border-purple-300 rounded-lg p-8 text-center">
+                <span className="text-purple-600 font-medium block text-lg">Main Content Area</span>
+                <span className="text-purple-500 text-sm">Feed / Posts / Videos</span>
+              </div>
+
+              {/* Additional Content Blocks */}
+              {[1, 2, 3, 4, 5].map((item) => (
+                <div key={item} className="bg-purple-50 border border-purple-200 rounded-lg p-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="bg-purple-200 rounded-full w-10 h-10 flex items-center justify-center">
+                      <span className="text-purple-600 text-xs font-bold">U{item}</span>
+                    </div>
+                    <div className="bg-purple-200 rounded px-3 py-1">
+                      <span className="text-purple-600 text-xs">Actions</span>
+                    </div>
+                  </div>
+                  <div className="bg-purple-100 rounded h-32 mb-3 flex items-center justify-center">
+                    <span className="text-purple-500 text-sm">Content Block {item}</span>
+                  </div>
+                  <div className="flex space-x-4">
+                    <div className="bg-purple-200 rounded px-3 py-1 flex-1 text-center">
+                      <span className="text-purple-600 text-xs">Like</span>
+                    </div>
+                    <div className="bg-purple-200 rounded px-3 py-1 flex-1 text-center">
+                      <span className="text-purple-600 text-xs">Comment</span>
+                    </div>
+                    <div className="bg-purple-200 rounded px-3 py-1 flex-1 text-center">
+                      <span className="text-purple-600 text-xs">Share</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </main>
+
+        {/* Right Sidebar - Fixed positioning within container */}
+        <aside className="hidden xl:block fixed right-[max(0px,calc(50%-640px))] top-16 bottom-0 w-80 bg-white border-l border-gray-200 overflow-y-auto">
+          <div className="p-4 h-full">
+            <div className="space-y-4">
+              {/* Trending/Suggestions Section */}
+              <div className="bg-orange-100 border-2 border-dashed border-orange-300 rounded-lg p-4">
+                <span className="text-orange-600 font-medium block mb-2">Right Sidebar</span>
+                <span className="text-orange-500 text-sm">Trending / Suggestions</span>
+              </div>
+
+              {/* Additional Right Sidebar Content */}
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                <div className="space-y-3">
+                  {[1, 2, 3].map((item) => (
+                    <div key={item} className="flex items-center space-x-3">
+                      <div className="bg-orange-200 rounded-full w-8 h-8 flex items-center justify-center">
+                        <span className="text-orange-600 text-xs">S{item}</span>
+                      </div>
+                      <div className="flex-1">
+                        <div className="bg-orange-100 rounded h-4 mb-1"></div>
+                        <div className="bg-orange-100 rounded h-3 w-2/3"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Who to Follow Section */}
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                <div className="bg-orange-200 rounded px-3 py-2 mb-3 text-center">
+                  <span className="text-orange-600 text-sm font-medium">Who to Follow</span>
+                </div>
+                <div className="space-y-3">
+                  {[1, 2, 3].map((item) => (
+                    <div key={item} className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <div className="bg-orange-200 rounded-full w-6 h-6"></div>
+                        <div className="bg-orange-100 rounded h-3 w-16"></div>
+                      </div>
+                      <div className="bg-orange-200 rounded px-2 py-1">
+                        <span className="text-orange-600 text-xs">Follow</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      {/* Mobile Bottom Navigation - Only visible on mobile */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
+        <div className="flex items-center justify-around h-16 px-4">
+          {["Home", "Search", "Create", "Activity", "Profile"].map((item) => (
+            <div key={item} className="bg-red-100 border border-red-300 rounded-lg px-3 py-2 flex-1 mx-1">
+              <div className="text-center">
+                <div className="bg-red-200 rounded-full w-6 h-6 mx-auto mb-1"></div>
+                <span className="text-red-600 text-xs font-medium">{item}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </nav>
+
+      {/* Mobile Bottom Padding */}
+      <div className="md:hidden h-16"></div>
     </div>
-  );
+  )
 }
