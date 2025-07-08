@@ -5,6 +5,7 @@ import { Header } from "@/components/shared/header";
 import { LeftSidebar } from "@/components/shared/left-sidebar";
 import { RightSidebar } from "@/components/shared/right-sidebar";
 import { MobileNavbar } from "@/components/shared/mobile-navbar";
+import { ThemeProvider } from "@/components/theme/theme-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,24 +28,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="min-h-screen bg-gray-50">
-          <Header />
-          <div className="max-w-7xl mx-auto flex md:pt-16">
-            <LeftSidebar />
-            <main className="flex-1 md:ml-16 lg:ml-64 xl:mr-80">
-              <div className="max-w-2xl mx-auto px-4 py-6 md:py-8">
-                <div className="space-y-6">{children}</div>
-              </div>
-            </main>
-            <RightSidebar />
+        <ThemeProvider>
+          <div className="min-h-screen bg-background">
+            <Header />
+            <div className="max-w-7xl mx-auto flex md:pt-16">
+              <LeftSidebar />
+              <main className="flex-1 md:ml-16 lg:ml-64 xl:mr-80">
+                <div className="max-w-2xl mx-auto px-4 py-6 md:py-8">
+                  <div className="space-y-6">{children}</div>
+                </div>
+              </main>
+              <RightSidebar />
+            </div>
+            <MobileNavbar />
+            <div className="md:hidden h-16"></div>
           </div>
-          <MobileNavbar />
-          <div className="md:hidden h-16"></div>
-        </div>
+        </ThemeProvider>
       </body>
     </html>
   );
