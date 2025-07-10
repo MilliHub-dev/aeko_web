@@ -5,16 +5,16 @@ import type { HTMLAttributes } from 'react';
 import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
-export interface PlusIconHandle {
+export interface SearchIconHandle {
   startAnimation: () => void;
   stopAnimation: () => void;
 }
 
-interface PlusIconProps extends HTMLAttributes<HTMLDivElement> {
+interface SearchIconProps extends HTMLAttributes<HTMLDivElement> {
   size?: number;
 }
 
-const PlusIcon = forwardRef<PlusIconHandle, PlusIconProps>(
+const SearchIcon = forwardRef<SearchIconHandle, SearchIconProps>(
   ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
     const controls = useAnimation();
     const isControlledRef = useRef(false);
@@ -64,28 +64,30 @@ const PlusIcon = forwardRef<PlusIconHandle, PlusIconProps>(
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="1.5"
+          strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          animate={controls}
-          transition={{ type: 'spring', stiffness: 100, damping: 15 }}
           variants={{
-            normal: {
-              rotate: 0,
-            },
+            normal: { x: 0, y: 0 },
             animate: {
-              rotate: 180,
+              x: [0, 0, -3, 0],
+              y: [0, -4, 0, 0],
             },
           }}
+          transition={{
+            duration: 1,
+            bounce: 0.3,
+          }}
+          animate={controls}
         >
-          <path d="M5 12h14" />
-          <path d="M12 5v14" />
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.3-4.3" />
         </motion.svg>
       </div>
     );
   }
 );
 
-PlusIcon.displayName = 'PlusIcon';
+SearchIcon.displayName = 'SearchIcon';
 
-export { PlusIcon };
+export { SearchIcon };

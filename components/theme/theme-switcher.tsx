@@ -1,6 +1,6 @@
 "use client";
 
-import { LucideMoon, LucideSun, LucideMonitor } from "lucide-react";
+import { LucideMoon, LucideSun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "../ui/button";
 import { useEffect, useState } from "react";
@@ -11,10 +11,10 @@ interface ThemeSwitcherProps {
   className?: string;
 }
 
-const ThemeSwitcher = ({ 
-  variant = "icon", 
-  showLabel = false, 
-  className = "" 
+const ThemeSwitcher = ({
+  variant = "icon",
+  showLabel = false,
+  className = "",
 }: ThemeSwitcherProps) => {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -33,53 +33,45 @@ const ThemeSwitcher = ({
         disabled
         aria-label="Loading theme switcher"
       >
-        <LucideSun className="h-4 w-4" />
+        <LucideSun className="h-4 w-4 text" />
       </Button>
     );
   }
 
-  const cycleTheme = () => {
-    const themes = ["light", "dark", "system"];
-    const currentIndex = themes.indexOf(theme || "system");
-    const nextIndex = (currentIndex + 1) % themes.length;
-    setTheme(themes[nextIndex]);
+  const toggleTheme = () => {
+    setTheme(theme === "light" ? "dark" : "light");
   };
 
   const getThemeIcon = () => {
-    switch (theme) {
-      case "light":
-        return <LucideSun className="h-4 w-4" />;
-      case "dark":
-        return <LucideMoon className="h-4 w-4" />;
-      case "system":
-        return <LucideMonitor className="h-4 w-4" />;
-      default:
-        return resolvedTheme === "dark" ? 
-          <LucideMoon className="h-4 w-4" /> : 
-          <LucideSun className="h-4 w-4" />;
+    if (theme === "dark" || (theme === "system" && resolvedTheme === "dark")) {
+      return (
+        <div className="flex items-center gap-2">
+          <LucideMoon className="w-full" />
+          <span className="hidden lg:inline">Dark</span>
+        </div>
+      );
     }
+    return (
+      <div className="flex items-center gap-2">
+        <LucideSun className="w-full" />
+        <span className="hidden lg:inline">Light</span>
+      </div>
+    );
   };
 
   const getThemeLabel = () => {
-    switch (theme) {
-      case "light":
-        return "Light";
-      case "dark":
-        return "Dark";
-      case "system":
-        return "System";
-      default:
-        return "Theme";
+    if (theme === "dark" || (theme === "system" && resolvedTheme === "dark")) {
+      return "Dark";
     }
+    return "Light";
   };
 
   const getAriaLabel = () => {
-    const currentTheme = theme || "system";
-    const nextTheme = {
-      light: "dark",
-      dark: "system",
-      system: "light"
-    }[currentTheme];
+    const currentTheme =
+      theme === "dark" || (theme === "system" && resolvedTheme === "dark")
+        ? "dark"
+        : "light";
+    const nextTheme = currentTheme === "dark" ? "light" : "dark";
     return `Switch to ${nextTheme} theme. Current theme: ${currentTheme}`;
   };
 
@@ -93,7 +85,7 @@ const ThemeSwitcher = ({
           aria-label="Switch to light theme"
           aria-pressed={theme === "light"}
         >
-          <LucideSun className="h-4 w-4" />
+          <LucideSun className="h-4 w-4 text-white dark:text-primary" />
           {showLabel && <span className="ml-2">Light</span>}
         </Button>
         <Button
@@ -103,18 +95,8 @@ const ThemeSwitcher = ({
           aria-label="Switch to dark theme"
           aria-pressed={theme === "dark"}
         >
-          <LucideMoon className="h-4 w-4" />
+          <LucideMoon className="h-4 w-4 text-white dark:text-background" />
           {showLabel && <span className="ml-2">Dark</span>}
-        </Button>
-        <Button
-          onClick={() => setTheme("system")}
-          variant={theme === "system" ? "default" : "ghost"}
-          size="sm"
-          aria-label="Switch to system theme"
-          aria-pressed={theme === "system"}
-        >
-          <LucideMonitor className="h-4 w-4" />
-          {showLabel && <span className="ml-2">System</span>}
         </Button>
       </div>
     );
@@ -122,19 +104,15 @@ const ThemeSwitcher = ({
 
   return (
     <Button
-      onClick={cycleTheme}
+      onClick={toggleTheme}
       variant="ghost"
-      size="icon"
-      className={`transition-all duration-200 hover:scale-105 ${className}`}
+      className={`rounded-full hover:bg-accent hover:text-primary transition-colors md:justify-center lg:justify-start lg:w-full text-white dark:text-primary ${className}`}
       aria-label={getAriaLabel()}
-      title={`Current theme: ${getThemeLabel()}. Click to cycle themes.`}
+      title={`Current theme: ${getThemeLabel()}. Click to toggle theme.`}
     >
-      <div className="relative">
-        {getThemeIcon()}
-      </div>
-      <span className="sr-only">
-        {getAriaLabel()}
-      </span>
+      {getThemeIcon()}
+
+      <span className="sr-only">{getAriaLabel()}</span>
     </Button>
   );
 };

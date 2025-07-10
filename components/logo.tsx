@@ -1,20 +1,25 @@
 import { useTheme } from "next-themes";
 import Image from "next/image";
 
-const Logo = () => {
+interface LogoProps {
+  size?: number;
+}
+
+const Logo = ({size = 50}: LogoProps) => {
   const { theme } = useTheme();
   return (
-    <div className="flex justify-center">
+    <div className="flex justify-start lg:pl-2">
       <Image
-        src={theme === "dark" ? "/aeko-dark.png" : "/aeko-light.png"}
+        src="/aeko.svg"
         alt="aeko logo"
-        width={50}
-        height={50}
+        width={size}
+        height={size}
         className="object-contain"
         priority
       />
     </div>
   );
 };
+
 
 export { Logo };

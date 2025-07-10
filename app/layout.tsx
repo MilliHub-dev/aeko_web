@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Header } from "@/components/shared/header";
 import { LeftSidebar } from "@/components/shared/left-sidebar";
 import { RightSidebar } from "@/components/shared/right-sidebar";
 import { MobileNavbar } from "@/components/shared/mobile-navbar";
 import { ThemeProvider } from "@/components/theme/theme-provider";
+import { Stories } from "@/components/stories";
+import { CreatePost } from "@/components/create-post";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,12 +34,13 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider>
-          <div className="min-h-screen bg-background">
-            <Header />
-            <div className="max-w-7xl mx-auto flex md:pt-16">
+          <div className="min-h-screen bg-primary dark:bg-background">
+            <div className="max-w-7xl mx-auto flex bg-background">
               <LeftSidebar />
-              <main className="flex-1 md:ml-16 lg:ml-64 xl:mr-80">
-                <div className="max-w-2xl mx-auto px-4 py-6 md:py-8">
+              <main className="relative flex-1 md:ml-16 lg:ml-64 xl:mr-80">
+                <div className="max-w-2xl mx-auto px-2 py-6 md:py-8 snap-y snap-mandatory space-y-5">
+                  <Stories />
+                  <CreatePost />
                   <div className="space-y-6">{children}</div>
                 </div>
               </main>

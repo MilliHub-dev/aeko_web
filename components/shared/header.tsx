@@ -7,6 +7,8 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useState, useCallback } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { BellIcon } from "../ui/bell";
+import { MessageCircleIcon } from "../ui/message-circle";
 
 interface User {
   name: string;
@@ -59,15 +61,15 @@ const Header = ({
 
   return (
     <header 
-      className={`hidden md:block fixed top-0 left-0 right-0 h-16 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border z-50 ${className}`}
+      className={`hidden md:block sticky top-0 left-0 right-0 h-16 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border z-50 ${className}`}
       role="banner"
       onKeyDown={handleKeyDown}
     >
-      <div className="max-w-7xl mx-auto flex items-center justify-between h-full px-4 lg:px-6">
+      <div className="max-w-7xl mx-auto flex items-center justify-center h-full px-4 lg:px-6">
         {/* Logo Section */}
-        <div className="flex-shrink-0">
+        {/* <div className="flex-shrink-0">
           <Logo />
-        </div>
+        </div> */}
 
         {/* Search Section */}
         <div className="flex-1 max-w-md mx-4 lg:mx-8">
@@ -79,7 +81,7 @@ const Header = ({
                 placeholder="Search... (⌘K)"
                 value={searchQuery}
                 onChange={handleSearchChange}
-                className="pl-10 pr-4 transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                className="pl-10 pr-4 transition-all duration-200 focus:ring-2 focus:ring-primary/20 ring-2"
                 aria-label="Search"
                 autoComplete="off"
               />
@@ -88,121 +90,7 @@ const Header = ({
         </div>
 
         {/* Actions Section */}
-        <nav className="flex items-center space-x-2 lg:space-x-3" role="navigation" aria-label="Header actions">
-          {/* Notifications */}
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="relative hover:bg-accent transition-colors"
-            aria-label={`Notifications${notificationCount > 0 ? ` (${notificationCount} unread)` : ''}`}
-          >
-            <LucideBell className="h-4 w-4" />
-            {notificationCount > 0 && (
-              <span 
-                className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-medium animate-pulse"
-                aria-hidden="true"
-              >
-                {notificationCount > 99 ? '99+' : notificationCount}
-              </span>
-            )}
-          </Button>
-
-          {/* Messages */}
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="relative hover:bg-accent transition-colors"
-            aria-label={`Messages${messageCount > 0 ? ` (${messageCount} unread)` : ''}`}
-          >
-            <LucideMessageCircle className="h-4 w-4" />
-            {messageCount > 0 && (
-              <span 
-                className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-medium animate-pulse"
-                aria-hidden="true"
-              >
-                {messageCount > 99 ? '99+' : messageCount}
-              </span>
-            )}
-          </Button>
-
-          {/* Theme Switcher */}
-          <ThemeSwitcher />
-
-          {/* User Profile Dropdown */}
-          <div className="relative">
-            <Button
-              variant="ghost"
-              className="flex items-center space-x-2 px-2 hover:bg-accent transition-colors"
-              onClick={() => setIsProfileOpen(!isProfileOpen)}
-              aria-expanded={isProfileOpen}
-              aria-haspopup="menu"
-              aria-label={`User menu for ${user.name}`}
-            >
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="text-xs font-medium">
-                  {user.initials}
-                </AvatarFallback>
-              </Avatar>
-              <LucideChevronDown className={`h-3 w-3 transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} />
-            </Button>
-
-            {/* Dropdown Menu */}
-            {isProfileOpen && (
-              <div className="absolute right-0 top-full mt-2 w-56 bg-popover border border-border rounded-md shadow-lg z-50">
-                <div className="p-3 border-b border-border">
-                  <div className="flex items-center space-x-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={user.avatar} alt={user.name} />
-                      <AvatarFallback>{user.initials}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{user.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="py-1">
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start px-3 py-2 text-sm"
-                    onClick={() => {
-                      onProfileClick?.();
-                      setIsProfileOpen(false);
-                    }}
-                  >
-                    <LucideUser className="h-4 w-4 mr-3" />
-                    Profile
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start px-3 py-2 text-sm"
-                    onClick={() => {
-                      onSettingsClick?.();
-                      setIsProfileOpen(false);
-                    }}
-                  >
-                    <LucideSettings className="h-4 w-4 mr-3" />
-                    Settings
-                  </Button>
-                  <div className="border-t border-border my-1" />
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start px-3 py-2 text-sm text-destructive hover:text-destructive"
-                    onClick={() => {
-                      onLogoutClick?.();
-                      setIsProfileOpen(false);
-                    }}
-                  >
-                    <LucideLogOut className="h-4 w-4 mr-3" />
-                    Sign out
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-        </nav>
+        
       </div>
 
       {/* Click outside to close dropdown */}

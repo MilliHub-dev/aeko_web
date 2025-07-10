@@ -1,10 +1,6 @@
-import { CircleDollarSignIcon } from "@/components/ui/circle-dollar-sign"
-import { CompassIcon } from "@/components/ui/compass"
-import { HomeIcon } from "@/components/ui/home"
-import { PlusIcon } from "@/components/ui/plus"
-import { RadioIcon } from "@/components/ui/radio"
-import { SettingsGearIcon } from "@/components/ui/settings-gear"
-import { UserIcon } from "@/components/ui/user"
+import { CompassIcon, HomeIcon, PlusIcon, RadioIcon, UserIcon, CircleDollarSignIcon, SettingsIcon } from "lucide-react"
+
+
 
 export const sidebarRoutes = [
   {
@@ -30,7 +26,7 @@ export const sidebarRoutes = [
   {
     name: "Settings",
     path: '/settings',
-    icon: SettingsGearIcon
+    icon: SettingsIcon
   }
 ]
 
