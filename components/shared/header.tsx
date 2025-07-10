@@ -1,14 +1,8 @@
 "use client";
 
-import { LucideBell, LucideMessageCircle, LucideSearch, LucideChevronDown, LucideUser, LucideSettings, LucideLogOut } from "lucide-react";
-import { Logo } from "../logo";
-import { ThemeSwitcher } from "../theme/theme-switcher";
-import { Button } from "../ui/button";
+import { LucideSearch } from "lucide-react";
 import { Input } from "../ui/input";
 import { useState, useCallback } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { BellIcon } from "../ui/bell";
-import { MessageCircleIcon } from "../ui/message-circle";
 
 interface User {
   name: string;

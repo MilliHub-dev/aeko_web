@@ -30,10 +30,6 @@ const WhoToFollow = () => {
     }
   ];
 
-  const handleFollow = (userId: number) => {
-    // Handle follow logic here
-    console.log(`Following user ${userId}`);
-  };
 
   return (
     <div className="bg-primary/20 dark:bg-gray-900/50 rounded-2xl p-4 space-y-4">
