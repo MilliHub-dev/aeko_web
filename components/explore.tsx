@@ -45,7 +45,7 @@ const Explore = () => {
     <div className="space-y-6">
       {/* Explore Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-primary dark:text-white">
+        <h2 className="text-2xl font-bold text-blue-gem-50 dark:text-green-yellow-300">
           Explore
         </h2>
       </div>
@@ -54,7 +54,7 @@ const Explore = () => {
       <div className="space-y-6">
         {exploreItems.map((item) => (
           <div key={item.id} className="group cursor-pointer">
-            <h3 className="text-prigray dark:text-white font-semibold text-base leading-tight mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+            <h3 className="text-blue-gem-50 dark:text-green-yellow-100 font-semibold text-base leading-tight mb-3">
               {item.title}
             </h3>
 
@@ -75,7 +75,7 @@ const Explore = () => {
                   ))}
                 </div>
 
-                <div className="flex items-center space-x-1 text-sm text-gray-600 dark:text-gray-400">
+                <div className="flex items-center space-x-1 text-sm text-blue-gem-200 dark:text-green-yellow-300">
                   <span>{item.timeAgo}</span>
                   <span>•</span>
                   <span>{item.category}</span>
@@ -87,7 +87,7 @@ const Explore = () => {
       </div>
 
       {/* Show More Button */}
-      <Link href={"#"} className="text-gray-600 cursor-pointer">
+      <Link href={"#"} className="text-blue-gem-50 dark:text-green-yellow-100 cursor-pointer">
         + Show More
       </Link>
     </div>

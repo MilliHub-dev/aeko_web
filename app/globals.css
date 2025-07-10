@@ -28,6 +28,30 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  --color-blue-gem-50: #f2f0ff;
+  --color-blue-gem-100: #e8e4ff;
+  --color-blue-gem-200: #d4ccff;
+  --color-blue-gem-300: #b5a4ff;
+  --color-blue-gem-400: #9270ff;
+  --color-blue-gem-500: #7137ff;
+  --color-blue-gem-600: #630fff;
+  --color-blue-gem-700: #5500ff;
+  --color-blue-gem-800: #4600da;
+  --color-blue-gem-900: #330099;
+  --color-blue-gem-950: #21007a;
+
+  --color-green-yellow-50: #f7ffe4;
+  --color-green-yellow-100: #edffc4;
+  --color-green-yellow-200: #dbff90;
+  --color-green-yellow-300: #bfff50;
+  --color-green-yellow-400: #99ff00;
+  --color-green-yellow-500: #84e600;
+  --color-green-yellow-600: #65b800;
+  --color-green-yellow-700: #4c8b00;
+  --color-green-yellow-800: #3e6d07;
+  --color-green-yellow-900: #355c0b;
+  --color-green-yellow-950: #193400;
 }
 
 :root {

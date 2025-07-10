@@ -25,7 +25,7 @@ const LeftSidebar = () => {
             <nav className="flex flex-col md:items-center lg:items-start gap-y-4">
               {/* Navigation Links */}
               <Button
-                className="flex items-center gap-x-3 rounded-full hover:bg-accent hover:text-primary transition-colors md:justify-center lg:justify-start lg:w-full lg:flex-1 text-white dark:text-primary"
+                className="flex items-center gap-x-3 rounded-full hover:bg-accent hover:text-primary transition-colors md:justify-center lg:justify-start lg:w-full lg:flex-1 text-blue-gem-50 dark:text-green-yellow-100"
                 onClick={() => handleRouteClick("Search")}
                 variant={"ghost"}
               >
@@ -40,7 +40,7 @@ const LeftSidebar = () => {
                   <Link
                     href={route.path}
                     key={route.name}
-                    className="w-full flex-1 flex items-center gap-x-3 p-2 rounded-full hover:bg-accent hover:text-primary transition-colors md:justify-center lg:justify-start text-white dark:text-primary"
+                    className="w-full flex-1 flex items-center gap-x-3 p-2 rounded-full hover:bg-accent hover:text-primary transition-colors md:justify-center lg:justify-start text-blue-gem-50 dark:text-green-yellow-100"
                   >
                     <div className="flex justify-center items-center">
                       <Icon className="w-full " strokeWidth={1.5} />
@@ -53,7 +53,7 @@ const LeftSidebar = () => {
               })}
 
               <Button
-                className="flex items-center gap-x-3 rounded-full hover:bg-accent hover:text-primary transition-colors md:justify-center lg:justify-start lg:w-full lg:flex-1 text-white dark:text-primary"
+                className="flex items-center gap-x-3 rounded-full hover:bg-accent hover:text-primary transition-colors md:justify-center lg:justify-start lg:w-full lg:flex-1 text-blue-gem-50 dark:text-green-yellow-100"
                 onClick={() => handleRouteClick("Search")}
                 variant={"ghost"}
               >
@@ -88,7 +88,7 @@ const LeftSidebar = () => {
       <AnimatePresence>
         {dialogState.isSearchOpen && (
           <motion.div
-            className="fixed inset-0 bg-primary/20 backdrop-blur-sm z-10"
+            className="fixed inset-0 bg-primary/60  z-10"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

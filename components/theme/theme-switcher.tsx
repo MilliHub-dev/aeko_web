@@ -45,14 +45,14 @@ const ThemeSwitcher = ({
   const getThemeIcon = () => {
     if (theme === "dark" || (theme === "system" && resolvedTheme === "dark")) {
       return (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-x-3">
           <LucideMoon className="w-full" />
           <span className="hidden lg:inline">Dark</span>
         </div>
       );
     }
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-x-3">
         <LucideSun className="w-full" />
         <span className="hidden lg:inline">Light</span>
       </div>
@@ -106,7 +106,7 @@ const ThemeSwitcher = ({
     <Button
       onClick={toggleTheme}
       variant="ghost"
-      className={`rounded-full hover:bg-accent hover:text-primary transition-colors md:justify-center lg:justify-start lg:w-full text-white dark:text-primary ${className}`}
+      className={`rounded-full hover:bg-accent hover:text-primary transition-colors md:justify-center lg:justify-start lg:w-full text-blue-gem-50 dark:text-green-yellow-100 ${className}`}
       aria-label={getAriaLabel()}
       title={`Current theme: ${getThemeLabel()}. Click to toggle theme.`}
     >

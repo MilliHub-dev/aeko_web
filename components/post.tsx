@@ -104,7 +104,7 @@ export function Post() {
               >
                 <Heart className="w-4 h-4" strokeWidth={1.5} />
               </Button>
-              <span className="text-sm text-gray-600 dark:text-gray-400">12 Likes</span>
+              <span className="text-sm text-primary dark:text-green-yellow-100">12 Likes</span>
             </div>
             
             <div className="flex items-center gap-1">
@@ -115,7 +115,7 @@ export function Post() {
               >
                 <MessageCircle className="w-4 h-4" strokeWidth={1.5} />
               </Button>
-              <span className="text-sm text-gray-600 dark:text-gray-400">25 Comments</span>
+              <span className="text-sm text-blue-gem-400 dark:text-green-yellow-100">25 Comments</span>
             </div>
             
             <div className="flex items-center gap-1">
@@ -127,7 +127,7 @@ export function Post() {
                 <Share className="w-4 h-4" strokeWidth={1.5} />
 
               </Button>
-              <span className="text-sm text-gray-600 dark:text-gray-400">187 Share</span>
+              <span className="text-sm text-blue-gem-400 dark:text-green-yellow-100">187 Share</span>
             </div>
           </div>
           

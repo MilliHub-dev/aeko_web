@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 
@@ -32,9 +33,9 @@ const WhoToFollow = () => {
 
 
   return (
-    <div className="bg-primary/20 dark:bg-gray-900/50 rounded-2xl p-4 space-y-4">
+    <div className="space-y-4">
       {/* Header */}
-      <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+      <h3 className="text-xl font-bold text-blue-gem-50 dark:text-green-yellow-300">
         Who to follow
       </h3>
 
@@ -50,7 +51,7 @@ const WhoToFollow = () => {
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 w-[80px]">
-                <div className="font-semibold text-gray-900 dark:text-white text-sm truncate">
+                <div className="font-semibold text-blue-gem-50 dark:text-green-yellow-100 text-sm truncate">
                   {user.name}
                 </div>
                 <div className="text-gray-500 dark:text-gray-400 text-sm truncate">
@@ -60,7 +61,7 @@ const WhoToFollow = () => {
             </div>
             <Button
               // onClick={() => handleFollow(user.id)}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full font-medium text-sm"
+              className="text-blue-gem-50 dark:text-white px-6 py-2 rounded-full font-medium text-sm"
             >
               Follow
             </Button>
@@ -69,12 +70,12 @@ const WhoToFollow = () => {
       </div>
 
       {/* Show More Button */}
-      <Button 
-        variant="ghost" 
-        className="text-blue-500 hover:text-blue-600 font-medium p-0 h-auto w-full justify-start"
+      <Link 
+        href={"#"}
+        className="text-blue-gem-50 dark:text-green-yellow-100 font-medium p-0 h-auto w-full justify-start"
       >
         + Show More
-      </Button>
+      </Link>
     </div>
   );
 };
