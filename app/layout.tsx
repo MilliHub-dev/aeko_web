@@ -7,6 +7,7 @@ import { MobileNavbar } from "@/components/shared/mobile-navbar";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { Stories } from "@/components/stories";
 import { CreatePost } from "@/components/create-post";
+import { MobileHeader } from "@/components/shared/mobile-header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,24 +41,23 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${quicksand.variable} antialiased`}
-      >
+      <body className={`${quicksand.variable} antialiased`}>
         <ThemeProvider>
-          <div className="min-h-screen bg-primary dark:bg-background">
-            <div className="max-w-7xl mx-auto flex bg-background">
+          <div className="min-h-screen  bg-primary dark:bg-background">
+            <MobileHeader />
+            <div className="max-w-7xl mx-auto flex bg-background w-full">
               <LeftSidebar />
               <main className="relative flex-1 md:ml-16 lg:ml-64 xl:mr-80">
-                <div className="max-w-2xl mx-auto px-2 py-6 md:py-8 snap-y snap-mandatory space-y-5">
+                <div className="max-w-2xl mx-auto px-4 md:px-2 py-20 md:py-8 snap-y snap-mandatory space-y-5">
                   <Stories />
                   <CreatePost />
-                  <div className="space-y-6">{children}</div>
+                  <div className="space-y-6 ">{children}</div>
                 </div>
               </main>
               <RightSidebar />
             </div>
             <MobileNavbar />
-            <div className="md:hidden h-16"></div>
+            {/* <div className="md:hidden h-16"></div> */}
           </div>
         </ThemeProvider>
       </body>

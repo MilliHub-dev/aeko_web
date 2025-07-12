@@ -3,7 +3,7 @@ import { Button } from "./ui/button";
 
 const CreatePost = () => {
   return (
-    <div className="hidden md:block w-full border border-border dark:border-border/30 mx-auto p-4 rounded-2xl transition-all">
+    <div className="w-full border border-border dark:border-border/30 mx-auto p-4 rounded-2xl transition-all">
       <div className="flex items-center gap-3">
         {/* Paperclip Icon */}
         <div className="flex-shrink-0">

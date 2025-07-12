@@ -1,11 +1,14 @@
 import {
-  CompassIcon,
-  HomeIcon,
-  PlusIcon,
-  RadioIcon,
-  UserIcon,
   CircleDollarSignIcon,
+  Compass,
+  CompassIcon,
+  Home,
+  HomeIcon,
+  Plus,
+  Radio,
+  RadioIcon,
   SettingsIcon,
+  User
 } from "lucide-react";
 
 export const sidebarRoutes = [
@@ -40,26 +43,26 @@ export const mobileRoutes = [
   {
     name: "Home",
     path: "/",
-    icon: HomeIcon,
+    icon: Home,
   },
   {
     name: "Feeds",
     path: "/feeds",
-    Icon: CompassIcon,
+    Icon: Home,
   },
   {
     name: "Aeko",
     path: "/aeko",
-    icon: PlusIcon,
+    icon: Plus,
   },
   {
     name: "Live Streams",
     path: "/live-streams",
-    icon: RadioIcon,
+    icon: Radio,
   },
   {
     name: "Profile",
     path: "/profile",
-    icon: UserIcon,
+    icon: User,
   },
 ];

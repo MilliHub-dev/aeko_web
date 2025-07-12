@@ -10,7 +10,22 @@ const Logo = ({size = 50}: LogoProps) => {
   return (
     <div className="flex justify-start lg:pl-2">
       <Image
-        src="/aeko.svg"
+        src="/aeko-mobile.svg"
+        alt="aeko logo"
+        width={size}
+        height={size}
+        className="object-contain"
+        priority
+      />
+    </div>
+  );
+};
+const MobileLogo = ({size = 50}: LogoProps) => {
+  const { theme } = useTheme();
+  return (
+    <div className="flex justify-start lg:pl-2">
+      <Image
+        src="/aeko-mobile.svg"
         alt="aeko logo"
         width={size}
         height={size}
@@ -22,4 +37,4 @@ const Logo = ({size = 50}: LogoProps) => {
 };
 
 
-export { Logo };
+export { Logo, MobileLogo };

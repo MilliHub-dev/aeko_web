@@ -69,7 +69,8 @@ export function Post() {
       {/* Post Content */}
       <div className="px-4 pb-3">
         <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
-          Habitant morbi tristique senectus et netus et. Suspendisse sed nisi lacus sed viverra. Dolor morbi non arcu risus quis varius.{" "}
+          Habitant morbi tristique senectus et netus et. Suspendisse sed nisi
+          lacus sed viverra. Dolor morbi non arcu risus quis varius.{" "}
           <span className="text-primary">#amazing</span>{" "}
           <span className="text-primary">#great</span>{" "}
           <span className="text-primary">#lifetime</span>{" "}
@@ -104,9 +105,11 @@ export function Post() {
               >
                 <Heart className="w-4 h-4" strokeWidth={1.5} />
               </Button>
-              <span className="text-sm text-primary dark:text-green-yellow-100">12 Likes</span>
+              <span className="text-sm text-blue-gem-400 dark:text-green-yellow-100">
+                12 <span className="hidden md:inline">Likes</span>
+              </span>
             </div>
-            
+
             <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
@@ -115,9 +118,11 @@ export function Post() {
               >
                 <MessageCircle className="w-4 h-4" strokeWidth={1.5} />
               </Button>
-              <span className="text-sm text-blue-gem-400 dark:text-green-yellow-100">25 Comments</span>
+              <span className="text-sm text-blue-gem-400 dark:text-green-yellow-100">
+                25 <span className="hidden md:inline">Comments</span>
+              </span>
             </div>
-            
+
             <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
@@ -125,20 +130,20 @@ export function Post() {
                 className="text-primary hover:bg-gray-100 dark:hover:bg-gray-800 w-8 h-8"
               >
                 <Share className="w-4 h-4" strokeWidth={1.5} />
-
               </Button>
-              <span className="text-sm text-blue-gem-400 dark:text-green-yellow-100">187 Share</span>
+              <span className="text-sm text-blue-gem-400 dark:text-green-yellow-100">
+                187 <span className="hidden md:inline">Shares</span>
+              </span>
             </div>
           </div>
-          
+
           <Button
             variant="ghost"
             size="icon"
             className="text-primary hover:bg-gray-100 dark:hover:bg-gray-800 w-8 h-8"
             onClick={() => toggleSave(1)}
           >
-            <Bookmark className="w-4 h-4" strokeWidth={1.5} />  
-
+            <Bookmark className="w-4 h-4" strokeWidth={1.5} />
           </Button>
         </div>
       </div>

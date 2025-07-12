@@ -50,7 +50,7 @@ const Stories = () => {
 
       <div 
         ref={scrollContainerRef}
-        className="max-w-screen-md mx-auto overflow-x-scroll no-scrollbar snap-x snap-mandatory"
+        className="max-w-screen-md overflow-x-scroll no-scrollbar snap-x snap-mandatory"
       >
         <div className="flex gap-6 w-max px-3 ml-1">
           {/* Add Story Button */}
