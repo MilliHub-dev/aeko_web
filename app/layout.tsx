@@ -45,7 +45,7 @@ export default function RootLayout({
         <ThemeProvider>
           <div className="min-h-screen  bg-primary dark:bg-background">
             <MobileHeader />
-            <div className="max-w-7xl mx-auto flex bg-background w-full">
+            <div className="max-w-7xl mx-auto bg-background w-full">
               <LeftSidebar />
               <main className="relative flex-1 md:ml-16 lg:ml-64 xl:mr-80">
                 <div className="max-w-2xl mx-auto px-4 md:px-2 py-20 md:py-8 snap-y snap-mandatory space-y-5">
