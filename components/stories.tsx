@@ -27,13 +27,13 @@ const Stories = () => {
   };
 
   return (
-    <div className="w-full px-6.5 mx-auto backdrop-blur-md rounded-lg relative">
+    <div className="w-full md:px-6.5 lg:px-3 md:mx-auto backdrop-blur-md rounded-lg relative">
       {/* Left Navigation Button */}
       <Button
         variant="ghost"
         size="sm"
         onClick={scrollLeft}
-        className="absolute left-1 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm border shadow-sm hover:bg-background/90"
+        className="hidden md:flex absolute left-1 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm border shadow-sm hover:bg-background/90 justify-center items-center"
       >
         <ChevronLeft className="w-4 h-4 text-primary" />
       </Button>
@@ -43,7 +43,7 @@ const Stories = () => {
         variant="ghost"
         size="sm"
         onClick={scrollRight}
-        className="absolute right-1 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm border shadow-sm hover:bg-background/90"
+        className="hidden md:flex absolute right-1 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm border shadow-sm hover:bg-background/90 justify-center items-center"
       >
         <ChevronRight className="w-4 h-4 text-primary" />
       </Button>
@@ -52,7 +52,7 @@ const Stories = () => {
         ref={scrollContainerRef}
         className="max-w-screen-md overflow-x-scroll no-scrollbar snap-x snap-mandatory"
       >
-        <div className="flex gap-6 w-max px-3 ml-1">
+        <div className="flex gap-5 md:gap-7 lg:gap-9 w-max px-3 md:ml-1">
           {/* Add Story Button */}
           <div className="flex flex-col items-center gap-1 snap-center">
             <Button

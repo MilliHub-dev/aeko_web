@@ -43,13 +43,13 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${quicksand.variable} antialiased`}>
         <ThemeProvider>
-          <div className="min-h-screen  bg-primary dark:bg-background">
+          <div className="min-h-screen bg-primary dark:bg-background">
             <MobileHeader />
             <div className="max-w-7xl mx-auto bg-background w-full">
               <LeftSidebar />
-              <main className="relative flex-1 md:ml-16 lg:ml-64 xl:mr-80">
-                <div className="max-w-2xl mx-auto px-4 md:px-2 py-20 md:py-8 snap-y snap-mandatory space-y-5">
-                  <Stories />
+              <main className="relative flex-1 md:ml-16 lg:ml-64 xl:mr-80 py-20 md:py-8">
+                <Stories />
+                <div className="max-w-2xl mx-auto px-4 md:px-2 snap-y snap-mandatory space-y-5 py-5">
                   <CreatePost />
                   <div className="space-y-6 ">{children}</div>
                 </div>
@@ -57,7 +57,6 @@ export default function RootLayout({
               <RightSidebar />
             </div>
             <MobileNavbar />
-            {/* <div className="md:hidden h-16"></div> */}
           </div>
         </ThemeProvider>
       </body>

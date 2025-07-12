@@ -60,9 +60,9 @@ export function Post() {
         <Button
           variant="ghost"
           size="icon"
-          className="text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 w-8 h-8"
+          className="text-primary hover:bg-gray-100 dark:hover:bg-gray-800 w-8 h-8"
         >
-          <MoreHorizontal className="w-4 h-4" />
+          <MoreHorizontal className="w-4 h-4" strokeWidth={1} />
         </Button>
       </div>
 
@@ -103,7 +103,7 @@ export function Post() {
                 className="text-primary hover:bg-gray-100 dark:hover:bg-gray-800 w-8 h-8"
                 onClick={() => toggleLike(1)}
               >
-                <Heart className="w-4 h-4" strokeWidth={1.5} />
+                <Heart className="w-4 h-4" strokeWidth={1} />
               </Button>
               <span className="text-sm text-blue-gem-400 dark:text-green-yellow-100">
                 12 <span className="hidden md:inline">Likes</span>
@@ -116,7 +116,7 @@ export function Post() {
                 size="icon"
                 className="text-primary hover:bg-gray-100 dark:hover:bg-gray-800 w-8 h-8"
               >
-                <MessageCircle className="w-4 h-4" strokeWidth={1.5} />
+                <MessageCircle className="w-4 h-4" strokeWidth={1} />
               </Button>
               <span className="text-sm text-blue-gem-400 dark:text-green-yellow-100">
                 25 <span className="hidden md:inline">Comments</span>
@@ -129,7 +129,7 @@ export function Post() {
                 size="icon"
                 className="text-primary hover:bg-gray-100 dark:hover:bg-gray-800 w-8 h-8"
               >
-                <Share className="w-4 h-4" strokeWidth={1.5} />
+                <Share className="w-4 h-4" strokeWidth={1} />
               </Button>
               <span className="text-sm text-blue-gem-400 dark:text-green-yellow-100">
                 187 <span className="hidden md:inline">Shares</span>
@@ -143,7 +143,7 @@ export function Post() {
             className="text-primary hover:bg-gray-100 dark:hover:bg-gray-800 w-8 h-8"
             onClick={() => toggleSave(1)}
           >
-            <Bookmark className="w-4 h-4" strokeWidth={1.5} />
+            <Bookmark className="w-4 h-4" strokeWidth={1} />
           </Button>
         </div>
       </div>
