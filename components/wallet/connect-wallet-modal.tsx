@@ -14,14 +14,14 @@ const ConnectWalletModal = ({
 }: ConnectWalletModalProps) => {
   return (
     showConnectModal && (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg max-w-md w-full p-6">
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={()=> setShowConnectModal(false)}>
+        <div className="bg-white dark:bg-background dark:border dark:border-primary/30 rounded-lg max-w-md w-full p-6">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-bold">Connect Wallet</h3>
+            <h3 className="text-xl font-bold text-primary dark:text-primary-foreground">Connect Wallet</h3>
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 text-primary dark:text-primary-foreground"
               onClick={() => setShowConnectModal(false)}
             >
               <X size={18} />
@@ -61,7 +61,7 @@ const ConnectWalletModal = ({
               Trust Wallet
             </Button>
           </div>
-          <p className="text-sm text-gray-500 mt-6">
+          <p className="text-sm text-gray-500 dark:text-primary-foreground mt-6">
             By connecting your wallet, you agree to our Terms of Service and
             Privacy Policy.
           </p>
