@@ -17,7 +17,10 @@ const SendModal = ({
   return (
     showSendModal && (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg max-w-md w-full p-6">
+        <div
+          className="bg-background rounded-lg max-w-md w-full p-6 dark:border dark:border-primary/30 text-primary dark:text-primary-foreground"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xl font-bold">Send Aeko Coin</h3>
             <Button
@@ -32,27 +35,27 @@ const SendModal = ({
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="recipient">Recipient Address</Label>
-              <Input id="recipient" placeholder="0x..." />
+              <Input id="recipient" placeholder="0x..." className="border border-primary dark:border-primary/30"/>
             </div>
             <div className="space-y-2">
               <Label htmlFor="amount">Amount</Label>
               <div className="relative">
-                <Input id="amount" placeholder="0.00" />
+                <Input id="amount" placeholder="0.00" className="border border-primary dark:border-primary/30"/>
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                   <span className="text-gray-500">AEKO</span>
                 </div>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Available: {balance} AEKO</span>
-                <button className="text-blue-600">Max</button>
+                <button className="text-primary">Max</button>
               </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="note">Note (Optional)</Label>
-              <Input id="note" placeholder="Add a note to this transaction" />
+              <Input id="note" placeholder="Add a note to this transaction" className="border border-primary dark:border-primary/30"/>
             </div>
             <div className="pt-2">
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-full">
+              <Button className="w-full hover:text-primary text-white bg-primary dark:bg-primary/70 rounded-full">
                 Review Transaction
               </Button>
             </div>
@@ -61,6 +64,6 @@ const SendModal = ({
       </div>
     )
   );
-}
+};
 
-export { SendModal }
+export { SendModal };

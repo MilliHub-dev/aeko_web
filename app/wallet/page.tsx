@@ -3,13 +3,11 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { ArrowUpRight, ArrowDownLeft, Clock, Wallet, Gift } from "lucide-react";
 import {
-  ArrowUpRight,
-  ArrowDownLeft,
-  Clock,
-  Wallet, Gift
-} from "lucide-react";
-import { Transaction, TransactionTable } from "@/components/wallet/transaction-table";
+  Transaction,
+  TransactionTable,
+} from "@/components/wallet/transaction-table";
 import { AnalyticsTab } from "@/components/wallet/analytics";
 import { BalanceCard } from "@/components/wallet/balance-card";
 import { BuySellCard } from "@/components/wallet/buy-sell-card";
@@ -28,7 +26,7 @@ export default function AekoWallet() {
   const [showReceiveModal, setShowReceiveModal] = useState<boolean>(false);
   const [showRedeemModal, setShowRedeemModal] = useState<boolean>(false);
   const [showBuySellModal, setShowBuySellModal] = useState<boolean>(false);
-  const [buySellMode, setBuySellMode] = useState<"buy" | "sell">("buy");
+  const [buySellMode, setBuySellMode] = useState<string>("buy");
 
   // Mock data
   const walletAddress: string = "0x1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t";
@@ -162,9 +160,19 @@ export default function AekoWallet() {
             </div>
             <div className="">
               <Tabs defaultValue="transactions" className="w-full">
-                <TabsList className="grid grid-cols-2 mb-6 w-full ">
-                  <TabsTrigger value="transactions">Transactions</TabsTrigger>
-                  <TabsTrigger value="analytics">Analytics</TabsTrigger>
+                <TabsList className="grid grid-cols-2 mb-6 w-full">
+                  <TabsTrigger
+                    value="transactions"
+                    className="data-[state=active]:dark:bg-primary/70 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:dark:text-primary-foreground text-primary dark:text-primary-foreground"
+                  >
+                    Transactions
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="analytics"
+                    className="data-[state=active]:dark:bg-primary/70 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:dark:text-primary-foreground text-primary dark:text-primary-foreground"
+                  >
+                    Analytics
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="transactions">
                   <TransactionTable
@@ -184,7 +192,9 @@ export default function AekoWallet() {
             <div className="bg-gigas-200 dark:bg-background dark:border-border dark:border-1 p-6 rounded-full mb-6">
               <Wallet className="h-12 w-12 text-primary" />
             </div>
-            <h2 className="text-2xl font-bold mb-2 text-primary">Connect Your Wallet</h2>
+            <h2 className="text-2xl font-bold mb-2 text-primary">
+              Connect Your Wallet
+            </h2>
             <p className="text-gray-500 dark:text-primary-foreground max-w-md mb-8">
               Connect your wallet to access your Aeko Coin balance, send and
               receive tokens, and manage your earnings.

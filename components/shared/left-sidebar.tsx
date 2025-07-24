@@ -67,7 +67,6 @@ const LeftSidebar = () => {
 
               <Button
                 className="flex items-center gap-x-3 rounded-full hover:bg-accent hover:text-primary transition-colors md:justify-center lg:justify-start lg:w-full lg:flex-1 text-blue-gem-50 dark:text-green-yellow-100"
-                onClick={() => handleRouteClick("Search")}
                 variant={"ghost"}
               >
                 <div className="flex justify-center items-center">

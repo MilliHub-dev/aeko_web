@@ -43,7 +43,7 @@ const Header = ({
             <span className="text-primary dark:text-primary-foreground">{truncateAddress(walletAddress)}</span>
             <ChevronDown size={16} className="text-primary dark:text-primary-foreground" />
           </Button>
-          <Button variant="default" size="sm" className="rounded-full bg-transparent border border-red-400 text-red-400" onClick={handleDisconnectWallet}>
+          <Button variant="default" size="sm" className="rounded-full bg-transparent hover:bg-red-400 hover:text-white border border-red-400 text-red-400" onClick={handleDisconnectWallet}>
             Disconnect
           </Button>
         </div>

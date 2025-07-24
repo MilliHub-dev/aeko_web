@@ -17,7 +17,10 @@ const ReceiveModal = ({
   return (
     showReceiveModal && (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg max-w-md w-full p-6">
+        <div
+          className="bg-white rounded-lg max-w-md w-full p-6"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xl font-bold">Receive Aeko Coin</h3>
             <Button
@@ -57,6 +60,6 @@ const ReceiveModal = ({
       </div>
     )
   );
-}
+};
 
-export { ReceiveModal }
+export { ReceiveModal };

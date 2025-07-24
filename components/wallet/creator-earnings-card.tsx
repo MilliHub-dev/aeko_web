@@ -12,7 +12,7 @@ const CreatorEarningsCard = ({
   setShowRedeemModal,
 }: CreatorEarningsCardProps) => {
   return (
-    <Card className="dark:border-border/30">
+    <Card className="dark:border-border/30 text-primary dark:text-primary-foreground">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg">Creator Earnings</CardTitle>
         <CardDescription>Available to redeem</CardDescription>
@@ -27,7 +27,7 @@ const CreatorEarningsCard = ({
       <CardFooter className="pt-0">
         <Button
           variant={"outline"}
-          className="w-full text-primary hover:text-primary/90 bg-transparent rounded-full"
+          className="w-full text-primary hover:text-white hover:bg-primary dark:hover:bg-primary/70 rounded-full"
           onClick={() => setShowRedeemModal(true)}
         >
           <Gift className="mr-2 h-4 w-4" /> Redeem Earnings

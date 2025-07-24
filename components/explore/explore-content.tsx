@@ -107,7 +107,7 @@ export function ExploreContent() {
               </div>
 
               <Link href={`/explore/topic/${topic.id}`}>
-                <h3 className="text-lg font-semibold text-blue-gem-50 dark:text-green-yellow-100 hover:text-blue-gem-500 dark:hover:text-green-yellow-300 transition-colors">
+                <h3 className="text-lg font-semibold text-primary dark:text-primary-foreground transition-colors">
                   {topic.title}
                 </h3>
               </Link>

@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Button } from "./ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Button } from "../ui/button";
 
 interface User {
   id: number;
@@ -54,7 +54,7 @@ const WhoToFollow = () => {
                 <div className="font-semibold text-blue-gem-50 dark:text-green-yellow-100 text-sm truncate">
                   {user.name}
                 </div>
-                <div className="text-gray-500 dark:text-gray-400 text-sm truncate">
+                <div className="text-gray-300 dark:text-gray-400 text-sm truncate">
                   {user.username}
                 </div>
               </div>

@@ -50,12 +50,12 @@ const TransactionTable = ({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Type</TableHead>
-                <TableHead>Transaction ID</TableHead>
-                <TableHead>Date & Time</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Details</TableHead>
+                <TableHead className="text-primary dark:text-primary/70">Type</TableHead>
+                <TableHead className="text-primary dark:text-primary/70">Transaction ID</TableHead>
+                <TableHead className="text-primary dark:text-primary/70">Date & Time</TableHead>
+                <TableHead className="text-primary dark:text-primary/70">Amount</TableHead>
+                <TableHead className="text-primary dark:text-primary/70">Status</TableHead>
+                <TableHead className="text-primary dark:text-primary/70">Details</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -75,7 +75,7 @@ const TransactionTable = ({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="ml-1 h-6 w-6 p-0"
+                        className="ml-1 h-6 w-6 p-0 text-primary"
                       >
                         <Copy size={14} />
                       </Button>
@@ -95,7 +95,7 @@ const TransactionTable = ({
                     </span>
                   </TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-primary">
                       <ExternalLink size={16} />
                     </Button>
                   </TableCell>

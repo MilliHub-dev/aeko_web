@@ -14,14 +14,20 @@ const ConnectWalletModal = ({
 }: ConnectWalletModalProps) => {
   return (
     showConnectModal && (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={()=> setShowConnectModal(false)}>
-        <div className="bg-white dark:bg-background dark:border dark:border-primary/30 rounded-lg max-w-md w-full p-6">
+      <div
+        className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+        onClick={() => setShowConnectModal(false)}
+      >
+        <div
+          className="bg-background text-primary dark:text-primary-foreground dark:border dark:border-primary/30 rounded-lg max-w-md w-full p-6 z-100"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-bold text-primary dark:text-primary-foreground">Connect Wallet</h3>
+            <h3 className="text-xl font-bold ">Connect Wallet</h3>
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 text-primary dark:text-primary-foreground"
+              className="h-8 w-8 p-0"
               onClick={() => setShowConnectModal(false)}
             >
               <X size={18} />
@@ -30,7 +36,7 @@ const ConnectWalletModal = ({
           <div className="space-y-4">
             <Button
               variant="outline"
-              className="w-full justify-start h-14 text-lg bg-transparent"
+              className="w-full justify-start h-14 text-lg bg-transparent text-primary dark:text-primary-foreground"
               onClick={() => handleConnectWallet("metamask")}
             >
               <div className="w-8 h-8 rounded-full bg-orange-100 mr-4"></div>
@@ -38,7 +44,7 @@ const ConnectWalletModal = ({
             </Button>
             <Button
               variant="outline"
-              className="w-full justify-start h-14 text-lg bg-transparent"
+              className="w-full justify-start h-14 text-lg bg-transparent text-primary dark:text-primary-foreground"
               onClick={() => handleConnectWallet("walletconnect")}
             >
               <div className="w-8 h-8 rounded-full bg-blue-100 mr-4"></div>
@@ -46,7 +52,7 @@ const ConnectWalletModal = ({
             </Button>
             <Button
               variant="outline"
-              className="w-full justify-start h-14 text-lg bg-transparent"
+              className="w-full justify-start h-14 text-lg bg-transparent text-primary dark:text-primary-foreground"
               onClick={() => handleConnectWallet("coinbase")}
             >
               <div className="w-8 h-8 rounded-full bg-blue-100 mr-4"></div>
@@ -54,7 +60,7 @@ const ConnectWalletModal = ({
             </Button>
             <Button
               variant="outline"
-              className="w-full justify-start h-14 text-lg bg-transparent"
+              className="w-full justify-start h-14 text-lg bg-transparent text-primary dark:text-primary-foreground"
               onClick={() => handleConnectWallet("trustwallet")}
             >
               <div className="w-8 h-8 rounded-full bg-blue-100 mr-4"></div>
@@ -69,6 +75,6 @@ const ConnectWalletModal = ({
       </div>
     )
   );
-}
+};
 
-export { ConnectWalletModal }
+export { ConnectWalletModal };

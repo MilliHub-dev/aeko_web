@@ -18,7 +18,7 @@ const BuySellCard = ({
   setBuySellMode,
 }: BuySellCardProps) => {
   return (
-    <Card className="dark:border-border/30">
+    <Card className="dark:border-border/30 text-primary dark:text-primary-foreground">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg">Buy/Sell Aeko Coin</CardTitle>
         <CardDescription>Exchange your Aeko Coin</CardDescription>
@@ -26,7 +26,7 @@ const BuySellCard = ({
       <CardContent className="space-y-4">
         <Button
           variant={"outline"}
-         className="w-full text-primary hover:text-primary/90 bg-transparent rounded-full"
+         className="w-full text-primary hover:text-white hover:bg-primary dark:hover:bg-primary/70 rounded-full"
           onClick={() => {
             setBuySellMode("buy");
             setShowBuySellModal(true);
@@ -36,7 +36,7 @@ const BuySellCard = ({
         </Button>
         <Button
           variant="outline"
-         className="w-full text-primary hover:text-primary/90 bg-transparent rounded-full"
+         className="w-full text-primary hover:text-white hover:bg-primary dark:hover:bg-primary/70 rounded-full"
           onClick={() => {
             setBuySellMode("sell");
             setShowBuySellModal(true);

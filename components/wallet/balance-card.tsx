@@ -21,7 +21,7 @@ const BalanceCard = ({
   setShowReceiveModal,
 }: BalanceCardProps) => {
   return (
-    <Card className="md:col-span-2 xl:col-span-1 dark:border-border/30">
+    <Card className="md:col-span-2 xl:col-span-1 dark:border-border/30 text-primary dark:text-primary-foreground">
       <CardHeader>
         <CardTitle className="text-xl">Aeko Coin Balance</CardTitle>
       </CardHeader>
@@ -35,7 +35,7 @@ const BalanceCard = ({
       <CardFooter className="flex flex-col sm:flex-row gap-2 pt-0">
         <Button
           variant="default"
-          className="w-full sm:flex-1 bg-red-400 dark:bg-transparent dark:text-red-400 border dark:border-red-400/30  hover:bg-red-300 rounded-full"
+          className="w-full sm:flex-1 bg-red-400 dark:bg-transparent dark:text-red-400 border dark:border-red-400/30  hover:bg-red-400/80 dark:hover:bg-red-400 rounded-full"
           onClick={() => setShowSendModal(true)}
         >
           <ArrowUpRight className="mr-2 h-4 w-4" />
