@@ -1,23 +1,8 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Nunito_Sans, Quicksand } from "next/font/google";
+import { Nunito_Sans, Quicksand } from "next/font/google";
 import "./globals.css";
-import { LeftSidebar } from "@/components/shared/left-sidebar";
-import { RightSidebar } from "@/components/shared/right-sidebar";
-import { MobileNavbar } from "@/components/shared/mobile-navbar";
 import { ThemeProvider } from "@/components/theme/theme-provider";
-import { Stories } from "@/components/stories";
-import { CreatePost } from "@/components/create-post";
-import { MobileHeader } from "@/components/shared/mobile-header";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { BaseLayout } from "@/components/shared/base-layout"
 
 export const metadata: Metadata = {
   title: "Aeko App",
@@ -43,21 +28,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${quicksand.variable} antialiased`}>
         <ThemeProvider>
-          <div className="min-h-screen bg-primary dark:bg-background">
-            <MobileHeader />
-            <div className="max-w-7xl mx-auto bg-background w-full">
-              <LeftSidebar />
-              <main className="relative flex-1 md:ml-16 lg:ml-64 xl:mr-80 py-20 md:py-8">
-                <Stories />
-                <div className="max-w-2xl mx-auto px-4 md:px-2 snap-y snap-mandatory space-y-5 py-5">
-                  <CreatePost />
-                  <div className="space-y-6 ">{children}</div>
-                </div>
-              </main>
-              <RightSidebar />
-            </div>
-            <MobileNavbar />
-          </div>
+          <BaseLayout>
+            {children}
+          </BaseLayout>
         </ThemeProvider>
       </body>
     </html>

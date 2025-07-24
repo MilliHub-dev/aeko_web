@@ -6,13 +6,16 @@ import { Button } from "../ui/button";
 import { ThemeSwitcher } from "../theme/theme-switcher";
 import { Logo } from "../logo";
 import React from "react";
-import {  SearchPanel, useSearchDialog } from "../search-panel";
+import {  SearchPanel, useSearchDialog } from "./search-panel";
 import { AnimatePresence, motion } from "motion/react";
 import { PlusIcon, SearchIcon } from "lucide-react";
 import { Avatar, AvatarFallback } from "../ui/avatar";
+import { usePathname } from "next/navigation";
 
 const LeftSidebar = () => {
   const { dialogState, handleRouteClick, handleBackdropClick, toggleSearch } = useSearchDialog();
+
+  const path = usePathname()
 
   return (
     <React.Fragment>
@@ -40,10 +43,20 @@ const LeftSidebar = () => {
                   <Link
                     href={route.path}
                     key={route.name}
-                    className="w-full flex-1 flex items-center gap-x-3 p-2 rounded-full hover:bg-accent hover:text-primary transition-colors md:justify-center lg:justify-start text-blue-gem-50 dark:text-green-yellow-100"
+                    className={`
+                      w-full flex-1 flex items-center gap-x-3 p-2 rounded-full 
+                      hover:bg-accent hover:text-primary
+                      md:justify-center lg:justify-start 
+                      text-blue-gem-50 dark:text-green-yellow-100
+                      transition-all duration-200 ease-in-out
+                      ${path === route.path ? 'bg-accent text-primary scale-105 border-primary/30 border' : 'bg-transparent'}
+                    `}
                   >
                     <div className="flex justify-center items-center">
-                      <Icon className="w-full " strokeWidth={1.5} />
+                      <Icon 
+                        className={`w-full transition-transform duration-200 ${path === route.path ? 'scale-110' : ''}`} 
+                        strokeWidth={1.5} 
+                      />
                     </div>
                     <span className="hidden lg:block font-medium">
                       {route.name}
@@ -88,7 +101,7 @@ const LeftSidebar = () => {
       <AnimatePresence>
         {dialogState.isSearchOpen && (
           <motion.div
-            className="fixed inset-0 bg-primary/60  z-10"
+            className="fixed inset-0 bg-black/50 left-[max(0px,calc(50%-640px))] top-0 bottom-0 z-10"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

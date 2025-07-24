@@ -1,5 +1,5 @@
 import { LucidePaperclip, Mic, Smile } from "lucide-react";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 
 const CreatePost = () => {
   return (

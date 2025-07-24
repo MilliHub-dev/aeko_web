@@ -37,7 +37,7 @@ const MobileHeader = ({
 
   return (
     <header
-      className={`md:hidden fixed top-0 left-0 right-0 h-16 bg-background border-b border-border/30 z-50 ${className}`}
+      className={`md:hidden fixed top-0 left-0 right-0 h-16 bg-primary dark:bg-background dark:border-b dark:border-border/30 text-white z-50 ${className}`}
       role="banner"
     >
       <div className="flex items-center justify-between h-full px-4">
@@ -48,30 +48,14 @@ const MobileHeader = ({
 
         {/* Actions Section */}
         <div className="flex items-center space-x-2">
-          <ThemeSwitcher className="text-primary"/>
-          {/* Notifications */}
-          {/* <Button
-            variant="ghost"
-            size="icon"
-            className="relative text-muted-foreground hover:text-foreground"
-            onClick={onNotificationClick}
-            aria-label={`Notifications${
-              notificationCount > 0 ? ` (${notificationCount})` : ""
-            }`}
-          >
-            <Bell className="h-5 w-5" />
-            {notificationCount > 0 && (
-              <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                {notificationCount > 9 ? "9+" : notificationCount}
-              </span>
-            )}
-          </Button> */}
+          {/* Theme Switcher */}
+          <ThemeSwitcher className="text-white" />
 
           {/* Messages */}
           <Button
             variant="ghost"
             size="icon"
-            className="relative hover:bg-accent hover:text-primary transition-colors  text-primary dark:text-green-yellow-100"
+            className="relative hover:bg-accent hover:text-primary transition-colors  text-white dark:text-green-yellow-100"
             onClick={onMessageClick}
             aria-label={`Messages${
               messageCount > 0 ? ` (${messageCount})` : ""
@@ -84,40 +68,8 @@ const MobileHeader = ({
               </span>
             )}
           </Button>
-
-          {/* Profile */}
-          {/* <Button
-            variant="ghost"
-            size="icon"
-            className="relative"
-            onClick={() => {
-              setIsProfileOpen(!isProfileOpen);
-              onProfileClick?.();
-            }}
-            aria-label="Profile menu"
-          >
-            {user.avatar ? (
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="text-xs">
-                  {user.initials}
-                </AvatarFallback>
-              </Avatar>
-            ) : (
-              <User className="h-5 w-5 text-muted-foreground" />
-            )}
-          </Button> */}
         </div>
       </div>
-
-      {/* Click outside to close dropdown */}
-      {/* {isProfileOpen && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setIsProfileOpen(false)}
-          aria-hidden="true"
-        />
-      )} */}
     </header>
   );
 };

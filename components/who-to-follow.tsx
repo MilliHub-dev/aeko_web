@@ -61,7 +61,8 @@ const WhoToFollow = () => {
             </div>
             <Button
               // onClick={() => handleFollow(user.id)}
-              className="text-blue-gem-50 dark:text-white px-6 py-2 rounded-full font-medium text-sm"
+              variant={"outline"}
+              className="text-white hover:text-primary/90 bg-transparent rounded-full"
             >
               Follow
             </Button>

@@ -1,11 +1,11 @@
-import { Bell, CircleDollarSign, Home, Search, User } from "lucide-react";
+import { Bell, CircleDollarSign, CompassIcon, Home, Search, User } from "lucide-react";
 import Link from "next/link";
 
 const MobileNavbar = () => {
   const navItems = [
     { id: "home", icon: Home, label: "Home", path: "/" },
-    { id: "search", icon: Search, label: "Search", path: "/search" },
-    { id: "analytics", icon: CircleDollarSign, label: "Analytics", path: "/analytics" },
+    { id: "explore", icon: CompassIcon, label: "Explore", path: "/explore" },
+    { id: "wallet", icon: CircleDollarSign, label: "Wallet", path: "/wallet" },
     { id: "activity", icon: Bell, label: "Activity", path: "/activity" },
     { id: "profile", icon: User, label: "Profile", path: "/profile" }
   ];
