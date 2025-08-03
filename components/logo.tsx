@@ -5,36 +5,16 @@ interface LogoProps {
   size?: number;
 }
 
-const Logo = ({size = 50}: LogoProps) => {
-  const { theme } = useTheme();
-  return (
-    <div className="flex justify-start lg:pl-2">
-      <Image
-        src="/aeko-mobile.svg"
-        alt="aeko logo"
-        width={size}
-        height={size}
-        className="object-contain"
-        priority
-      />
-    </div>
-  );
-};
-const MobileLogo = ({size = 50}: LogoProps) => {
-  const { theme } = useTheme();
-  return (
-    <div className="flex justify-start lg:pl-2">
-      <Image
-        src="/aeko-mobile.svg"
-        alt="aeko logo"
-        width={size}
-        height={size}
-        className="object-contain"
-        priority
-      />
-    </div>
-  );
+const Logo = () => {
+	return (
+		<div className="">
+			<img
+				src="/aeko-mobile.svg"
+				alt="aeko logo"
+				className="object-contain"
+			/>
+		</div>
+	);
 };
 
-
-export { Logo, MobileLogo };
+export { Logo };

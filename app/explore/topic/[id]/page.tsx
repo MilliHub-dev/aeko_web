@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Post } from "@/components/home/post";
+import { Post } from "@/components/home/post-feed/post";
 
 interface TopicPageProps {
   params: {

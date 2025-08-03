@@ -4,29 +4,19 @@ import { LeftSidebar } from "./left-sidebar";
 import { RightSidebar } from "./right-sidebar";
 import { MobileNavbar } from "./mobile-navbar";
 import { MobileHeader } from "./mobile-header";
-import { usePathname } from "next/navigation";
 
 interface BaseLayoutProps {
 	children: React.ReactNode;
 }
 
 export function BaseLayout({ children }: BaseLayoutProps) {
-	const path = usePathname();
 	return (
-		<div className="min-h-screen bg-gray-50">
-			<MobileHeader />
-
-			<div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
-				<div className="flex gap-8">
+		<div className="max-w-full bg-gray-50">
+			{/* <MobileHeader /> */}
+			<div className="container xl:mx-auto px-2 lg:px-6 xl:px-8">
+				<div className="flex">
 					<LeftSidebar />
-					<main
-						className={`relative flex-2 max-w-4xl ${
-							path === "/wallet" ||
-							path === "/live-streams" ||
-							path === "/explore" ||
-							path === "/settings"
-						}`}
-					>
+					<main className="relative flex-4 max-w-4xl md:ml-16 md:mt-16 xl:m-0">
 						{children}
 					</main>
 					<RightSidebar />
