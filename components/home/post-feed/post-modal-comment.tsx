@@ -32,6 +32,30 @@ export function CommentSection({ postId }: { postId: string }) {
 			content: "Great work! The lighting is perfect ✨",
 			likes: 89,
 			timeAgo: "1h"
+		},
+		{
+			id: "3",
+			username: "Emily Davis",
+			profileImage: "/users/emily.jpg",
+			content: "Wow, this really captures the moment! 🥰",
+			likes: 67,
+			timeAgo: "30m"
+		},
+		{
+			id: "4",
+			username: "David Smith",
+			profileImage: "/users/david.jpg",
+			content: "This is amazing! The colors are so vibrant 🎨",
+			likes: 45,
+			timeAgo: "15m"
+		},
+		{
+			id: "5",
+			username: "Laura Brown",
+			profileImage: "/users/laura.jpg",
+			content: "Absolutely stunning! The details are incredible 🌟",
+			likes: 32,
+			timeAgo: "10m"
 		}
 	];
 

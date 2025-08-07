@@ -1,78 +1,48 @@
 "use client";
 
-import { Bell, MessageCircle, User } from "lucide-react";
-import { Button } from "../ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Bell, Grid, MessageSquare } from "lucide-react";
+import Image from "next/image";
+import { Button } from "../ui/button"; // Adjust to your actual Button import
 import { Logo } from "../logo";
-import { useState } from "react";
-import { ThemeSwitcher } from "../theme/theme-switcher";
 
-interface User {
-  name: string;
-  email: string;
-  avatar?: string;
-  initials: string;
-}
+const MobileHeader = () => {
+	return (
+		<header className="fixed top-0 left-0 right-0 z-50 bg-transparent backdrop-blur-md px-4 py-3 md:hidden">
+			<div className="flex items-center justify-between">
+				{/* Left Icon - Grid */}
+				<Button
+					variant="ghost"
+					size="icon"
+					className="rounded-full bg-secondary hover:bg-primary hover:text-secondary h-10 w-10 md:h-13 md:w-13 border"
+				>
+					<Grid className="h-5 w-5" />
+				</Button>
 
-interface MobileHeaderProps {
-  className?: string;
-  notificationCount?: number;
-  messageCount?: number;
-  user?: User;
-  onNotificationClick?: () => void;
-  onMessageClick?: () => void;
-  onProfileClick?: () => void;
-}
-
-const MobileHeader = ({
-  className = "",
-  notificationCount = 0,
-  messageCount = 0,
-  user = { name: "User", email: "user@example.com", initials: "U" },
-  onNotificationClick,
-  onMessageClick,
-  onProfileClick,
-}: MobileHeaderProps) => {
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-
-  return (
-		<header
-			className={`lg:hidden fixed top-0 left-0 right-0 h-16  z-50 ${className}`}
-			role="banner"
-		>
-			<div className="flex items-center justify-center bg-gray-50 h-full px-4">
-				{/* Logo Section */}
-				<div className="flex-shrink-0">
+				{/* Center Logo */}
+				<div className="flex-shrink-0 w-16">
 					<Logo />
 				</div>
 
-				{/* Actions Section */}
-				<div className="flex items-center space-x-2">
-					{/* Theme Switcher */}
-					{/* <ThemeSwitcher className="text-white" /> */}
-
-					{/* Messages */}
-					{/* <Button
+				{/* Right Icons */}
+				<div className="flex justify-center items-center space-x-4">
+					<Button
 						variant="ghost"
 						size="icon"
-						className="relative hover:bg-accent hover:text-primary transition-colors  text-white dark:text-green-yellow-100"
-						onClick={onMessageClick}
-						aria-label={`Messages${
-							messageCount > 0 ? ` (${messageCount})` : ""
-						}`}
+						className="rounded-full bg-secondary hover:bg-primary hover:text-secondary h-10 w-10 md:h-13 md:w-13 border"
 					>
-						<MessageCircle className="h-5 w-5" />
-						{messageCount > 0 && (
-							<span className="absolute -top-1 -right-1 h-4 w-4 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center">
-								{messageCount > 9 ? "9+" : messageCount}
-							</span>
-						)}
-					</Button> */}
+						<Bell className="h-5 w-5" />
+					</Button>
+					<Button
+						variant="ghost"
+						size="icon"
+						className="rounded-full bg-secondary hover:bg-primary hover:text-secondary h-10 w-10 md:h-13 md:w-13 border"
+					>
+						<MessageSquare className="h-5 w-5" />
+					</Button>
 				</div>
 			</div>
 		</header>
-  );
+	);
 };
 
 export { MobileHeader };
-export type { MobileHeaderProps, User };

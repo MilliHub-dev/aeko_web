@@ -11,16 +11,7 @@ import { CreatePost } from "../home/create-post";
 
 const RightSidebar = () => {
 	const path = usePathname();
-	const handleCreatePost = async (postData: {
-		type: PostType;
-		content: string;
-		media?: File;
-		hashtags: string[];
-	}) => {
-		// Handle post creation here
-		// You can send the data to your API
-		console.log("New post:", postData);
-	};
+
 	return (
 		<aside
 			className={`hidden xl:block w-90 flex-shrink-0 ${
@@ -32,7 +23,6 @@ const RightSidebar = () => {
 		>
 			<div className="sticky top-0 space-y-6 py-8 px-4">
 				<div className="flex justify-center items-center space-x-4">
-					<CreatePost onPost={handleCreatePost} />
 					<Button
 						variant="ghost"
 						size="icon"

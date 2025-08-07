@@ -9,6 +9,7 @@ interface PostFooterProps {
 	bookmarks: string;
 	comments: string;
 	textColor?: string;
+	onCommentClick?: () => void;
 }
 
 const PostFooter = ({
@@ -18,7 +19,8 @@ const PostFooter = ({
 	shares,
 	bookmarks,
 	comments,
-	textColor = "text-white"
+	textColor = "text-white",
+	onCommentClick
 }: PostFooterProps) => (
 	<div className="space-y-4">
 		<div className="space-y-2">
@@ -55,7 +57,8 @@ const PostFooter = ({
 			<Metric
 				icon={<MessageCircle className="w-6 h-6" />}
 				value={comments}
-				className={textColor}
+				className={`${textColor} cursor-pointer hover:opacity-80 transition-opacity`}
+				onClick={onCommentClick}
 			/>
 		</div>
 	</div>

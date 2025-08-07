@@ -4,7 +4,7 @@ import { PostHeader } from "./post-header";
 import { Metric } from "./post-metric";
 
 const TextPost = (props: PostProps) => (
-	<div className="relative w-full max-w-sm md:max-w-xl mx-auto bg-card p-4 space-y-4 rounded-2xl hover:shadow-sm transition-shadow">
+	<div className="relative w-full max-w-md md:max-w-xl mx-auto bg-card p-2 md:p-4 space-y-4 rounded-2xl hover:shadow-sm transition-shadow">
 		<PostHeader
 			username={props.username!}
 			handle={props.handle!}

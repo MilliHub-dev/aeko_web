@@ -1,4 +1,5 @@
 import { Post, PostProps, PostType } from "@/components/home/post-feed/post";
+import { QuickPost } from "@/components/home/quick-post";
 import { Stories } from "@/components/home/stories";
 
 export default function Home() {
@@ -8,7 +9,7 @@ export default function Home() {
 			username: "Lisa Wong",
 			handle: "@lisawongdesigns",
 			profileImage: "/users/lisa-wong.jpeg",
-			backgroundImage: "/posts/interior-design.jpg",
+			backgroundImage: "/posts/interior-design-4x5.jpg",
 			content:
 				"Just finished this minimalist living room project! Love how the natural light plays with the neutral tones. Swipe for before photos ➡️ #InteriorDesign",
 			likes: "4.2K",
@@ -59,7 +60,7 @@ export default function Home() {
 			username: "Alex Rivera",
 			handle: "@arivera.photo",
 			profileImage: "/users/alex-rivera.jpg",
-			backgroundImage: "/posts/street-photography.jpg",
+			backgroundImage: "/posts/street-photography-4x5.jpg",
 			content:
 				"Rainy evening in Tokyo. The neon lights reflecting off the wet streets create such a cyberpunk atmosphere. Shot on Sony A7IV, 35mm f/1.4 📸",
 			likes: "12.5K",
@@ -89,6 +90,7 @@ export default function Home() {
 		<div className="py-20 md:py-8">
 			{/* <Stories /> */}
 			<div className="w-full mx-auto snap-y snap-mandatory space-y-5">
+				<QuickPost />
 				<div className="flex flex-col gap-8">
 					{posts.map((post, idx) => (
 						<Post

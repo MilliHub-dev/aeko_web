@@ -8,6 +8,7 @@ import { ImageIcon, VideoIcon, X, Loader2, Plus } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { PostType } from "./post-feed/post";
+import { useMobile } from "@/hooks/use-mobile";
 
 interface CreatePostProps {
 	onPost?: (data: {
@@ -26,6 +27,7 @@ export function CreatePost({ onPost }: CreatePostProps) {
 	const [isLoading, setIsLoading] = useState(false);
 	const [postType, setPostType] = useState<PostType>("text");
 	const fileInputRef = useRef<HTMLInputElement>(null);
+	const isMobile = useMobile();
 
 	const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
@@ -72,14 +74,19 @@ export function CreatePost({ onPost }: CreatePostProps) {
 
 	return (
 		<>
-			<Button
-				variant="ghost"
-				size="icon"
-				className="rounded-full bg-secondary hover:bg-primary hover:text-secondary h-13 w-13 border"
+			<button
+				className="flex items-center gap-x-3 p-2 rounded-full hover:bg-secondary hover:text-primary transition-colors md:justify-center lg:justify-start lg:w-full lg:flex-1"
 				onClick={() => setIsOpen(true)}
 			>
-				<Plus className="h-5 w-5" />
-			</Button>
+				<div className="flex justify-center items-center">
+					<Plus
+						className="w-full"
+						strokeWidth={1.5}
+						size={isMobile ? 35 : 30}
+					/>
+				</div>
+				<span className="hidden lg:block font-medium">Create Post</span>
+			</button>
 
 			<Dialog
 				open={isOpen}

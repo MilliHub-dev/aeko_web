@@ -59,6 +59,7 @@
 	--ring: oklch(31.57% 0.057 180.36/30%);
 	--radius: 16px;
   font-size: 14px;
+  isolation: isolate;
 }
 
 .dark {

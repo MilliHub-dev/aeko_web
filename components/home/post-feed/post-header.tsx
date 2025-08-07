@@ -10,9 +10,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface PostHeaderProps {
-	username: string;
-	handle: string;
-	profileImage: string;
+	username: string | undefined;
+	handle: string | undefined;
+	profileImage: string | undefined;
 	className?: string;
 	avatarBackground?: "bg-black/30 backdrop-blur-sm" | "bg-none";
 	avatarText?: "text-white" | "text-primary";
