@@ -8,7 +8,7 @@ const ThemeProvider = ({ children }: ThemeProviderProps) => {
 	return (
 		<BaseThemeProvider
 			attribute="class"
-			defaultTheme="system"
+			defaultTheme="light"
 			enableSystem
 		>
 			{children}
