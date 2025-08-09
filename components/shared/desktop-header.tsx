@@ -39,9 +39,9 @@ const DesktopHeader = ({
 
 	return (
 		<>
-			<div className="bg-gray-50 xl:hidden blur-sm   fixed top-0 left-0 right-0 z-5 h-16" />
+			<div className="hidden bg-gray-50 md:block xl:hidden blur-sm fixed top-0 left-0 right-0 z-5 h-16 isolate" />
 			<header
-				className={`xl:hidden fixed top-0 left-0 right-0 z-5 backdrop-blur-lg   ${className}`}
+				className={`hidden md:block xl:hidden fixed top-0 left-0 right-0 z-5 isolate backdrop-blur-lg   ${className}`}
 				role="banner"
 			>
 				{/* Header Content */}

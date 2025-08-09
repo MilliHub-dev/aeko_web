@@ -88,7 +88,7 @@ export default function Home() {
 
 	return (
 		<div className="py-20 md:py-8">
-			{/* <Stories /> */}
+			<Stories />
 			<div className="w-full mx-auto snap-y snap-mandatory space-y-5">
 				<QuickPost />
 				<div className="flex flex-col gap-8">

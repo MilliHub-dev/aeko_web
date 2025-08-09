@@ -4,12 +4,13 @@ import { PostHeader } from "./post-header";
 import { Metric } from "./post-metric";
 
 const TextPost = (props: PostProps) => (
-	<div className="relative w-full max-w-md md:max-w-xl mx-auto bg-card p-2 md:p-4 space-y-4 rounded-2xl hover:shadow-sm transition-shadow">
+	<div className="relative w-full max-w-md md:max-w-xl mx-auto bg-card p-2 md:p-4 space-y-4 rounded-2xl border-1">
 		<PostHeader
 			username={props.username!}
 			handle={props.handle!}
 			profileImage={props.profileImage!}
 			avatarBackground="bg-none"
+			dropDownBackground="bg-secondary"
 			avatarText="text-primary"
 		/>
 		<div className="space-y-3">

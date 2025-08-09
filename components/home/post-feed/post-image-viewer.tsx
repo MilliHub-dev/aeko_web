@@ -21,7 +21,7 @@ const PostImageViewer = ({
 	showOverlay = true
 }: PostImageViewerProps) => {
 	return (
-		<>
+		<div className="isolate">
 			{/* Image Media */}
 			<Image
 				src={backgroundImage}
@@ -60,7 +60,7 @@ const PostImageViewer = ({
 					{footer}
 				</motion.div>
 			)}
-		</>
+		</div>
 	);
 };
 

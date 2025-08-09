@@ -14,7 +14,8 @@ interface PostHeaderProps {
 	handle: string | undefined;
 	profileImage: string | undefined;
 	className?: string;
-	avatarBackground?: "bg-black/30 backdrop-blur-sm" | "bg-none";
+	avatarBackground?: "bg-black/30 backdrop-blur-sm" | "bg-none" | "bg-secondary";
+	dropDownBackground?: "bg-black/30 backdrop-blur-sm" | "bg-none" | "bg-secondary";
 	avatarText?: "text-white" | "text-primary";
 }
 
@@ -24,6 +25,7 @@ const PostHeader = ({
 	profileImage,
 	className = "",
 	avatarBackground = "bg-black/30 backdrop-blur-sm",
+	dropDownBackground = "bg-black/30 backdrop-blur-sm",
 	avatarText = "text-white"
 }: PostHeaderProps) => (
 	<div className={`flex items-center justify-between ${className}`}>
@@ -42,7 +44,7 @@ const PostHeader = ({
 		<DropdownMenu>
 			<DropdownMenuTrigger
 				asChild
-				className={`w-13 h-13 px-2.5 py-1.75 rounded-full flex items-center justify-center ${avatarBackground} cursor-pointer`}
+				className={`w-13 h-13 px-2.5 py-1.75 rounded-full flex items-center justify-center ${dropDownBackground} cursor-pointer`}
 			>
 				<MoreVertical className={`w-5 h-5  ${avatarText}`} />
 			</DropdownMenuTrigger>

@@ -40,7 +40,7 @@ const LeftSidebar = () => {
 		<React.Fragment>
 			<aside className="hidden md:block flex-shrink-0 lg:w-70 xl:w-65">
 				<div className="sticky top-0 flex flex-col h-[calc(100vw-12rem)] lg:h-auto gap-8 border-none py-8 px-4 text-xl justify-center">
-					<div className="hidden lg:inline-block md:w-16 lg:w-24">
+					<div className="hidden xl:inline-block md:w-16 lg:w-24">
 						<Logo />
 					</div>
 					<div className="space-y-5xl">

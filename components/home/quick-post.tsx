@@ -3,6 +3,7 @@
 import { LucidePaperclip, Mic, Smile } from "lucide-react";
 import { Button } from "../ui/button";
 import { useState } from "react";
+import { Textarea } from "../ui/textarea";
 
 const QuickPost = () => {
 	const [text, setText] = useState("");
@@ -18,7 +19,7 @@ const QuickPost = () => {
 	return (
 		<form
 			onSubmit={handleSubmit}
-			className="w-full max-w-xl border border-border dark:border-border/30 mx-auto p-4 rounded-2xl transition-all"
+			className="hidden md:block w-full max-w-xl border border-border dark:border-border/30 mx-auto p-4 rounded-2xl transition-all"
 		>
 			<div className="flex items-start gap-3">
 				{/* Attachment */}
@@ -36,12 +37,12 @@ const QuickPost = () => {
 
 				{/* Input Field */}
 				<div className="flex-1">
-					<textarea
+					<Textarea
 						rows={1}
 						value={text}
 						onChange={(e) => setText(e.target.value)}
 						placeholder="What's on your mind right now?"
-						className="w-full resize-none bg-transparent border-none focus:outline-none text-base placeholder:text-muted-foreground"
+						className="w-full bg-transparent border-none focus:outline-none text-base placeholder:text-muted-foreground placeholder:text-xl shadow-none"
 					/>
 				</div>
 

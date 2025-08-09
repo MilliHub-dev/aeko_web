@@ -80,7 +80,7 @@ const PostVideoPlayer = ({
 
 	return (
 		<div
-			className={`relative w-full h-full overflow-hidden ${className}`}
+			className={`relative w-full h-full overflow-hidden isolate ${className}`}
 			onMouseMove={handleMouseMove}
 		>
 			{/* Video */}

@@ -82,7 +82,7 @@ const Post = ({
 		<>
 			<div
 				ref={containerRef}
-				className="relative flex-1 w-full max-w-md md:max-w-xl mx-auto aspect-[4/5] rounded-2xl overflow-hidden"
+				className="relative flex-1 w-full max-w-md md:max-w-xl mx-auto aspect-[4/4] rounded-2xl overflow-hidden"
 				onMouseMove={handleMouseMove}
 				onMouseLeave={() => !isPlaying && setShowOverlay(true)}
 			>
