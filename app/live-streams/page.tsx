@@ -18,20 +18,20 @@ export default function LiveStreamsPage() {
   ];
 
   return (
-    <div className="space-y-6 px-4 min-h-screen">
-      <div className="sticky top-16 md:top-0 z-10 bg-background mb-6 pt-4 border-b border-primary/30 -mx-4 px-4">
-        <h1 className="hidden md:inline text-2xl font-bold text-primary dark:text-green-yellow-300">
-          Live Streams
-        </h1>
-        <div className="bg-background/95 backdrop-blur-sm pb-2 pt-2">
-          {/* Category Tabs */}
-          <CategoryTabs
-            categories={categories}
-            activeCategory={activeCategory}
-            setActiveCategory={setActiveCategory}
-          />
+    <div className="space-y-5 px-6 min-h-screen">
+      <div className="sticky top-16 md:top-0 z-10 mb-6 pt-12  text-black bg-background">
+        <div>
+          <h1 className="hidden md:block text-3xl font-semibold">
+            Live Streams
+          </h1>
         </div>
+        <CategoryTabs
+          categories={categories}
+          activeCategory={activeCategory}
+          setActiveCategory={setActiveCategory}
+        />
       </div>
+
       <LiveStreamContent activeCategory={activeCategory} />
     </div>
   );

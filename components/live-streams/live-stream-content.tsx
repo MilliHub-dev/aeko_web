@@ -112,13 +112,11 @@ export function LiveStreamContent({
   const upcoming = filteredStreams.filter((stream) => !stream.isLive);
 
   return (
-    <div className="space-y-8 text-primary dark:text-primary-foreground">
+    <div className="space-y-8 py-4 text-black">
       {/* Live Now Section */}
       {liveNow.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold">
-            Live Now
-          </h2>
+          <h2 className="text-xl font-semibold">Live Now</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {liveNow.map((stream) => (
               <LiveStreamCard key={stream.id} stream={stream} />

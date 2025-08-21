@@ -1,15 +1,15 @@
+import { Plus, SettingsIcon, SearchIcon, UsersIcon } from "lucide-react";
 import {
-  CircleDollarSignIcon,
-  Compass,
-  CompassIcon,
-  Home,
+  BellIcon,
+  ChatIcon,
+  ChatSquareOutline,
   HomeIcon,
-  Plus,
-  Radio,
-  RadioIcon,
-  SettingsIcon,
-  User
-} from "lucide-react";
+  RadioSolid,
+  UserOutline,
+  UsersGroup,
+  WalletOutline,
+} from "./icons";
+import path from "path";
 
 export const sidebarRoutes = [
   {
@@ -20,17 +20,33 @@ export const sidebarRoutes = [
   {
     name: "Explore",
     path: "/explore",
-    icon: CompassIcon,
+    icon: SearchIcon,
+  },
+  {
+    name: "Communities",
+    path: "/communities",
+    icon: UsersGroup,
   },
   {
     name: "Live Streams",
     path: "/live-streams",
-    icon: RadioIcon,
+    icon: RadioSolid,
   },
   {
-    name: "Wallet",
+    name: "Messages",
+    path: "/messages",
+    icon: ChatIcon,
+  },
+
+  {
+    name: "Notifications",
+    path: "/notifications",
+    icon: BellIcon,
+  },
+  {
+    name: "Aeko Wallet",
     path: "/wallet",
-    icon: CircleDollarSignIcon,
+    icon: WalletOutline,
   },
   {
     name: "Settings",
@@ -41,28 +57,33 @@ export const sidebarRoutes = [
 
 export const mobileRoutes = [
   {
-    name: "Home",
+    id: "home",
+    label: "Home",
     path: "/",
-    icon: Home,
+    icon: HomeIcon,
   },
   {
-    name: "Feeds",
-    path: "/feeds",
-    Icon: Home,
+    id: "explore",
+    label: "Explore",
+    path: "/explore",
+    icon: SearchIcon,
   },
   {
-    name: "Aeko",
+    id: "aeko",
+    label: "Aeko",
     path: "/aeko",
     icon: Plus,
   },
   {
-    name: "Live Streams",
+    id: "live-stream",
+    label: "Live Streams",
     path: "/live-streams",
-    icon: Radio,
+    icon: RadioSolid,
   },
   {
-    name: "Profile",
+    id: "profile",
+    label: "Profile",
     path: "/profile",
-    icon: User,
+    icon: UserOutline,
   },
 ];

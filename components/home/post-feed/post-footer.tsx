@@ -38,7 +38,7 @@ const PostFooter = ({
 				))}
 			</div>
 		</div>
-		<div className="flex items-center space-x-6">
+		<div className="flex items-center justify-between gap-x-6 ">
 			<Metric
 				icon={<Heart className="w-6 h-6 fill-white" />}
 				value={likes}

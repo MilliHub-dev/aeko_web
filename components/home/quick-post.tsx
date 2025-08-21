@@ -4,9 +4,11 @@ import { LucidePaperclip, Mic, Smile } from "lucide-react";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import { Textarea } from "../ui/textarea";
+import { useMobile } from "@/hooks/use-mobile";
 
 const QuickPost = () => {
 	const [text, setText] = useState("");
+	const isMobile = useMobile();
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
@@ -19,9 +21,9 @@ const QuickPost = () => {
 	return (
 		<form
 			onSubmit={handleSubmit}
-			className="hidden md:block w-full max-w-xl border border-border dark:border-border/30 mx-auto p-4 rounded-2xl transition-all"
+			className="hidden md:block w-full md:max-w-lg lg:max-w-xl border border-border dark:border-border/30 mx-auto p-4 rounded-4xl transition-all"
 		>
-			<div className="flex items-start gap-3">
+			<div className="flex items-center gap-3">
 				{/* Attachment */}
 				<Button
 					variant="ghost"
@@ -31,18 +33,19 @@ const QuickPost = () => {
 				>
 					<LucidePaperclip
 						className="w-5 h-5 text-primary"
-						strokeWidth={1}
+						strokeWidth={1.5}
+						size={isMobile ? 35 : 30}
 					/>
 				</Button>
 
 				{/* Input Field */}
 				<div className="flex-1">
 					<Textarea
-						rows={1}
+						rows={isMobile ? 2 : 3}
 						value={text}
 						onChange={(e) => setText(e.target.value)}
 						placeholder="What's on your mind right now?"
-						className="w-full bg-transparent border-none focus:outline-none text-base placeholder:text-muted-foreground placeholder:text-xl shadow-none"
+						className="w-full bg-transparent border-none focus:outline-none text-base placeholder:text-muted-foreground placeholder:text-lg shadow-none place-content-center"
 					/>
 				</div>
 
@@ -56,7 +59,8 @@ const QuickPost = () => {
 					>
 						<Smile
 							className="w-5 h-5 text-primary"
-							strokeWidth={1}
+							strokeWidth={1.5}
+							size={isMobile ? 35 : 30}
 						/>
 					</Button>
 
@@ -68,7 +72,8 @@ const QuickPost = () => {
 					>
 						<Mic
 							className="w-5 h-5 text-primary"
-							strokeWidth={1}
+							strokeWidth={1.5}
+							size={isMobile ? 35 : 30}
 						/>
 					</Button>
 

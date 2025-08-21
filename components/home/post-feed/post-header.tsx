@@ -8,6 +8,8 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { UserPlusBroken } from "@/lib/icons";
 
 interface PostHeaderProps {
 	username: string | undefined;
@@ -41,29 +43,36 @@ const PostHeader = ({
 				<span className={`${avatarText}/70 text-sm`}>{handle}</span>
 			</div>
 		</div>
-		<DropdownMenu>
-			<DropdownMenuTrigger
-				asChild
+		<div className="flex gap-4">
+			<Button
 				className={`w-13 h-13 px-2.5 py-1.75 rounded-full flex items-center justify-center ${dropDownBackground} cursor-pointer`}
 			>
-				<MoreVertical className={`w-5 h-5  ${avatarText}`} />
-			</DropdownMenuTrigger>
-			<DropdownMenuContent
-				side="bottom"
-				align="end"
-				className="w-48 bg-gray-50 px-4"
-			>
-				<DropdownMenuItem>Not Interested</DropdownMenuItem>
-				<DropdownMenuSeparator />
-				<DropdownMenuItem>Report</DropdownMenuItem>
-				<DropdownMenuSeparator />
-				<DropdownMenuItem>Save</DropdownMenuItem>
-				<DropdownMenuSeparator />
-				<DropdownMenuItem>View Profile</DropdownMenuItem>
-				<DropdownMenuSeparator />
-				<DropdownMenuItem>Block {username}</DropdownMenuItem>
-			</DropdownMenuContent>
-		</DropdownMenu>
+				<UserPlusBroken className={`w-5 h-5  ${avatarText}`} />
+			</Button>
+			<DropdownMenu>
+				<DropdownMenuTrigger
+					asChild
+					className={`w-13 h-13 px-2.5 py-1.75 rounded-full flex items-center justify-center ${dropDownBackground} cursor-pointer`}
+				>
+					<MoreVertical className={`w-5 h-5  ${avatarText}`} />
+				</DropdownMenuTrigger>
+				<DropdownMenuContent
+					side="bottom"
+					align="end"
+					className="w-48 bg-gray-50 px-4"
+				>
+					<DropdownMenuItem>Not Interested</DropdownMenuItem>
+					<DropdownMenuSeparator />
+					<DropdownMenuItem>Report</DropdownMenuItem>
+					<DropdownMenuSeparator />
+					<DropdownMenuItem>Save</DropdownMenuItem>
+					<DropdownMenuSeparator />
+					<DropdownMenuItem>View Profile</DropdownMenuItem>
+					<DropdownMenuSeparator />
+					<DropdownMenuItem>Block {username}</DropdownMenuItem>
+				</DropdownMenuContent>
+			</DropdownMenu>
+		</div>
 	</div>
 );
 

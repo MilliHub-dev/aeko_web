@@ -1,82 +1,95 @@
 "use client";
 
 import { Button } from "../ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useRef } from "react";
+import { motion, useSpring } from "motion/react";
+import { useRef, useState, useEffect } from "react";
 
 const Stories = () => {
-	const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null); // Outer fixed wrapper
+  const innerRef = useRef<HTMLDivElement>(null); // Inner draggable content
 
-	const scroll = (direction: "left" | "right") => {
-		if (scrollContainerRef.current) {
-			const container = scrollContainerRef.current;
-			const scrollAmount = container.clientWidth * 0.9; // 90% ensures perfect alignment
-			container.scrollBy({
-				left: direction === "left" ? -scrollAmount : scrollAmount,
-				behavior: "smooth"
-			});
-		}
-	};
+  const [maxDrag, setMaxDrag] = useState(0);
+  const [itemWidth, setItemWidth] = useState(0);
+  const x = useSpring(0, { stiffness: 300, damping: 30 });
 
-	return (
-		<div className="w-full max-w-[100vw] sm:max-w-md md:max-w-lg lg:max-w-2xl mx-auto relative isolate">
-			<div className="flex items-center relative">
-				{/* Left Navigation Button */}
-				<Button
-					variant="ghost"
-					size="icon"
-					onClick={() => scroll("left")}
-					className="hidden md:flex absolute left-0 z-10 w-9 h-9 rounded-full bg-background/80 backdrop-blur-sm border shadow-sm hover:bg-background transition-colors justify-center items-center -translate-x-1/2"
-				>
-					<ChevronLeft className="w-5 h-5 text-primary" />
-				</Button>
+  const calculateDragLimits = () => {
+    if (wrapperRef.current && innerRef.current) {
+      const wrapperWidth = wrapperRef.current.offsetWidth;
+      const innerWidth = innerRef.current.scrollWidth;
 
-				{/* Scrollable Stories Container */}
-				<div
-					ref={scrollContainerRef}
-					className="w-full overflow-x-auto no-scrollbar snap-x snap-mandatory py-4 px-3 sm:px-4 md:px-6"
-				>
-					<div className="flex gap-3 sm:gap-4 md:gap-5">
-						{/* Add Story */}
-						<div className="flex-shrink-0 flex flex-col items-center gap-2 snap-start">
-							<Button
-								variant="outline"
-								className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full border-2 border-border/30 bg-muted shrink-0 hover:bg-primary/10"
-							>
-								<span className="text-xl sm:text-2xl">+</span>
-							</Button>
-							<p className="text-[10px] sm:text-xs text-muted-foreground truncate w-14 sm:w-16 md:w-20 lg:w-24 text-center">
-								Add Story
-							</p>
-						</div>
+      const firstItem = innerRef.current.querySelector(
+        ".snap-start"
+      ) as HTMLElement | null;
+      if (firstItem) {
+        const style = window.getComputedStyle(firstItem);
+        const marginRight = parseFloat(style.marginRight);
+        setItemWidth(firstItem.offsetWidth + marginRight);
+      }
 
-						{/* Story Circles */}
-						{Array.from({ length: 12 }).map((_, i) => (
-							<div
-								key={i}
-								className="flex-shrink-0 flex flex-col items-center gap-2 snap-start"
-							>
-								<div className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full border-2 border-primary bg-muted cursor-pointer hover:border-primary/70 transition-colors" />
-								<p className="text-[10px] sm:text-xs text-muted-foreground truncate w-14 sm:w-16 md:w-20 lg:w-24 text-center">
-									user_{i + 1}
-								</p>
-							</div>
-						))}
-					</div>
-				</div>
+      // Max drag is the difference between inner content and visible area
+      setMaxDrag(innerWidth - wrapperWidth);
+    }
+  };
 
-				{/* Right Navigation Button */}
-				<Button
-					variant="ghost"
-					size="icon"
-					onClick={() => scroll("right")}
-					className="hidden md:flex absolute right-0 z-10 w-9 h-9 rounded-full bg-background/80 backdrop-blur-sm border shadow-sm hover:bg-background transition-colors justify-center items-center translate-x-1/2"
-				>
-					<ChevronRight className="w-5 h-5 text-primary" />
-				</Button>
-			</div>
-		</div>
-	);
+  useEffect(() => {
+    calculateDragLimits();
+    window.addEventListener("resize", calculateDragLimits);
+    return () => {
+      window.removeEventListener("resize", calculateDragLimits);
+    };
+  }, []);
+
+  const handleDragEnd = () => {
+    const currentX = x.get();
+    const snapTo = Math.round(currentX / itemWidth) * itemWidth;
+    const clamped = Math.max(Math.min(snapTo, 0), -maxDrag);
+    x.set(clamped);
+  };
+
+  return (
+    <div className="w-full max-w-[100vw] sm:max-w-md md:max-w-lg lg:max-w-2xl mx-auto relative isolate mb-8">
+      {/* Outer Wrapper */}
+      <div ref={wrapperRef} className="overflow-hidden pl-10 sm:px-4 md:px-6">
+        {/* Draggable Inner */}
+        <motion.div
+          ref={innerRef}
+          className="flex gap-3 sm:gap-4 md:gap-5 snap-x snap-mandatory cursor-grab active:cursor-grabbing -mx-6"
+          style={{ x }}
+          drag="x"
+          dragConstraints={{ left: -maxDrag, right: 0 }}
+          dragElastic={0.2}
+          dragMomentum={false}
+          onDragEnd={handleDragEnd}
+        >
+          {/* Add Story */}
+          <div className="flex-shrink-0 flex flex-col items-center gap-2 snap-start">
+            <Button
+              variant="outline"
+              className="w-16 h-16 md:w-24 md:h-24 rounded-full border-2 border-border/30 bg-muted shrink-0 hover:bg-primary/10"
+            >
+              <span className="text-xl sm:text-2xl">+</span>
+            </Button>
+            <p className="text-[10px] sm:text-xs text-muted-foreground truncate w-14 sm:w-16 md:w-20 lg:w-24 text-center">
+              Add Story
+            </p>
+          </div>
+
+          {/* Story Circles */}
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex-shrink-0 flex flex-col items-center gap-2 snap-start"
+            >
+              <div className="w-16 h-16 md:w-24 md:h-24 rounded-full border-2 border-primary bg-muted cursor-pointer hover:border-primary/70 transition-colors" />
+              <p className="text-[10px] sm:text-xs text-muted-foreground truncate w-14 sm:w-16 md:w-20 lg:w-24 text-center">
+                user_{i + 1}
+              </p>
+            </div>
+          ))}
+        </motion.div>
+      </div>
+    </div>
+  );
 };
 
 export { Stories };

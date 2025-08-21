@@ -1,36 +1,40 @@
-"use client"
+"use client";
 
-import { useRef } from "react"
-import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // Define interfaces
 interface CategoryTabsProps {
-  categories: string[]
-  activeCategory: string
-  setActiveCategory: (category: string) => void
+  categories: string[];
+  activeCategory: string;
+  setActiveCategory: (category: string) => void;
 }
 
-const CategoryTabs = ({ categories, activeCategory, setActiveCategory }: CategoryTabsProps) => {
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
+const CategoryTabs = ({
+  categories,
+  activeCategory,
+  setActiveCategory,
+}: CategoryTabsProps) => {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollBy({
         left: -200,
         behavior: "smooth",
-      })
+      });
     }
-  }
+  };
 
   const scrollRight = () => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollBy({
         left: 200,
         behavior: "smooth",
-      })
+      });
     }
-  }
+  };
 
   return (
     <div className="w-[calc(100%+30px)] -ml-5 md:w-full md:mx-auto md:px-6.5 lg:px-3 backdrop-blur-md rounded-lg relative">
@@ -65,8 +69,8 @@ const CategoryTabs = ({ categories, activeCategory, setActiveCategory }: Categor
               onClick={() => setActiveCategory(category)}
               className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors snap-center ${
                 activeCategory === category
-                  ? "bg-gigas-600 text-white dark:bg-green-yellow-500 dark:text-gray-900"
-                  : "border border-primary text-primary dark:text-gray-200 hover:bg-primary hover:text-white dark:hover:text-gray-900"
+                  ? "bg-primary text-white"
+                  : "border border-primary text-black "
               }`}
             >
               {category}
@@ -75,7 +79,7 @@ const CategoryTabs = ({ categories, activeCategory, setActiveCategory }: Categor
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export {CategoryTabs}
+export { CategoryTabs };

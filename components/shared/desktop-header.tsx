@@ -1,13 +1,11 @@
 "use client";
 
-import { Bell, MessageCircle, MessageSquare, User } from "lucide-react";
+import { Bell, MessageSquare, User } from "lucide-react";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Logo } from "../logo";
 import { useState } from "react";
-import { ThemeSwitcher } from "../theme/theme-switcher";
-import { CreatePost } from "../home/create-post";
-import { PostType } from "../home/post-feed/post";
+import { ChatIcon } from "@/lib/icons";
 
 interface User {
 	name: string;
@@ -35,8 +33,6 @@ const DesktopHeader = ({
 	onMessageClick,
 	onProfileClick
 }: DesktopHeaderProps) => {
-	const [isProfileOpen, setIsProfileOpen] = useState(false);
-
 	return (
 		<>
 			<div className="hidden bg-gray-50 md:block xl:hidden blur-sm fixed top-0 left-0 right-0 z-5 h-16 isolate" />
@@ -46,13 +42,14 @@ const DesktopHeader = ({
 			>
 				{/* Header Content */}
 				<div className="flex justify-between bg-transparent h-full py-4 px-4 relative">
+					<div className="flex-1" />
 					{/* Logo */}
-					<div className="flex-shrink-0 w-14 md:w-16 lg:w-24">
+					<div className="flex flex-2 flex-col justify-center items-center flex-shrink-0 w-14 md:w-16 lg:w-24 justify-self-center">
 						<Logo />
 					</div>
 
 					{/* Action Buttons */}
-					<div className="flex justify-center items-center space-x-4">
+					<div className="flex flex-1 justify-center items-center space-x-4">
 						<Button
 							variant="ghost"
 							size="icon"
@@ -65,7 +62,10 @@ const DesktopHeader = ({
 							size="icon"
 							className="rounded-full bg-secondary hover:bg-primary hover:text-secondary h-10 w-10 md:h-13 md:w-13 border"
 						>
-							<MessageSquare className="h-5 w-5" />
+							<ChatIcon
+								strokeWidth={0.5}
+								className="h-5 w-5"
+							/>
 						</Button>
 						<Avatar className="h-10 w-10 md:h-13 md:w-13 aspect-square outline-2 outline-offset-2 outline-normal-active">
 							<AvatarImage src="/profile.jpeg" />
