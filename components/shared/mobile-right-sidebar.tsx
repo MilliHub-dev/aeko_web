@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { PostType } from "../home/post-feed/post";
+import { PostType } from "../home/post/components/post";
 import { CreatePost } from "../home/create-post";
 
 const MobileRightSidebar = () => {

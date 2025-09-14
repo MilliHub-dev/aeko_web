@@ -2,13 +2,17 @@
 
 import { Dialog } from "@base-ui-components/react/dialog";
 import { Search, X } from "lucide-react";
-import { motion } from "motion/react";
 import { useReducer, useState } from "react";
 
 type DialogState = { isSearchOpen: boolean };
-type DialogAction = { type: "TOGGLE_SEARCH" } | { type: "CLOSE_ALL" };
+type DialogAction =
+	| { type: "TOGGLE_SEARCH" }
+	| { type: "CLOSE_ALL" };
 
-const dialogReducer = (state: DialogState, action: DialogAction): DialogState => {
+const dialogReducer = (
+	state: DialogState,
+	action: DialogAction
+): DialogState => {
 	switch (action.type) {
 		case "TOGGLE_SEARCH":
 			return { isSearchOpen: !state.isSearchOpen };
@@ -21,12 +25,16 @@ const dialogReducer = (state: DialogState, action: DialogAction): DialogState =>
 
 // Custom hook - this is exportable and follows Rules of Hooks
 const useSearchDialog = () => {
-	const [dialogState, dispatch] = useReducer(dialogReducer, {
-		isSearchOpen: false
-	});
+	const [dialogState, dispatch] = useReducer(
+		dialogReducer,
+		{
+			isSearchOpen: false
+		}
+	);
 
 	const handleRouteClick = (name: string) => {
-		if (name === "Search") dispatch({ type: "TOGGLE_SEARCH" });
+		if (name === "Search")
+			dispatch({ type: "TOGGLE_SEARCH" });
 		else dispatch({ type: "CLOSE_ALL" });
 	};
 
@@ -56,7 +64,10 @@ interface SearchPanelProps {
 	onClose: () => void;
 }
 
-const SearchPanel = ({ isOpen, onClose }: SearchPanelProps) => {
+const SearchPanel = ({
+	isOpen,
+	onClose
+}: SearchPanelProps) => {
 	const [query, setQuery] = useState("");
 
 	return (
@@ -85,7 +96,9 @@ const SearchPanel = ({ isOpen, onClose }: SearchPanelProps) => {
 							<input
 								type="text"
 								value={query}
-								onChange={(e) => setQuery(e.target.value)}
+								onChange={(e) =>
+									setQuery(e.target.value)
+								}
 								placeholder="Search anything..."
 								className="w-full pl-10 pr-4 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
 								autoFocus
@@ -98,14 +111,16 @@ const SearchPanel = ({ isOpen, onClose }: SearchPanelProps) => {
 								<div className="space-y-2">
 									{/* Add your search results here */}
 									<p className="text-sm text-muted-foreground">
-										No results found for "{query}"
+										No results found for
+										"{query}"
 									</p>
 								</div>
 							) : (
 								<div className="flex flex-col items-center justify-center h-full text-center space-y-2">
 									<Search className="w-12 h-12 text-muted-foreground/50" />
 									<p className="text-sm text-muted-foreground">
-										Start typing to search...
+										Start typing to
+										search...
 									</p>
 								</div>
 							)}
@@ -119,11 +134,14 @@ const SearchPanel = ({ isOpen, onClose }: SearchPanelProps) => {
 
 // Update the usage in your app:
 const ParentComponent = () => {
-	const { dialogState, toggleSearch, closeDialog } = useSearchDialog();
+	const { dialogState, toggleSearch, closeDialog } =
+		useSearchDialog();
 
 	return (
 		<>
-			<button onClick={toggleSearch}>Open Search</button>
+			<button onClick={toggleSearch}>
+				Open Search
+			</button>
 			<SearchPanel
 				isOpen={dialogState.isSearchOpen}
 				onClose={closeDialog}

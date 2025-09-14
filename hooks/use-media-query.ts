@@ -58,6 +58,8 @@ export const breakpoints = {
 	mobile: "(max-width: 767px)",
 	tablet: "(min-width: 768px) and (max-width: 1023px)",
 	desktop: "(min-width: 1024px)",
+	largerScreens:
+		"(min-width: 1024px) and (max-width: 1279px)",
 
 	// Orientation queries
 	portrait: "(orientation: portrait)",
@@ -66,8 +68,10 @@ export const breakpoints = {
 	// Common device queries
 	phone: "(max-width: 480px)",
 	"phone-lg": "(max-width: 640px)",
-	"tablet-sm": "(min-width: 640px) and (max-width: 768px)",
-	"tablet-lg": "(min-width: 768px) and (max-width: 1024px)",
+	"tablet-sm":
+		"(min-width: 640px) and (max-width: 768px)",
+	"tablet-lg":
+		"(min-width: 768px) and (max-width: 1024px)",
 
 	// High resolution displays
 	retina: "(-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi)",
@@ -82,7 +86,8 @@ export const breakpoints = {
 
 	// Reduced motion preference
 	"reduce-motion": "(prefers-reduced-motion: reduce)",
-	"no-reduce-motion": "(prefers-reduced-motion: no-preference)",
+	"no-reduce-motion":
+		"(prefers-reduced-motion: no-preference)",
 
 	// Color scheme preference
 	"dark-scheme": "(prefers-color-scheme: dark)",
@@ -94,7 +99,9 @@ export const breakpoints = {
  * @param breakpoint - Key from breakpoints object
  * @returns boolean indicating if the breakpoint matches
  */
-export function useBreakpoint(breakpoint: keyof typeof breakpoints): boolean {
+export function useBreakpoint(
+	breakpoint: keyof typeof breakpoints
+): boolean {
 	return useMediaQuery(breakpoints[breakpoint]);
 }
 
@@ -102,12 +109,20 @@ export function useBreakpoint(breakpoint: keyof typeof breakpoints): boolean {
  * Hook that returns the current screen size category
  * @returns string indicating current screen size
  */
-export function useScreenSize(): "mobile" | "tablet" | "desktop" {
+export function useScreenSize():
+	| "mobile"
+	| "tablet"
+	| "desktop"
+	| "largerScreens" {
 	const isMobile = useMediaQuery(breakpoints.mobile);
 	const isTablet = useMediaQuery(breakpoints.tablet);
+	const isLargerScreens = useMediaQuery(
+		breakpoints["xl"]
+	);
 
 	if (isMobile) return "mobile";
 	if (isTablet) return "tablet";
+	if (isLargerScreens) return "largerScreens";
 	return "desktop";
 }
 

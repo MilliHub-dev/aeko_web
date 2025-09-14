@@ -61,9 +61,10 @@
   font-size: 14px;
   isolation: isolate;
   scrollbar-gutter: stable;
+  isolation: isolate;
 }
 
-.dark {
+/* .dark {
   --background: oklch(31.57% 0.057 180.36);
   --foreground: oklch(0.985 0 0);
   --primary: oklch(0.9017 0.2527 132.6);
@@ -78,7 +79,7 @@
   --border: oklch(0.9254 0.2085 127.55);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
-}
+} */
 
 @layer base {
   * {
