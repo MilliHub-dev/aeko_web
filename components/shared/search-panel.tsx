@@ -112,7 +112,7 @@ const SearchPanel = ({
 									{/* Add your search results here */}
 									<p className="text-sm text-muted-foreground">
 										No results found for
-										"{query}"
+										&quot;{query}&quot;
 									</p>
 								</div>
 							) : (
@@ -131,23 +131,3 @@ const SearchPanel = ({
 		</Dialog.Root>
 	);
 };
-
-// Update the usage in your app:
-const ParentComponent = () => {
-	const { dialogState, toggleSearch, closeDialog } =
-		useSearchDialog();
-
-	return (
-		<>
-			<button onClick={toggleSearch}>
-				Open Search
-			</button>
-			<SearchPanel
-				isOpen={dialogState.isSearchOpen}
-				onClose={closeDialog}
-			/>
-		</>
-	);
-};
-
-export { SearchPanel, useSearchDialog };

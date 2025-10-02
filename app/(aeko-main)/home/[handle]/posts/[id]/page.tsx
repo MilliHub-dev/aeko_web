@@ -9,6 +9,7 @@ import {
 	Share2
 } from "lucide-react";
 import Link from "next/link";
+import { CommentSection } from "@/components/home/post/post-modal-comment";
 
 export default async function PostPage({
 	params
@@ -24,7 +25,7 @@ export default async function PostPage({
 	}
 
 	return (
-		<div className="bg-background flex relative">
+		<div className="bg-background flex relative flex-col min-h-screen">
 			<div className="relative">
 				<div className="absolute top-10 z-20 isolate left-0 w-full flex justify-between py-2 px-6">
 					<Link
@@ -90,7 +91,14 @@ export default async function PostPage({
 								/>
 							</div>
 						</div>
-						{/* CommentList*/}
+						<div className="w-full max-w-screen-sm mx-auto px-6 py-6">
+							<h2 className="text-xl font-semibold mb-4">
+								Comments
+							</h2>
+							<CommentSection
+								postId={post.id}
+							/>
+						</div>
 					</>
 				)}
 				{post.type === "image" &&
@@ -105,7 +113,14 @@ export default async function PostPage({
 									className="w-full h-full object-cover"
 								/>
 							</div>
-							{/* PostDesc */}
+							<div className="w-full max-w-screen-sm mx-auto px-6 py-6">
+								<h2 className="text-xl font-semibold mb-4">
+									Comments
+								</h2>
+								<CommentSection
+									postId={post.id}
+								/>
+							</div>
 						</>
 					)}
 				{post.type === "video" && post.videoSrc && (
@@ -122,7 +137,14 @@ export default async function PostPage({
 								muted
 							/>
 						</div>
-						{/* PostDesc */}
+						<div className="w-full max-w-screen-sm mx-auto px-6 py-6">
+							<h2 className="text-xl font-semibold mb-4">
+								Comments
+							</h2>
+							<CommentSection
+								postId={post.id}
+							/>
+						</div>
 					</>
 				)}
 			</div>

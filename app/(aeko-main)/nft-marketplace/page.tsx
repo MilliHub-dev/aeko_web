@@ -1,8 +1,7 @@
 import { CategoryTabs } from "@/components/category-tabs";
 import { NFTCard } from "@/components/nfts/nft-card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Settings2 } from "lucide-react";
+import { Search } from "lucide-react";
 
 export default function NFTMarketPlace() {
 	const auctions = [

@@ -1,639 +1,609 @@
 "use client";
 
-import { ExploreContent } from "@/components/explore/explore-content";
-import { Input } from "@/components/ui/input";
-import { useState } from "react";
-import { Search, X } from "lucide-react";
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
 import {
 	Avatar,
 	AvatarFallback,
 	AvatarImage
 } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Tabs } from "@base-ui-components/react/tabs";
-import { CategoryTabs } from "@/components/category-tabs";
-
-import Link from "next/link";
-import { Card } from "@/components/communities/card/card";
 import { Button } from "@/components/ui/button";
-import { PostProps } from "@/types/post";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import {
+	Search,
+	UserPlus,
+	LayoutGrid,
+	Share2,
+	ChevronRight,
+	Heart,
+	MessageCircle,
+	Bookmark
+} from "lucide-react";
 
-const categories = [
+interface CommunitySummary {
+	slug: string;
+	name: string;
+	category: string;
+	description: string;
+	members: string;
+	cover: string;
+	isFollowing: boolean;
+}
+
+interface ExploreCommunity extends CommunitySummary {
+	growth: string;
+}
+
+interface TrendingPost {
+	id: string;
+	community: string;
+	user: string;
+	handle: string;
+	avatar: string;
+	image: string;
+	likes: string;
+	comments: string;
+	shares: string;
+}
+
+const myCommunities: CommunitySummary[] = [
+	{
+		slug: "christian-prayer",
+		name: "Christian Prayer & Fasting",
+		category: "Faith",
+		description:
+			"If one could have faith as small as a mustard seed, we can tell a mountain to move.",
+		members: "+ 11k others",
+		cover: "/communities/faith.jpg",
+		isFollowing: true
+	},
+	{
+		slug: "piano-life",
+		name: "Piano",
+		category: "Music",
+		description: "Piano is life.",
+		members: "+ 30k others",
+		cover: "/communities/piano.jpg",
+		isFollowing: true
+	},
+	{
+		slug: "creative-arts",
+		name: "Creative Arts Studio",
+		category: "Creative",
+		description:
+			"Daily sketch sprints, live critiques, and supply swaps.",
+		members: "+ 8k others",
+		cover: "/communities/creative.jpg",
+		isFollowing: true
+	}
+];
+
+const exploreCommunities: ExploreCommunity[] = [
+	{
+		slug: "sports-hub",
+		name: "Sports Hub",
+		category: "Sports",
+		description:
+			"Skating is not just a sport, it's a lifestyle.",
+		members: "+ 11k others",
+		cover: "/communities/sports.jpg",
+		growth: "+6.2% weekly",
+		isFollowing: false
+	},
+	{
+		slug: "music-makers",
+		name: "Music Makers",
+		category: "Music",
+		description:
+			"Studio workflows, mixes, and collaborative jams.",
+		members: "+ 9k others",
+		cover: "/communities/music.jpg",
+		growth: "+4.4% weekly",
+		isFollowing: false
+	},
+	{
+		slug: "dao-builders",
+		name: "DAO Builders Circle",
+		category: "DeFi",
+		description:
+			"Operational excellence for tokenised communities.",
+		members: "+ 12k others",
+		cover: "/communities/dao-builders.jpg",
+		growth: "+5.1% weekly",
+		isFollowing: false
+	}
+];
+
+const trendingPosts: TrendingPost[] = [
+	{
+		id: "post-1",
+		community: "Christian Prayer & Fasting",
+		user: "Joshua Martins",
+		handle: "@dJoshmart",
+		avatar: "/users/alex-rivera.jpg",
+		image: "/posts/prayer-cap.jpg",
+		likes: "120K",
+		comments: "200",
+		shares: "25"
+	},
+	{
+		id: "post-2",
+		community: "Sports Hub",
+		user: "Debby",
+		handle: "@finegirllikedebs",
+		avatar: "/users/emily-carter.jpg",
+		image: "/posts/tennis-action.jpg",
+		likes: "18.4K",
+		comments: "340",
+		shares: "56"
+	}
+];
+
+const exploreFilters = [
 	"For You",
-	"Trending",
 	"DeFi",
 	"NFTs",
 	"Trading",
 	"Technology"
 ];
 
-interface TrendingTopic {
-	id: number;
-	title: string;
-	category: string;
-	timeAgo: string;
-	avatars: string[];
-	image?: string;
-	description: string;
-}
-
 export default function CommunitiesPage() {
-	const [searchQuery, setSearchQuery] =
-		useState<string>("");
-	const [showSearchResults, setShowSearchResults] =
-		useState<boolean>(false);
+	const [searchOpen, setSearchOpen] = useState(false);
+	const [searchQuery, setSearchQuery] = useState("");
+	const [primaryTab, setPrimaryTab] = useState<
+		"my" | "explore"
+	>("my");
+	const [exploreFilter, setExploreFilter] =
+		useState<string>(exploreFilters[0]);
 
-	// Recent search users data
-	const recentSearchUsers = [
-		{
-			id: 1,
-			name: "Dr Mille",
-			username: "@drmille",
-			avatar: "/users/mike-chen.jpg"
-		},
-		{
-			id: 2,
-			name: "Ayo Mash",
-			username: "@aymash",
-			avatar: "/users/sarah-johnson.jpeg"
-		},
-		{
-			id: 3,
-			name: "Debby",
-			username: "@fingerlittle",
-			avatar: "/users/lisa-wong.jpeg"
-		},
-		{
-			id: 4,
-			name: "Joshua Martins",
-			username: "@joshmart",
-			avatar: "/users/alex-rivera.jpg"
-		},
-		{
-			id: 5,
-			name: "Dr Mille",
-			username: "@drmille",
-			avatar: "/users/emily-carter.jpg"
-		}
-	];
-
-	// Recent search queries
-	const recentSearches = [
-		"Pricillia Baby's announcement",
-		"Kussman's Wedding",
-		"Kussman's Wife",
-		"Kussman's Wife's black eye"
-	];
-
-	// Trending topics
-	const trending = [
-		"#Pric's baby",
-		"#you.me.us",
-		"#challenge"
-	];
-
-	const handleSearchFocus = () => {
-		setShowSearchResults(true);
-	};
-
-	const trendingTopics: TrendingTopic[] = [
-		{
-			id: 1,
-			title: "Bitcoin ETF Approval: Market Impact Analysis",
-			category: "Trading",
-			timeAgo: "Trending Now",
-			avatars: [
-				"/placeholder.svg",
-				"/placeholder.svg",
-				"/placeholder.svg"
-			],
-			image: "/placeholder.svg",
-			description:
-				"Breaking down the implications of spot Bitcoin ETF approvals on crypto markets."
-		},
-		{
-			id: 2,
-			title: "Ethereum's New Layer 2 Solutions Transform DeFi Landscape",
-			category: "DeFi",
-			timeAgo: "Trending Now",
-			avatars: [
-				"/placeholder.svg",
-				"/placeholder.svg",
-				"/placeholder.svg"
-			],
-			image: "/placeholder.svg",
-			description:
-				"Latest developments in Ethereum scaling solutions revolutionize DeFi protocols."
-		},
-		{
-			id: 3,
-			title: "NFT Gaming Platform Secures $100M Investment",
-			category: "NFTs",
-			timeAgo: "Trending Now",
-			avatars: [
-				"/placeholder.svg",
-				"/placeholder.svg",
-				"/placeholder.svg"
-			],
-			image: "/placeholder.svg",
-			description:
-				"Major investment signals growing confidence in blockchain gaming sector."
-		},
-		{
-			id: 4,
-			title: "New DeFi Protocol Promises Zero-Knowledge Privacy",
-			category: "DeFi",
-			timeAgo: "Trending Now",
-			avatars: [
-				"/placeholder.svg",
-				"/placeholder.svg",
-				"/placeholder.svg"
-			],
-			image: "/placeholder.svg",
-			description:
-				"Revolutionary protocol combines DeFi functionality with enhanced privacy features."
-		},
-		{
-			id: 5,
-			title: "AI Trading Bots Show Promise in Crypto Markets",
-			category: "Technology",
-			timeAgo: "2 hours ago",
-			avatars: [
-				"/placeholder.svg",
-				"/placeholder.svg",
-				"/placeholder.svg"
-			],
-			image: "/placeholder.svg",
-			description:
-				"Machine learning algorithms achieve breakthrough performance in crypto trading."
-		},
-		{
-			id: 6,
-			title: "Green Bitcoin Mining Initiative Gains Traction",
-			category: "Technology",
-			timeAgo: "5 hours ago",
-			avatars: [
-				"/placeholder.svg",
-				"/placeholder.svg",
-				"/placeholder.svg"
-			],
-			image: "/placeholder.svg",
-			description:
-				"Major miners commit to renewable energy sources for sustainable crypto mining."
-		}
-	];
-
-	const posts: PostProps[] = [
-		{
-			id: "1",
-			type: "image",
-			username: "Lisa Wong",
-			handle: "@lisawongdesigns",
-			profileImage: "/users/lisa-wong.jpeg",
-			backgroundImage:
-				"/posts/interior-design-4x5.jpg",
-			content:
-				"Just finished this minimalist living room project! Love how the natural light plays with the neutral tones. Swipe for before photos ➡️ #InteriorDesign",
-			likes: "4.2K",
-			shares: "892",
-			bookmarks: "345",
-			comments: [],
-			commentMetric: "3.4K",
-			hashtags: [
-				"interiordesign",
-				"minimalism",
-				"homedecor",
-				"design",
-				"architecture"
-			],
-			timePosted: "3h"
-		},
-		{
-			id: "2",
-			type: "video",
-			username: "Mike Chen",
-			handle: "@chefmikechen",
-			profileImage: "/users/mike-chen.jpg",
-			backgroundImage: "/posts/cooking-thumbnail.jpg",
-			videoSrc: "/posts/ramen-recipe.mp4",
-			content:
-				"The secret to perfect tonkotsu ramen! � Been perfecting this recipe for months. Full recipe in bio! #Cooking",
-			likes: "89.4K",
-			shares: "12.3K",
-			bookmarks: "15.2K",
-			comments: [],
-			commentMetric: "3.4K",
-			hashtags: [
-				"cooking",
-				"foodie",
-				"ramen",
-				"recipe",
-				"chefsofinstagram"
-			],
-			timePosted: "5h"
-		},
-		{
-			id: "3",
-			type: "text",
-			username: "Sarah Johnson",
-			handle: "@sarahcodes",
-			profileImage: "/users/sarah-johnson.jpeg",
-			content:
-				"🎉 Big news! After 6 months of hard work, we've just open-sourced our React state management library. Already 2.5k stars on GitHub in just 24 hours! Check it out: github.com/statex/react\n\nProud of what our small team has accomplished. Threading some key features below... 🧵",
-			likes: "3.1K",
-			shares: "945",
-			bookmarks: "721",
-			comments: [],
-			commentMetric: "234",
-			hashtags: [
-				"opensource",
-				"reactjs",
-				"javascript",
-				"webdev",
-				"programming"
-			],
-			timePosted: "1h"
-		},
-		{
-			id: "4",
-			type: "image",
-			username: "Alex Rivera",
-			handle: "@arivera.photo",
-			profileImage: "/users/alex-rivera.jpg",
-			backgroundImage:
-				"/posts/street-photography-4x5.jpg",
-			content:
-				"Rainy evening in Tokyo. The neon lights reflecting off the wet streets create such a cyberpunk atmosphere. Shot on Sony A7IV, 35mm f/1.4 📸",
-			likes: "12.5K",
-			shares: "2.8K",
-			bookmarks: "1.9K",
-			comments: [],
-			commentMetric: "428",
-			hashtags: [
-				"photography",
-				"tokyo",
-				"streetphotography",
-				"nightlife",
-				"urban"
-			],
-			timePosted: "8h"
-		},
-		{
-			id: "5",
-			type: "text",
-			username: "Dr. Emily Carter",
-			handle: "@dr_carter",
-			profileImage: "/users/emily-carter.jpg",
-			content:
-				"Just published our research on AI-assisted cancer detection in Nature Medicine! Our model achieved 94% accuracy, potentially reducing diagnostic time by 60%.\n\nThank you to my amazing team and all the healthcare workers who helped validate the results. 🧬🔬\n\nLink to paper: nature.com/articles/s41591...",
-			likes: "15.7K",
-			shares: "8.9K",
-			bookmarks: "6.2K",
-			comments: [],
-			commentMetric: "892",
-			hashtags: [
-				"science",
-				"AI",
-				"healthcare",
-				"research",
-				"medicine"
-			],
-			timePosted: "12h"
-		}
-	];
-
-	const handleSearchBlur = (e: React.FocusEvent) => {
-		// Only hide if clicking outside the search area
-		if (
-			!e.currentTarget.contains(
-				e.relatedTarget as Node
-			)
-		) {
-			setShowSearchResults(false);
-		}
-	};
-
-	const handleClearSearch = () => {
-		setSearchQuery("");
-	};
+	const filteredExploreCommunities = useMemo(() => {
+		if (exploreFilter === "For You")
+			return exploreCommunities;
+		return exploreCommunities.filter(
+			(community) =>
+				community.category === exploreFilter
+		);
+	}, [exploreFilter]);
 
 	return (
-		<div className="space-y-5 px-6 pb-6 mx-auto">
-			<Tabs.Root defaultValue="my-communities">
-				<div className="sticky top-16 md:top-0 z-10 mb-6 pt-12 pb-6 text-black bg-background">
-					<div className=" pb-2 pt-2">
-						{/* Search Area - Visible on both mobile and desktop */}
-						<div
-							className="mb-4 relative"
-							onBlur={handleSearchBlur}
-							tabIndex={-1}
+		<div className="relative min-h-screen overflow-hidden bg-background">
+			<div
+				className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_10%,hsla(var(--primary),0.18),transparent_60%),radial-gradient(circle_at_90%_0%,hsla(var(--muted-foreground),0.12),transparent_55%),linear-gradient(180deg,rgba(6,12,24,0.85),rgba(6,12,24,0.95))]"
+				aria-hidden="true"
+			/>
+			<div className="relative z-10 mx-auto w-full px-4 pb-24 pt-8 sm:px-6 lg:px-8">
+				<header className="flex items-center justify-between gap-3 px-4 py-3">
+					<div className="flex items-center gap-4">
+						<h1 className="text-3xl font-semibold tracking-tight text-foreground">
+							Communities
+						</h1>
+					</div>
+					<div className="flex items-center gap-2">
+						<button
+							className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary"
+							onClick={() =>
+								setSearchOpen(
+									(prev) => !prev
+								)
+							}
+							aria-label="Search communities"
 						>
-							<div className="relative">
-								<div className="absolute left-3 top-1/2 -translate-y-1/2 text-black  size-10 rounded-full flex items-center justify-center">
-									<Search className="w-4 h-4" />
-								</div>
-								<Input
-									placeholder="Search for Communities"
-									className="w-full bg-gray-50 border-gray-200 rounded-full pl-15 pr-10 shadow-md focus:outline-none focus:ring-2 focus:ring-secondary h-15 placeholder:text-xl"
-									value={searchQuery}
-									onChange={(e) =>
-										setSearchQuery(
-											e.target.value
-										)
-									}
-									onFocus={
-										handleSearchFocus
-									}
-								/>
-								{searchQuery && (
-									<button
-										className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-										onClick={
-											handleClearSearch
-										}
+							<Search className="h-5 w-5" />
+						</button>
+					</div>
+				</header>
+
+				{searchOpen && (
+					<div className="mt-4 rounded-[24px] border border-border/50 bg-card/90 p-4 shadow-lg backdrop-blur">
+						<div className="flex items-center gap-3 rounded-full border border-border/60 bg-background/80 px-4 py-2">
+							<Search className="h-4 w-4 text-muted-foreground" />
+							<Input
+								autoFocus
+								value={searchQuery}
+								onChange={(event) =>
+									setSearchQuery(
+										event.target.value
+									)
+								}
+								placeholder="Search communities, hosts, topics"
+								className="flex-1 border-0 bg-transparent p-0 text-sm focus-visible:ring-0"
+							/>
+							<button
+								className="text-xs font-semibold text-primary"
+								onClick={() =>
+									setSearchQuery("")
+								}
+							>
+								Clear
+							</button>
+						</div>
+						{searchQuery ? (
+							<p className="mt-3 text-xs text-muted-foreground">
+								Showing quick matches for
+								&quot;{searchQuery}&quot;
+							</p>
+						) : (
+							<p className="mt-3 text-xs text-muted-foreground">
+								Type to see recent searches
+								and suggested hosts.
+							</p>
+						)}
+					</div>
+				)}
+
+				<div className="mt-6 flex mx-auto w-full max-w-4xl items-center rounded-full border border-border/60 bg-card/80 p-1 text-sm font-semibold text-muted-foreground">
+					{(["my", "explore"] as const).map(
+						(tab) => (
+							<button
+								key={tab}
+								onClick={() =>
+									setPrimaryTab(tab)
+								}
+								className={cn(
+									"flex-1 rounded-full px-4 py-2 transition",
+									primaryTab === tab
+										? "bg-primary text-primary-foreground shadow-sm"
+										: "text-muted-foreground hover:text-primary"
+								)}
+							>
+								{tab === "my"
+									? "My Communities"
+									: "Explore"}
+							</button>
+						)
+					)}
+				</div>
+
+				<div className="mt-8 grid gap-12 lg:grid-cols-[minmax(0,1fr)_320px]">
+					<main className="space-y-12">
+						{primaryTab === "my" ? (
+							<section className="space-y-6">
+								<div className="flex items-center justify-between">
+									<div>
+										<h2 className="text-lg font-semibold text-foreground">
+											Communities you
+											follow
+										</h2>
+										<p className="text-sm text-muted-foreground">
+											Manage the
+											circles you
+											contribute to
+											regularly.
+										</p>
+									</div>
+									<Link
+										href="/communities/following"
+										className="text-sm font-semibold text-primary"
 									>
-										<X className="w-4 h-4" />
-									</button>
+										See all
+									</Link>
+								</div>
+								<div className="grid gap-4 md:grid-cols-2">
+									{myCommunities.map(
+										(community) => (
+											<CommunityCard
+												key={
+													community.slug
+												}
+												community={
+													community
+												}
+											/>
+										)
+									)}
+								</div>
+							</section>
+						) : (
+							<section className="space-y-6">
+								<div className="flex flex-wrap items-center justify-between gap-3">
+									<div>
+										<h2 className="text-lg font-semibold text-foreground">
+											Featured
+											communities
+										</h2>
+										<p className="text-sm text-muted-foreground">
+											Tailored picks
+											based on what
+											you engage with.
+										</p>
+									</div>
+									<div className="flex items-center gap-2">
+										{exploreFilters.map(
+											(filter) => (
+												<button
+													key={
+														filter
+													}
+													onClick={() =>
+														setExploreFilter(
+															filter
+														)
+													}
+													className={cn(
+														"rounded-full px-3 py-1 text-xs font-semibold transition",
+														exploreFilter ===
+															filter
+															? "bg-primary text-primary-foreground"
+															: "border border-border/50 bg-background/80 text-muted-foreground hover:border-primary/30 hover:text-primary"
+													)}
+												>
+													{filter}
+												</button>
+											)
+										)}
+									</div>
+								</div>
+								<div className="grid gap-4 md:grid-cols-2">
+									{filteredExploreCommunities.map(
+										(community) => (
+											<ExploreCommunityCard
+												key={
+													community.slug
+												}
+												community={
+													community
+												}
+											/>
+										)
+									)}
+								</div>
+							</section>
+						)}
+
+						{/* <section className="space-y-6">
+							<div className="flex items-center justify-between">
+								<h2 className="text-lg font-semibold text-foreground">
+									Trending posts from
+									communities
+								</h2>
+								<button className="inline-flex items-center gap-2 text-sm font-semibold text-primary">
+									View feed
+									<ChevronRight className="h-4 w-4" />
+								</button>
+							</div>
+							<div className="space-y-4">
+								{trendingPosts.map(
+									(post) => (
+										<TrendingPostCard
+											key={post.id}
+											post={post}
+										/>
+									)
 								)}
 							</div>
+						</section> */}
+					</main>
 
-							{/* Search Results Panel - Show when focused */}
-							{showSearchResults && (
-								<div className="absolute top-full left-0 right-0 mt-2 bg-background border border-border rounded-lg shadow-lg z-20 p-4">
-									{/* Recent Search Section */}
-									<div className="mb-4">
-										<div className="flex justify-between items-center mb-2">
-											<h3 className="text-sm font-medium">
-												Recent
-												Search
-											</h3>
-											<button className="text-muted-foreground">
-												<X className="w-4 h-4" />
-											</button>
-										</div>
-
-										{/* User Avatars */}
-										<div className="flex space-x-4 mb-4 overflow-x-auto pb-2">
-											{recentSearchUsers.map(
-												(user) => (
-													<div
-														key={
-															user.id
-														}
-														className="flex flex-col items-center space-y-1 min-w-[60px]"
-													>
-														<Avatar className="w-12 h-12">
-															<AvatarImage
-																src={
-																	user.avatar
-																}
-																alt={
-																	user.name
-																}
-															/>
-															<AvatarFallback>
-																{user.name.charAt(
-																	0
-																)}
-															</AvatarFallback>
-														</Avatar>
-														<span className="text-xs font-medium truncate w-full text-center">
-															{
-																user.name
-															}
-														</span>
-														<span className="text-xs text-muted-foreground truncate w-full text-center">
-															{
-																user.username
-															}
-														</span>
-													</div>
-												)
-											)}
-										</div>
-
-										{/* Recent Search Queries */}
-										<div className="space-y-2">
-											{recentSearches.map(
-												(
-													search,
-													index
-												) => (
-													<div
-														key={
-															index
-														}
-														className="flex justify-between items-center py-1"
-													>
-														<span className="text-sm">
-															{
-																search
-															}
-														</span>
-														<button className="text-muted-foreground">
-															<X className="w-3 h-3" />
-														</button>
-													</div>
-												)
-											)}
-										</div>
-									</div>
-
-									{/* Trending Topics Section */}
-									<div>
-										<div className="flex justify-between items-center mb-2">
-											<h3 className="text-sm font-medium">
-												Trending
-												Topics
-											</h3>
-											<button className="text-muted-foreground">
-												<X className="w-4 h-4" />
-											</button>
-										</div>
-
-										<div className="flex flex-wrap gap-2">
-											{trending.map(
-												(
-													topic,
-													index
-												) => (
-													<Badge
-														key={
-															index
-														}
-														variant="outline"
-														className="rounded-full px-3 py-1"
-													>
-														{
-															topic
-														}
-														<button className="ml-1 text-muted-foreground">
-															<X className="w-3 h-3" />
-														</button>
-													</Badge>
-												)
-											)}
-										</div>
-									</div>
-
-									{/* Watch Viral Posts Section */}
-									<div className="mt-4">
-										<h3 className="text-sm font-medium mb-2">
-											Watch viral
-											posts
-										</h3>
-										<div className="grid grid-cols-2 gap-2">
-											<div className="aspect-video bg-muted rounded-lg"></div>
-											<div className="aspect-video bg-muted rounded-lg"></div>
-										</div>
-									</div>
-								</div>
-							)}
-						</div>
-					</div>
-					<Tabs.List className="flex justify-center items-center">
-						<div className="">
-							<Tabs.Tab
-								value="my-communities"
-								className="p-2 border border-primary w-45 rounded-l-2xl  data-[selected]:bg-primary data-[selected]:text-white"
-							>
-								My Communities
-							</Tabs.Tab>
-							<Tabs.Tab
-								value="explore"
-								className="p-2 border border-primary w-45 rounded-r-2xl data-[selected]:bg-primary data-[selected]:text-white"
-							>
-								Explore
-							</Tabs.Tab>
-							<Tabs.Indicator />
-						</div>
-					</Tabs.List>
-				</div>
-				<div className="space-y-2 mt-20 md:mt-0 text-black">
-					<Tabs.Panel value="my-communities">
-						{" "}
-						{/* My Communities Grid */}
-						<div className="mb-8 flex justify-end">
-							<Link
-								href="/communities"
-								className="text-lg font-semibold text-primary-foreground"
-							>
-								See All
-							</Link>
-						</div>
-						<div className="grid md:grid-cols-2 xl:grid-cols-4 gap-6">
-							{posts.map((post, idx) => (
-								<Card
-									key={`image-${idx}`}
-									{...post}
-								/>
-							))}
-						</div>
-						{/* Load More Button */}
-						<div className="flex justify-center pt-4">
-							<Button className="bg-primary text-white">
-								Load More
+					<aside className="space-y-6">
+						<div className="rounded-[28px] border border-border/60 bg-card/80 p-6 shadow-sm">
+							<h3 className="text-sm font-semibold text-foreground">
+								Host a live moment
+							</h3>
+							<p className="mt-2 text-xs text-muted-foreground">
+								Spin up a room for AMAs,
+								prayer circles, or creative
+								sessions.
+							</p>
+							<Button className="mt-4 w-full rounded-full text-sm">
+								Create community
 							</Button>
 						</div>
-					</Tabs.Panel>
-					<Tabs.Panel value="explore">
-						{/* Trending Topics Grid */}
-						<div className="my-8">
-							<h2 className="text-2xl font-semibold">
-								Trending Topics
-							</h2>
+						<div className="rounded-[28px] border border-border/60 bg-primary/10 p-6 text-sm text-primary">
+							Keep an eye on safety guidelines
+							and signal moderators if you
+							spot anything suspicious.
 						</div>
-						<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-							{trendingTopics.map((topic) => (
-								<div
-									key={topic.id}
-									className="border border-border dark:border-border/30 bg-background/95 backdrop-blur-md rounded-2xl overflow-hidden hover:shadow-md transition-shadow"
-								>
-									{/* Topic Image */}
-									<div className="relative aspect-[16/9] bg-gradient-to-br from-blue-gem-300 to-blue-gem-500 dark:from-green-yellow-300 dark:to-green-yellow-500">
-										{/* Image would go here */}
-									</div>
-
-									{/* Topic Content */}
-									<div className="p-4 space-y-3">
-										<div className="flex items-center space-x-2">
-											<Badge
-												variant="outline"
-												className="text-xs font-normal px-2 py-0.5 border-blue-gem-200 dark:border-green-yellow-200 text-blue-gem-500 dark:text-green-yellow-500"
-											>
-												{
-													topic.category
-												}
-											</Badge>
-											<span className="text-xs text-gray-500 dark:text-gray-400">
-												{
-													topic.timeAgo
-												}
-											</span>
-										</div>
-
-										<Link
-											href={`/explore/topic/${topic.id}`}
-										>
-											<h3 className="text-lg font-semibold text-primary dark:text-primary-foreground transition-colors">
-												{
-													topic.title
-												}
-											</h3>
-										</Link>
-
-										<p className="text-sm text-gray-600 dark:text-gray-300">
-											{
-												topic.description
-											}
-										</p>
-
-										<div className="flex items-center justify-between pt-2">
-											<div className="flex items-center space-x-2">
-												{/* Avatar Stack */}
-												<div className="flex -space-x-2">
-													{topic.avatars
-														.slice(
-															0,
-															3
-														)
-														.map(
-															(
-																avatar,
-																index
-															) => (
-																<Avatar
-																	key={
-																		index
-																	}
-																	className="w-6 h-6 border-2 border-white dark:border-gray-800"
-																>
-																	<AvatarImage
-																		src={
-																			avatar
-																		}
-																	/>
-																	<AvatarFallback className="bg-gray-300 text-gray-600 text-xs">
-																		{index +
-																			1}
-																	</AvatarFallback>
-																</Avatar>
-															)
-														)}
-												</div>
-												<span className="text-xs text-gray-500 dark:text-gray-400">
-													+2.5k
-													discussing
-												</span>
-											</div>
-										</div>
-									</div>
-								</div>
-							))}
-						</div>
-					</Tabs.Panel>
+					</aside>
 				</div>
-			</Tabs.Root>
+			</div>
+		</div>
+	);
+}
+
+function CommunityCard({
+	community
+}: {
+	community: CommunitySummary;
+}) {
+	return (
+		<Link
+			href={`/communities/${community.slug}`}
+			className="relative overflow-hidden rounded-[28px] border border-border/50 bg-background/80 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+		>
+			<div className="relative aspect-[4/3]">
+				<Image
+					src={community.cover}
+					alt={community.name}
+					fill
+					sizes="(max-width: 768px) 100vw, 50vw"
+					className="object-cover"
+				/>
+				<div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
+				<div className="absolute inset-x-4 top-4 flex items-center justify-between">
+					<Badge className="rounded-full bg-primary/80 px-3 py-1 text-xs font-semibold text-primary-foreground">
+						{community.category}
+					</Badge>
+					<Button
+						variant="secondary"
+						size="sm"
+						className="rounded-full px-4 text-xs font-semibold"
+					>
+						{community.isFollowing
+							? "Unfollow"
+							: "Follow"}
+					</Button>
+				</div>
+				<div className="absolute inset-x-4 bottom-4 space-y-2 text-white">
+					<h3 className="text-lg font-semibold">
+						{community.name}
+					</h3>
+					<p className="text-xs text-white/80">
+						{community.description}
+					</p>
+					<AvatarStack
+						members={community.members}
+					/>
+				</div>
+			</div>
+		</Link>
+	);
+}
+
+function ExploreCommunityCard({
+	community
+}: {
+	community: ExploreCommunity;
+}) {
+	return (
+		<Link
+			href={`/communities/${community.slug}`}
+			className="relative overflow-hidden rounded-[28px] border border-border/50 bg-background/80 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+		>
+			<div className="relative aspect-[4/3]">
+				<Image
+					src={community.cover}
+					alt={community.name}
+					fill
+					sizes="(max-width: 768px) 100vw, 50vw"
+					className="object-cover"
+				/>
+				<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
+				<div className="absolute inset-x-4 top-4 flex items-center justify-between text-xs font-semibold text-white">
+					<Badge className="rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white">
+						{community.category}
+					</Badge>
+					<Badge className="rounded-full bg-primary/80 px-3 py-1 text-xs font-semibold text-primary-foreground">
+						{community.growth}
+					</Badge>
+				</div>
+				<div className="absolute inset-x-4 bottom-4 space-y-2 text-white">
+					<h3 className="text-lg font-semibold">
+						{community.name}
+					</h3>
+					<p className="text-xs text-white/80">
+						{community.description}
+					</p>
+					<div className="flex items-center justify-between text-xs">
+						<AvatarStack
+							members={community.members}
+						/>
+						<Button
+							variant="secondary"
+							size="sm"
+							className="rounded-full bg-white/90 px-4 text-xs font-semibold text-foreground"
+						>
+							{community.isFollowing
+								? "Unfollow"
+								: "Follow"}
+						</Button>
+					</div>
+				</div>
+			</div>
+		</Link>
+	);
+}
+
+function TrendingPostCard({
+	post
+}: {
+	post: TrendingPost;
+}) {
+	return (
+		<article className="relative overflow-hidden rounded-[32px] border border-border/60 bg-card/80 shadow-md">
+			<div className="relative aspect-[4/5]">
+				<Image
+					src={post.image}
+					alt={post.user}
+					fill
+					sizes="(max-width: 768px) 100vw, 50vw"
+					className="object-cover"
+				/>
+				<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+				<div className="absolute inset-x-4 top-4 flex items-center justify-between text-white">
+					<div className="flex items-center gap-2 rounded-full bg-black/50 px-4 py-2">
+						<Avatar className="h-8 w-8 border-2 border-white/80">
+							<AvatarImage
+								src={post.avatar}
+								alt={post.user}
+							/>
+							<AvatarFallback>
+								{post.user.slice(0, 2)}
+							</AvatarFallback>
+						</Avatar>
+						<div className="leading-tight">
+							<p className="text-sm font-semibold">
+								{post.user}
+							</p>
+							<p className="text-xs text-white/70">
+								{post.handle}
+							</p>
+						</div>
+					</div>
+					<Button
+						variant="secondary"
+						size="sm"
+						className="rounded-full bg-black/50 px-4 text-xs text-white"
+					>
+						<UserPlus className="mr-2 h-4 w-4" />
+						Follow
+					</Button>
+				</div>
+				<div className="absolute inset-x-4 bottom-4">
+					<div className="flex items-center gap-2 text-xs text-white/80">
+						<Badge className="rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white">
+							{post.community}
+						</Badge>
+					</div>
+				</div>
+			</div>
+			<div className="flex items-center justify-between gap-4 px-5 py-4 text-sm text-muted-foreground">
+				<div className="flex items-center gap-4">
+					<span className="flex items-center gap-1 text-rose-500">
+						<Heart className="h-4 w-4" />
+						{post.likes}
+					</span>
+					<span className="flex items-center gap-1">
+						<MessageCircle className="h-4 w-4" />
+						{post.comments}
+					</span>
+					<span className="flex items-center gap-1">
+						<Bookmark className="h-4 w-4" />
+						{post.shares}
+					</span>
+				</div>
+				<button className="text-xs font-semibold text-primary">
+					Report
+				</button>
+			</div>
+		</article>
+	);
+}
+
+function AvatarStack({ members }: { members: string }) {
+	return (
+		<div className="flex items-center gap-3 text-xs text-white/80">
+			<div className="flex -space-x-3">
+				{[
+					"/users/mike-chen.jpg",
+					"/users/sarah-johnson.jpeg",
+					"/users/lisa-wong.jpeg"
+				].map((avatar, index) => (
+					<Avatar
+						key={avatar + index}
+						className="h-8 w-8 border-2 border-white"
+					>
+						<AvatarImage
+							src={avatar}
+							alt="Community member"
+						/>
+						<AvatarFallback>CM</AvatarFallback>
+					</Avatar>
+				))}
+			</div>
+			<span>{members}</span>
 		</div>
 	);
 }

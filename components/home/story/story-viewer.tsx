@@ -37,11 +37,11 @@ const StoryViewer = ({
 
 		if (nextStory) {
 			router.replace(
-				`/stories/${userStories.username}/story/${nextStory.id}`
+				`/home/stories/${userStories.username}/story/${nextStory.id}`
 			);
 		} else if (nextUser) {
 			router.replace(
-				`/stories/${nextUser.username}/story/${nextUser.stories[0].id}`
+				`/home/stories/${nextUser.username}/story/${nextUser.stories[0].id}`
 			);
 		} else {
 			handleClose();
@@ -54,7 +54,7 @@ const StoryViewer = ({
 
 		if (prevStory) {
 			router.replace(
-				`/stories/${userStories.username}/story/${prevStory.id}`
+				`/home/stories/${userStories.username}/story/${prevStory.id}`
 			);
 		} else if (prevUser) {
 			const lastStory =
@@ -62,7 +62,7 @@ const StoryViewer = ({
 					prevUser.stories.length - 1
 				];
 			router.replace(
-				`/stories/${prevUser.username}/story/${lastStory.id}`
+				`/home/stories/${prevUser.username}/story/${lastStory.id}`
 			);
 		} else {
 			handleClose();
@@ -97,7 +97,7 @@ const StoryViewer = ({
 						<ArrowLeft className="w-6 h-6 text-white" />
 					</Button>
 
-					<div className="relative flex flex-col items-center justify-center  bg-black w-[40rem] h-[71.12rem] rounded-lg overflow-hidden">
+					<div className="relative flex flex-col items-center justify-center  bg-black lg:w-[35rem] lg:h-[61.12rem] w-[40rem] h-[71.12rem] rounded-lg overflow-hidden">
 						<h1 className="absolute top-12 left-0 right-0 text-white text-center font-bold text-3xl">
 							Header
 						</h1>

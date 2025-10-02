@@ -1,30 +1,30 @@
 "use client";
 
-import Link from "next/link";
-import { PostType } from "../home/post/components/post";
 import { CreatePost } from "../home/create-post";
+import type { PostType } from "../home/post/components/post";
 
-const MobileRightSidebar = () => {
-  const handleCreatePost = async (postData: {
-    type: PostType;
-    content: string;
-    media?: File;
-    hashtags: string[];
-  }) => {
-    // Handle post creation here
-    // You can send the data to your API
-    console.log("New post:", postData);
-  };
+export function MobileRightSidebar() {
+	const handleCreatePost = async (postData: {
+		type: PostType;
+		content: string;
+		media?: File;
+		hashtags: string[];
+	}) => {
+		console.log("New post:", postData);
+	};
 
-  return (
-    <aside className="hidden md:flex flex-col xl:hidden fixed right-0 top-0 bottom-0 w-[90px] z-40">
-      <div className="flex flex-col items-center py-6 h-full">
-        <div className="mt-auto">
-          <CreatePost onPost={handleCreatePost} />
-        </div>
-      </div>
-    </aside>
-  );
-};
-
-export { MobileRightSidebar };
+	return (
+		<aside className="fixed right-0 top-0 z-40 hidden h-full w-[90px] flex-col border-l border-border/60 bg-card/80 text-muted-foreground shadow-[0_18px_30px_rgba(15,15,15,0.35)] backdrop-blur-xl md:flex xl:hidden">
+			<div className="flex h-full flex-col items-center justify-between py-6">
+				<div className="flex gap-1 text-xs">
+					<span className="h-2 w-2 rounded-full bg-destructive" />
+					<span className="h-2 w-2 rounded-full bg-secondary" />
+					<span className="h-2 w-2 rounded-full bg-primary" />
+				</div>
+				<div className="mt-auto">
+					<CreatePost onPost={handleCreatePost} />
+				</div>
+			</div>
+		</aside>
+	);
+}

@@ -329,8 +329,8 @@ export const usersStories: UserStoryGroup[] = [
 	},
 	{
 		userId: "u2",
-		username: "blessing",
-		avatarUrl: "/avatars/blessing.png",
+		username: "emily-carter",
+		avatarUrl: "/avatars/emily-carter.jpg",
 		stories: [
 			{
 				id: "s3",
@@ -346,8 +346,8 @@ export const usersStories: UserStoryGroup[] = [
 	},
 	{
 		userId: "u3",
-		username: "tunde",
-		avatarUrl: "/avatars/tunde.png",
+		username: "lisa-wong",
+		avatarUrl: "/avatars/lisa-wong.jpeg",
 		stories: [
 			{
 				id: "s4",
@@ -373,8 +373,8 @@ export const usersStories: UserStoryGroup[] = [
 	},
 	{
 		userId: "u4",
-		username: "amara",
-		avatarUrl: "/avatars/amara.png",
+		username: "mike-chen",
+		avatarUrl: "/avatars/mike-chen.jpg",
 		stories: [
 			{
 				id: "s6",
@@ -390,8 +390,8 @@ export const usersStories: UserStoryGroup[] = [
 	},
 	{
 		userId: "u5",
-		username: "chioma",
-		avatarUrl: "/avatars/chioma.png",
+		username: "sarah-johnson",
+		avatarUrl: "/avatars/sarah-johnson.jpeg",
 		stories: [
 			{
 				id: "s7",
@@ -417,8 +417,8 @@ export const usersStories: UserStoryGroup[] = [
 	},
 	{
 		userId: "u6",
-		username: "david",
-		avatarUrl: "/avatars/david.png",
+		username: "alex-rivera",
+		avatarUrl: "/avatars/alex-rivera.jpg",
 		stories: [
 			{
 				id: "s9",
@@ -429,33 +429,6 @@ export const usersStories: UserStoryGroup[] = [
 				postedAt: "2025-09-10T07:20:00Z",
 				expiresAt: "2025-09-11T07:20:00Z",
 				seen: true
-			}
-		]
-	},
-	{
-		userId: "u7",
-		username: "zainab",
-		avatarUrl: "/avatars/zainab.png",
-		stories: [
-			{
-				id: "s10",
-				userId: "u7",
-				mediaUrl: "/stories/u7/story1.mp4",
-				mediaType: "video",
-				duration: 18,
-				postedAt: "2025-09-10T13:00:00Z",
-				expiresAt: "2025-09-11T13:00:00Z",
-				seen: true
-			},
-			{
-				id: "s11",
-				userId: "u7",
-				mediaUrl: "/stories/u7/story2.jpg",
-				mediaType: "image",
-				duration: 4,
-				postedAt: "2025-09-10T13:30:00Z",
-				expiresAt: "2025-09-11T13:30:00Z",
-				seen: false
 			}
 		]
 	}

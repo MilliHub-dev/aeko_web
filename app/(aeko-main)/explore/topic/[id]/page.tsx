@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Post } from "@/components/home/post/components/post";
+// import { Post } from "@/components/home/post/components/post";
 
 interface TopicPageProps {
   params: {
@@ -67,11 +67,11 @@ export default function TopicPage({ params }: TopicPageProps) {
         Related Posts
       </h2>
       
-      <div className="space-y-6">
+      {/* <div className="space-y-6">
         {[1, 2, 3].map((item) => (
           <Post key={item} />
         ))}
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -1,62 +1,78 @@
 "use client";
 
-import { sidebarRoutes } from "@/lib/routes";
 import Link from "next/link";
-import { Logo } from "../logo";
 import { usePathname } from "next/navigation";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
-const MobileLeftSidebar = () => {
-  const path = usePathname();
+import { sidebarRoutes } from "@/lib/routes";
+import {
+	Avatar,
+	AvatarFallback,
+	AvatarImage
+} from "../ui/avatar";
 
-  return (
-    <aside className="hidden md:flex flex-col xl:hidden border-r border-gray-300">
-      <div className="sticky top-0 h-[calc(100vh-1rem)] flex flex-col items-center py-6 xl:h-full">
-        {/* User Profile at the bottom */}
-        <div className="flex gap-x-4 mt-auto mb-12">
-          <Avatar className="h-13 w-13 aspect-square outline-2 outline-offset-2 outline-normal-active">
-            <AvatarImage src="/profile.jpeg" />
-            <AvatarFallback>You</AvatarFallback>
-          </Avatar>
-        </div>
+const contactList = [
+	{ name: "Erik Gunsel", avatar: "/users/mike-chen.jpg" },
+	{
+		name: "Emily Smith",
+		avatar: "/users/sarah-johnson.jpeg"
+	},
+	{
+		name: "Arthur Adelak",
+		avatar: "/users/alex-rivera.jpg"
+	}
+];
 
-        {/* Navigation Links */}
-        <nav className="flex flex-col items-center gap-y-8 flex-1">
-          {sidebarRoutes.map((route) => {
-            const Icon = route.icon;
-            return (
-              <Link
-                href={route.path}
-                key={route.name}
-                className={`
-                      flex items-center justify-center size-18 rounded-full 
-                      hover:bg-secondary hover:text-primary
-                      transition-all duration-200 ease-in-out
-                      ${
-                        path === route.path
-                          ? "bg-secondary text-primary"
-                          : "bg-transparent"
-                      }
-                    `}
-                title={route.name}
-              >
-                <Icon
-                  className="transition-transform duration-200"
-                  strokeWidth={1.5}
-                  size={35}
-                />
-              </Link>
-            );
-          })}
-        </nav>
+export function MobileLeftSidebar() {
+	const pathname = usePathname();
 
-        {/* Logo at the top */}
-        <div className="inline-block w-16 mt-auto flex-shrink-0">
-          <Logo />
-        </div>
-      </div>
-    </aside>
-  );
-};
+	return (
+		<aside className="sticky top-6 hidden h-[calc(100vh-3rem)] w-20 shrink-0 md:flex xl:hidden">
+			<div className="relative flex h-full w-full flex-col items-center overflow-hidden rounded-[32px] bg-card pb-4 text-muted-foreground">
+				<nav className="mt-6 flex flex-1 flex-col items-center gap-4">
+					{sidebarRoutes.map((route) => {
+						const Icon = route.icon;
+						const active = pathname.startsWith(
+							route.path
+						);
+						return (
+							<Link
+								key={route.path}
+								href={route.path}
+								aria-label={route.name}
+								className={`group relative flex h-14 w-14 items-center justify-center rounded-2xl transition ${
+									active
+										? "bg-primary/20 text-foreground shadow-md shadow-primary/20"
+										: "hover:bg-muted/60 hover:text-foreground"
+								}`}
+							>
+								<Icon className="h-6 w-6" />
+							</Link>
+						);
+					})}
+				</nav>
 
-export { MobileLeftSidebar };
+				<div className="mt-4 w-full space-y-4 px-4">
+					<p className="text-[6.5px] text-center font-semibold uppercase tracking-[0.35em] text-muted-foreground">
+						Messages
+					</p>
+					<div className="flex flex-col items-center gap-3 text-muted-foreground">
+						{contactList.map((contact) => (
+							<Avatar
+								key={contact.name}
+								className="h-12 w-12 border border-border/60"
+							>
+								<AvatarImage
+									src={contact.avatar}
+									alt={contact.name}
+								/>
+								<AvatarFallback>
+									{contact.name.charAt(0)}
+								</AvatarFallback>
+							</Avatar>
+						))}
+					</div>
+				</div>
+			</div>
+		</aside>
+	);
+}

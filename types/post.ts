@@ -23,6 +23,7 @@ export interface PostProps {
 	likes: string;
 	shares: string;
 	bookmarks: string;
+	tag?: string;
 	comments?: Comment[];
 	commentMetric: string;
 	hashtags?: string[];

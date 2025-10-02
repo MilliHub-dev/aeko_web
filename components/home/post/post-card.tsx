@@ -31,6 +31,7 @@ const PostCard = (post: PostProps) => {
 	} = useVideoControls();
 
 	const footerProps = {
+		postId: post.id,
 		type: post.type,
 		content: post.content,
 		hashtags: post.hashtags,

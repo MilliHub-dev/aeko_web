@@ -7,12 +7,14 @@ import { useRouteName } from "@/hooks";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { ChatIcon } from "@/lib/icons";
+import { useMobileMenu } from "./mobile-menu-context";
 import { getLayoutConfig } from "@/lib/layout-config";
 
 const MobileHeader = () => {
     const routeName = useRouteName();
     const path = usePathname();
     const { isUserPostsRoute } = getLayoutConfig(path);
+    const { toggleMenu } = useMobileMenu();
 
 	return (
 		<header
@@ -24,13 +26,15 @@ const MobileHeader = () => {
 		>
 			<div className="flex items-center justify-between">
 				{/* Left Icon - Grid */}
-				<Button
-					variant="ghost"
-					size="icon"
-					className="rounded-full bg-secondary hover:bg-primary hover:text-secondary h-15 w-15 md:h-13 md:w-13 "
-				>
-					<Menu className="size-6" />
-				</Button>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-full bg-secondary hover:bg-primary hover:text-secondary h-15 w-15 md:h-13 md:w-13 "
+                    onClick={toggleMenu}
+                    aria-label="Open menu"
+                >
+                    <Menu className="size-6" />
+                </Button>
 
 				{/* Center Logo */}
                 <div className="flex-shrink-0 w-18">

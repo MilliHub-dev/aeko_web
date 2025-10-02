@@ -13,6 +13,7 @@ export default function RootLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
+
 	return (
 		<html
 			lang="en"
@@ -22,9 +23,7 @@ export default function RootLayout({
 			<body
 				className={`${equitanSans.className} antialiased`}
 			>
-				<ThemeProvider>
-					{children}
-				</ThemeProvider>
+				<ThemeProvider>{children}</ThemeProvider>
 			</body>
 		</html>
 	);

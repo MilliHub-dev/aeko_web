@@ -61,7 +61,7 @@ const PostWrapper = ({
 	};
 
 	return (
-		<div className="relative px-6 py-4 md:py-6 max-w-200 snap-center lg:snap-start lg:flex gap-x-4">
+		<div className="relative px-6 py-4 md:py-16 max-w-200 snap-center lg:snap-start lg:flex gap-x-6">
 			<div
 				ref={ref}
 				onMouseMove={
@@ -77,9 +77,9 @@ const PostWrapper = ({
 					isMedia ? onTouchEnd : undefined
 				}
 				className={clsx(
-					"relative flex flex-col justify-between mx-auto w-full max-w-md md:max-w-lg lg:max-w-2xl rounded-4xl isolate p-6",
+					"relative flex flex-col justify-between mx-auto w-full max-w-md md:max-w-lg lg:max-w-xl rounded-4xl isolate p-6 ",
 					isMedia
-						? "flex-1 aspect-[9/16] lg:aspect-[9/13] xl:aspect-[9/16] overflow-hidden"
+						? "flex-1 aspect-[9/16] lg:aspect-[9/14] xl:aspect-[9/16] overflow-hidden outline-primary/30 outline-4 outline-offset-0"
 						: "aspect-auto border-1"
 				)}
 			>
@@ -90,9 +90,11 @@ const PostWrapper = ({
 				shares={shares}
 				bookmarks={bookmarks}
 				comments={comments}
+				postId={id}
 			/>
 		</div>
 	);
 };
 
 export { PostWrapper };
+

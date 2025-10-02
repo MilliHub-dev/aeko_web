@@ -1,139 +1,245 @@
 "use client";
 
-import { sidebarRoutes } from "@/lib/routes";
 import Link from "next/link";
-import { Logo } from "../logo";
 import { usePathname } from "next/navigation";
-import { CreatePost } from "../home/create-post";
+import { useMemo } from "react";
+import { cva } from "class-variance-authority";
+
+import { sidebarRoutes } from "@/lib/routes";
 import {
 	Avatar,
 	AvatarFallback,
 	AvatarImage
 } from "../ui/avatar";
-import { ScrollArea } from "@base-ui-components/react/scroll-area";
-import { PostType } from "@/types/post";
 
-const LeftSidebar = () => {
-	const path = usePathname();
+const navItem = cva(
+	"group relative flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition",
+	{
+		variants: {
+			active: {
+				true: "bg-primary/15 text-foreground shadow-md shadow-primary/20",
+				false: "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+			}
+		},
+		defaultVariants: {
+			active: false
+		}
+	}
+);
 
-	const handleCreatePost = async (postData: {
-		type: PostType;
-		content: string;
-		media?: File;
-		hashtags: string[];
-	}) => {
-		// Handle post creation here
-		// You can send the data to your API
-		console.log("New post:", postData);
-	};
+const MAIN_LINK_COUNT = 5;
+
+const contactList = [
+	{
+		name: "Erik Gunsel",
+		avatar: "/users/mike-chen.jpg"
+	},
+	{
+		name: "Emily Smith",
+		avatar: "/users/sarah-johnson.jpeg"
+	},
+	{
+		name: "Arthur Adelak",
+		avatar: "/users/alex-rivera.jpg"
+	}
+];
+
+export function LeftSidebar() {
+	const pathname = usePathname();
+
+	const { mainLinks, secondaryLinks } = useMemo(() => {
+		return {
+			mainLinks: sidebarRoutes.slice(
+				0,
+				MAIN_LINK_COUNT
+			),
+			secondaryLinks:
+				sidebarRoutes.slice(MAIN_LINK_COUNT)
+		};
+	}, []);
 
 	return (
-		<aside className="hidden xl:block flex-shrink-0 border-r border-gray-200 ">
-			<div className="sticky top-0 flex flex-col h-screen gap-8 border-none p-8 xl:p-0 xl:px-8 text-xl text-black">
-				{/* User Profile at the top */}
-				<div className="flex flex-col items-center gap-y-4 pt-8">
-					<Link href="#">
-						<Avatar className="h-16 w-16 aspect-square outline-2 outline-offset-2 outline-normal-active">
-							<AvatarImage src="/profile.jpeg" />
+		<aside className="sticky top-6 hidden h-[calc(100vh-3rem)] w-[300px] shrink-0 xl:flex">
+			<div className="relative flex h-full w-full flex-col overflow-hidden rounded-[32px]  bg-card">
+				<div className="space-y-4 px-6 pb-5 pt-6">
+					<div className="flex items-center gap-3">
+						<Avatar className="h-14 w-14 border border-border/60">
+							<AvatarImage
+								src="/profile.jpeg"
+								alt="Andrew Smith"
+							/>
 							<AvatarFallback>
-								You
+								AS
 							</AvatarFallback>
 						</Avatar>
-						<div className="text-center">
-							<p className="text-lg font-medium">
-								John Doe
+						<div className="space-y-1">
+							<p className="text-xs uppercase tracking-[0.35em] text-muted-foreground">
+								Product Designer
 							</p>
-							<p className="text-sm font-medium text-muted-foreground">
-								@johndoe
-							</p>
-						</div>
-					</Link>
-					<div className="flex justify-between w-full text-md mt-2">
-						<div className="text-center">
-							<p className="font-medium">
-								46
-							</p>
-							<p className="text-muted-foreground">
-								Posts
-							</p>
-						</div>
-						<div className="text-center">
-							<p className="font-medium">
-								2.8K
-							</p>
-							<p className="text-muted-foreground">
-								Followers
-							</p>
-						</div>
-						<div className="text-center">
-							<p className="font-medium">
-								200
-							</p>
-							<p className="text-muted-foreground">
-								Following
+							<p className="text-lg font-semibold">
+								Andrew Smith
 							</p>
 						</div>
 					</div>
 				</div>
 
-				<ScrollArea.Root className="">
-					<ScrollArea.Viewport className="h-[calc(100vh-28rem)]">
-						{/* Navigation Links */}
-						<nav className="flex flex-col items-start gap-y-4 ">
-							{sidebarRoutes.map((route) => {
-								const Icon = route.icon;
-								return (
-									<Link
-										href={route.path}
-										key={route.name}
-										className={`
-                      flex items-center w-full p-3 gap-x-3 rounded-md 
-                      hover:bg-secondary hover:text-primary
-                      transition-all duration-200 ease-in-out
-                      ${
-							path === route.path ||
-							path.startsWith(
-								`${route.path}/`
-							)
-								? "bg-primary text-white"
-								: "bg-transparent"
-						}
-                `}
-										title={route.name}
-									>
-										<div className="flex justify-center items-center">
-											<Icon
-												className="transition-transform duration-200"
-												strokeWidth={
-													1.5
-												}
-												size={24}
-											/>
-										</div>
-										<span className="block font-medium">
-											{route.name}
-										</span>
-									</Link>
-								);
-							})}
-							<CreatePost
-								onPost={handleCreatePost}
-							/>
-						</nav>
-					</ScrollArea.Viewport>
-					<ScrollArea.Scrollbar className="m-2 flex w-1 justify-center rounded bg-secondary opacity-0 transition-opacity delay-300 data-[hovering]:opacity-100 data-[hovering]:delay-0 data-[hovering]:duration-75 data-[scrolling]:opacity-100 data-[scrolling]:delay-0 data-[scrolling]:duration-75">
-						<ScrollArea.Thumb className="w-full rounded bg-primary" />
-					</ScrollArea.Scrollbar>
-					<ScrollArea.Corner />
-				</ScrollArea.Root>
+				<div className="flex-1 px-6">
+					<div className="flex h-full flex-col justify-between gap-8 overflow-hidden pb-6">
+						<div className="space-y-8 pr-2">
+							<section className="space-y-3">
+								<p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
+									Main
+								</p>
+								<div className="space-y-2">
+									{mainLinks.map(
+										(route) => {
+											const Icon =
+												route.icon;
+											const active =
+												pathname.startsWith(
+													route.path
+												);
+											return (
+												<Link
+													key={
+														route.path
+													}
+													href={
+														route.path
+													}
+													className={navItem(
+														{
+															active
+														}
+													)}
+												>
+													<span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-muted text-primary transition group-hover:bg-muted/80 group-hover:text-foreground">
+														<Icon className="h-4 w-4" />
+													</span>
+													<div className="flex min-w-0 flex-col">
+														<span className="truncate text-lg">
+															{
+																route.name
+															}
+														</span>
+													</div>
+												</Link>
+											);
+										}
+									)}
+								</div>
+							</section>
 
-				{/* Logo at the bottom */}
-				<div className="mt-auto mb-8 flex-shrink-0 w-20">
-					<Logo />
+							<section className="space-y-3">
+								<p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
+									More
+								</p>
+								<div className="space-y-2">
+									{secondaryLinks.map(
+										(route) => {
+											const Icon =
+												route.icon;
+											const active =
+												pathname.startsWith(
+													route.path
+												);
+											return (
+												<Link
+													key={
+														route.path
+													}
+													href={
+														route.path
+													}
+													className={navItem(
+														{
+															active
+														}
+													)}
+												>
+													<span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-muted text-primary transition group-hover:bg-muted/80 group-hover:text-foreground">
+														<Icon className="h-4 w-4" />
+													</span>
+													<span className="truncate text-lg">
+														{
+															route.name
+														}
+													</span>
+												</Link>
+											);
+										}
+									)}
+								</div>
+							</section>
+
+							<section className="space-y-3">
+								<div className="flex items-center justify-between text-xs uppercase tracking-[0.35em] text-muted-foreground">
+									<span>Messages</span>
+									<button
+										type="button"
+										className="rounded-full bg-muted px-2 py-1 text-[11px] text-muted-foreground transition hover:bg-muted/80 hover:text-foreground"
+									>
+										New
+									</button>
+								</div>
+								<div className="space-y-3">
+									{contactList.map(
+										(contact) => (
+											<button
+												key={
+													contact.name
+												}
+												type="button"
+												className="flex w-full items-center justify-between rounded-2xl bg-muted px-3 py-2 text-left text-sm text-muted-foreground transition hover:bg-muted/80 hover:text-foreground"
+											>
+												<span className="flex items-center gap-3">
+													<Avatar className="h-8 w-8 border border-border/50">
+														<AvatarImage
+															src={
+																contact.avatar
+															}
+															alt={
+																contact.name
+															}
+														/>
+														<AvatarFallback>
+															{contact.name.charAt(
+																0
+															)}
+														</AvatarFallback>
+													</Avatar>
+													<span className="truncate text-sm">
+														{
+															contact.name
+														}
+													</span>
+												</span>
+												<span className="h-2 w-2 rounded-full bg-primary" />
+											</button>
+										)
+									)}
+								</div>
+							</section>
+						</div>
+
+						<div className="rounded-[28px] bg-muted p-5">
+							<h3 className="text-base font-semibold text-foreground">
+								Let&apos;s create something
+							</h3>
+							<p className="mt-1 text-sm text-muted-foreground">
+								Create a new post and share
+								what&apos;s trending.
+							</p>
+							<Link
+								href="/home"
+								className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/30 transition hover:bg-primary/90"
+							>
+								Add New Post
+							</Link>
+						</div>
+					</div>
 				</div>
 			</div>
 		</aside>
 	);
-};
-
-export { LeftSidebar };
+}

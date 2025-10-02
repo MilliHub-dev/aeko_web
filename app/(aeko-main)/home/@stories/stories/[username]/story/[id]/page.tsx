@@ -6,7 +6,7 @@ import {
 
 export default async function StoriesPage({
 	params
-}: PageProps<"/stories/[username]/story/[id]">) {
+}: PageProps<"/home/stories/[username]/story/[id]">) {
 	const { username, id } = await params;
 
 	const allStories = getAllStories();
@@ -14,6 +14,7 @@ export default async function StoriesPage({
 	const currentUserIndex = allStories.findIndex(
 		(u) => u.username === username
 	);
+
 	if (currentUserIndex === -1) return null;
 
 	const currentUserStories = getStory(username, id);

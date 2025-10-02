@@ -1,150 +1,177 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
+
 import { LiveStream, LiveStreamCard, UpcomingStreamCard } from "./live-card";
+
+const STREAMS: LiveStream[] = [
+  {
+    id: 1,
+    title: "Ranked grind: Neon mains unlocked",
+    streamer: {
+      name: "KaylaRush",
+      username: "@kaylarush",
+      avatar: "/placeholder.svg",
+    },
+    category: "Gaming",
+    viewers: 4820,
+    thumbnail: "/placeholder.svg",
+    isLive: true,
+    description:
+      "High-intensity Valorant queues with live comms and chat-picked challenges.",
+    tags: ["valorant", "ranked", "fps"],
+  },
+  {
+    id: 2,
+    title: "Moonlight rooftop DJ session",
+    streamer: {
+      name: "Nova.fm",
+      username: "@nova",
+      avatar: "/placeholder.svg",
+    },
+    category: "Music",
+    viewers: 3270,
+    thumbnail: "/placeholder.svg",
+    isLive: true,
+    description:
+      "Future bass set blended with crowd requests and behind-the-track stories.",
+    tags: ["live", "futurebass", "nightmix"],
+  },
+  {
+    id: 3,
+    title: "Creator hotline: monetise your ideas",
+    streamer: {
+      name: "Studio 54",
+      username: "@studio54",
+      avatar: "/placeholder.svg",
+    },
+    category: "Talk Shows",
+    viewers: 1890,
+    thumbnail: "/placeholder.svg",
+    isLive: true,
+    description: "Live coaching on sponsorship pitches with rapid-fire audience Q&A.",
+    tags: ["creator", "business", "contracts"],
+  },
+  {
+    id: 4,
+    title: "Pick-up game under the lights",
+    streamer: {
+      name: "StreetBall TV",
+      username: "@streetball",
+      avatar: "/placeholder.svg",
+    },
+    category: "Sports",
+    viewers: 2540,
+    thumbnail: "/placeholder.svg",
+    isLive: true,
+    description:
+      "Mic'd-up commentary, slo-mo replays, and live scoreboard overlays.",
+    tags: ["hoops", "cityleague", "replays"],
+  },
+  {
+    id: 5,
+    title: "Build a Next.js design system live",
+    streamer: {
+      name: "DevMaster",
+      username: "@devmaster",
+      avatar: "/placeholder.svg",
+    },
+    category: "Education",
+    viewers: 0,
+    thumbnail: "/placeholder.svg",
+    isLive: false,
+    scheduledFor: "Today at 8:30 PM",
+    description:
+      "Refine typography scales, motion tokens, and theme switching with live code reviews.",
+    tags: ["nextjs", "design", "frontend"],
+  },
+  {
+    id: 6,
+    title: "Illustrate a cyberpunk cityscape",
+    streamer: {
+      name: "MiraSketch",
+      username: "@mira.sketch",
+      avatar: "/placeholder.svg",
+    },
+    category: "Creative",
+    viewers: 0,
+    thumbnail: "/placeholder.svg",
+    isLive: false,
+    scheduledFor: "Tomorrow at 2:00 PM",
+    description:
+      "Layer neon palettes with real-time Procreate tips and brush giveaways.",
+    tags: ["digitalart", "illustration", "tutorial"],
+  },
+];
 
 export function LiveStreamContent({
   activeCategory,
 }: {
   activeCategory: string;
 }) {
-  const liveStreams: LiveStream[] = [
-    {
-      id: 1,
-      title: "Bitcoin Technical Analysis & Trading",
-      streamer: {
-        name: "CryptoMaster",
-        username: "@cryptomaster",
-        avatar: "/placeholder.svg",
-      },
-      category: "Trading",
-      viewers: 1245,
-      thumbnail: "/placeholder.svg",
-      isLive: true,
-      description:
-        "Live technical analysis of BTC/USD with real-time trading strategies and market insights.",
-    },
-    {
-      id: 2,
-      title: "DeFi Deep Dive - Yield Farming Strategies",
-      streamer: {
-        name: "DeFiGuru",
-        username: "@defiguru",
-        avatar: "/placeholder.svg",
-      },
-      category: "Education",
-      viewers: 876,
-      thumbnail: "/placeholder.svg",
-      isLive: true,
-      description:
-        "Exploring the best yield farming opportunities across different DeFi protocols.",
-    },
-    {
-      id: 3,
-      title: "NFT Trading & Collection Review",
-      streamer: {
-        name: "NFTWhale",
-        username: "@nftwhale",
-        avatar: "/placeholder.svg",
-      },
-      category: "NFTs",
-      viewers: 3421,
-      thumbnail: "/placeholder.svg",
-      isLive: true,
-      description: "Live NFT trading, collection reviews, and market analysis.",
-    },
-    {
-      id: 4,
-      title: "Altcoin Season Analysis",
-      streamer: {
-        name: "AltHunter",
-        username: "@althunter",
-        avatar: "/placeholder.svg",
-      },
-      category: "Trading",
-      viewers: 567,
-      thumbnail: "/placeholder.svg",
-      isLive: true,
-      description:
-        "Analyzing promising altcoins and their potential for the upcoming bull run.",
-    },
-    {
-      id: 5,
-      title: "Crypto Talk: The Future of Web3",
-      streamer: {
-        name: "Web3Expert",
-        username: "@web3expert",
-        avatar: "/placeholder.svg",
-      },
-      category: "Talk Shows",
-      viewers: 0,
-      thumbnail: "/placeholder.svg",
-      isLive: false,
-      scheduledFor: "Tomorrow at 7:00 PM",
-      description:
-        "Discussion about the latest developments in Web3, DAOs, and the future of decentralized internet.",
-    },
-    {
-      id: 6,
-      title: "Smart Contract Development Workshop",
-      streamer: {
-        name: "BlockchainDev",
-        username: "@blockchaindev",
-        avatar: "/placeholder.svg",
-      },
-      category: "Education",
-      viewers: 0,
-      thumbnail: "/placeholder.svg",
-      isLive: false,
-      scheduledFor: "Friday at 3:00 PM",
-      description:
-        "Learn how to develop and audit smart contracts on Ethereum and other EVM-compatible chains.",
-    },
-  ];
-
-  // Filter streams based on active category
   const filteredStreams =
     activeCategory === "All"
-      ? liveStreams
-      : liveStreams.filter((stream) => stream.category === activeCategory);
+      ? STREAMS
+      : STREAMS.filter((stream) => stream.category === activeCategory);
 
-  // Separate live and upcoming streams
   const liveNow = filteredStreams.filter((stream) => stream.isLive);
   const upcoming = filteredStreams.filter((stream) => !stream.isLive);
 
   return (
-    <div className="space-y-8 py-4 text-black">
-      {/* Live Now Section */}
+    <div className="mt-12 space-y-12 text-foreground">
       {liveNow.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Live Now</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <section className="space-y-6">
+          <header className="flex flex-col justify-between gap-4 border-b border-border/60 pb-4 sm:flex-row sm:items-end">
+            <div className="space-y-2">
+              <Badge className="w-fit rounded-full bg-primary/15 text-xs font-medium uppercase tracking-wide text-primary">
+                Live now
+              </Badge>
+              <h2 className="text-2xl font-semibold">Rooms heating up right now</h2>
+              <p className="text-sm text-muted-foreground">
+                TikTok-inspired vertical energy, responsive overlays, and community shoutouts in real time.
+              </p>
+            </div>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Updated moments ago
+            </p>
+          </header>
+          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {liveNow.map((stream) => (
               <LiveStreamCard key={stream.id} stream={stream} />
             ))}
           </div>
-        </div>
+        </section>
       )}
 
-      {/* Upcoming Streams Section */}
       {upcoming.length > 0 && (
-        <div className="space-y-4 mt-8">
-          <h2 className="text-xl font-semibold text-primary dark:text-primary-foreground">
-            Upcoming Streams
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <section className="space-y-6">
+          <header className="flex flex-col justify-between gap-4 border-b border-border/60 pb-4 sm:flex-row sm:items-end">
+            <div className="space-y-2">
+              <Badge variant="outline" className="w-fit rounded-full border-primary/40 text-xs font-medium uppercase tracking-wide text-primary">
+                Upcoming
+              </Badge>
+              <h2 className="text-2xl font-semibold">Secure your spot before the countdown ends</h2>
+              <p className="text-sm text-muted-foreground">
+                RSVP to unlock pre-show chat perks and get a reminder the moment creators go live.
+              </p>
+            </div>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              {upcoming.length} sessions in queue
+            </p>
+          </header>
+          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {upcoming.map((stream) => (
               <UpcomingStreamCard key={stream.id} stream={stream} />
             ))}
           </div>
-        </div>
+        </section>
       )}
 
-      {/* No Streams Message */}
       {filteredStreams.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-500 dark:text-gray-400">
-            No streams found for this category. Try selecting a different
-            category.
+        <div className="rounded-[28px] border border-border/60 bg-card/70 px-8 py-12 text-center shadow-sm">
+          <h3 className="text-lg font-semibold">No streams yet</h3>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Explore a different category or follow creators to see their live rooms appear here.
           </p>
         </div>
       )}
