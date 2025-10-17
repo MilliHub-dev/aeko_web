@@ -4,7 +4,7 @@ export default function AekoMainLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
 	return (
-		<div className="no-gutter">
+		<div className="lg:no-gutter">
 			<BaseLayout>{children}</BaseLayout>;
 		</div>
 	);

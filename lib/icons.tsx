@@ -146,7 +146,7 @@ const ReplyOutline = ({
 	);
 };
 const ReAeko = ({
-	width = 40,
+	width = 30,
 	height = 18,
 	size,
 	strokeWidth = 2,

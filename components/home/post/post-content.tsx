@@ -153,7 +153,7 @@ const PostText = ({
 	return (
 		<div
 			className={clsx(
-				"flex flex-col gap-4 py-10",
+				"flex flex-col gap-4 py-6",
 				className
 			)}
 		>

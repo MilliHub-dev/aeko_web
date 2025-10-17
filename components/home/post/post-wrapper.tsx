@@ -61,7 +61,7 @@ const PostWrapper = ({
 	};
 
 	return (
-		<div className="relative px-6 py-4 md:py-16 max-w-200 snap-center lg:snap-start lg:flex gap-x-6">
+		<div className="relative px-4 py-4 md:py-16 max-w-200 snap-center lg:snap-start lg:flex gap-x-6">
 			<div
 				ref={ref}
 				onMouseMove={

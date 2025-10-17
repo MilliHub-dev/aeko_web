@@ -92,9 +92,9 @@
 }
 
 @layer utilities {
-  .glass-panel {
-    @apply bg-white/10 backdrop-blur-md border border-white/20 shadow-[inset_0_1px_4px_rgba(255,255,255,0.25),0_4px_10px_rgba(0,0,0,0.35),0_0_12px_rgba(255,255,255,0.15)];
-  }
+	.glass-panel {
+		@apply bg-white/10 backdrop-blur-md border border-white/20 shadow-[inset_0_1px_4px_rgba(255,255,255,0.25),0_4px_10px_rgba(0,0,0,0.35),0_0_12px_rgba(255,255,255,0.15)];
+	}
 	.no-scrollbar::-webkit-scrollbar {
 		display: none;
 	}
@@ -103,8 +103,15 @@
 		scrollbar-width: none;
 	}
 
-	.no-gutter {
-		scrollbar-gutter: stable both-edges;
+	/* .no-gutter {
+  scrollbar-gutter: stable both-edges;
+} */
+
+	@media (min-width: 768px) {
+		/* Adjust the min-width value as needed */
+		.no-gutter {
+			scrollbar-gutter: stable both-edges;
+		}
 	}
 
 	.btn-glass {

@@ -31,9 +31,7 @@ export function Stories() {
 				<div className="mt-6 flex flex-col items-center gap-3 px-4">
 					<button
 						type="button"
-						onClick={() =>
-							router.push("/home/stories/new")
-						}
+						onClick={() => router.push("/home")}
 						className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md shadow-primary/30 transition hover:bg-primary/90"
 					>
 						+

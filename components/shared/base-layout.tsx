@@ -30,7 +30,7 @@ export function BaseLayout({ children }: BaseLayoutProps) {
 				<div className="relative max-w-full bg-background ">
 					{showMobileHeader && <MobileHeader />}
 					<div
-						className={`pl-2 xl:px-8 grid min-h-screen items-start ${
+						className={`xl:px-8 grid min-h-screen items-start ${
 							isSimpleLayout
 								? "md:grid-cols-[5.625rem_1fr] xl:grid-cols-[24rem_1fr] max-w-full"
 								: "md:grid-cols-[5.625rem_5rem_1fr] xl:grid-cols-[24rem_6.5rem_minmax(0,1fr)_28rem]"
