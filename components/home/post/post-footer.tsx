@@ -9,7 +9,7 @@ import {
 	Share2
 } from "lucide-react";
 
-import { useCommentsPanel } from "./comments-panel-context";
+import { usePostUIStore, usePostsStore } from "@/features/posts/stores";
 import { Metric } from "./post-metric";
 import { ReAeko } from "@/lib/icons";
 
@@ -40,7 +40,18 @@ const PostFooter = ({
 	isHovered = false,
 	postId
 }: PostFooterProps) => {
-	const { open } = useCommentsPanel();
+	const { openCommentsPanel } = usePostUIStore();
+	const { toggleLike, toggleBookmark, incrementShare, likedPosts, bookmarkedPosts, posts } = usePostsStore();
+	const isLiked = likedPosts.has(postId);
+	const isBookmarked = bookmarkedPosts.has(postId);
+	
+	// Get current post from store if available, otherwise use props
+	const storePost = posts.find((p) => p.id === postId);
+	const currentLikes = storePost?.likes || likes;
+	const currentShares = storePost?.shares || shares;
+	const currentBookmarks = storePost?.bookmarks || bookmarks;
+	const currentComments = storePost?.commentMetric || comments;
+	
 	const isText = type === "text";
 
 	const detailPanel = clsx(
@@ -115,25 +126,31 @@ const PostFooter = ({
 			<div className={metricsRow}>
 				<Metric
 					icon={
-						<Heart className="h-6 w-6 text-rose-400 fill-rose-500/80" />
+						<Heart className={`h-6 w-6 ${isLiked ? "text-rose-400 fill-rose-500/80" : ""}`} />
 					}
-					value={likes}
+					value={currentLikes}
+					className="hover:scale-[1.05] cursor-pointer"
+					onClick={() => toggleLike(postId)}
 				/>
 				<Metric
 					icon={<Share2 className="h-6 w-6" />}
-					value={shares}
+					value={currentShares}
+					className="hover:scale-[1.05] cursor-pointer"
+					onClick={() => incrementShare(postId)}
 				/>
 				<Metric
-					icon={<Bookmark className="h-6 w-6" />}
-					value={bookmarks}
+					icon={<Bookmark className={`h-6 w-6 ${isBookmarked ? "fill-current" : ""}`} />}
+					value={currentBookmarks}
+					className="hover:scale-[1.05] cursor-pointer"
+					onClick={() => toggleBookmark(postId)}
 				/>
 				<Metric
 					icon={
 						<MessageCircle className="h-6 w-6" />
 					}
-					value={comments}
-					className="hover:scale-[1.05]"
-					onClick={() => open(postId)}
+					value={currentComments}
+					className="hover:scale-[1.05] cursor-pointer"
+					onClick={() => openCommentsPanel(postId)}
 				/>
 				<Metric
 					icon={<ReAeko strokeWidth={4} />}

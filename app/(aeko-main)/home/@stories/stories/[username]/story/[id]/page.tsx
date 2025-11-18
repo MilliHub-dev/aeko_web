@@ -6,7 +6,9 @@ import {
 
 export default async function StoriesPage({
 	params
-}: PageProps<"/home/stories/[username]/story/[id]">) {
+}: {
+	params: Promise<{ username: string; id: string }>;
+}) {
 	const { username, id } = await params;
 
 	const allStories = getAllStories();

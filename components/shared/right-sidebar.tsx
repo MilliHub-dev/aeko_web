@@ -38,21 +38,17 @@ const schedule = [
 
 export function RightSidebar() {
 	return (
-		<aside className="sticky top-6 hidden h-[calc(100vh-3rem)] w-[320px] shrink-0 xl:flex">
-			<div className="flex h-full w-full flex-col gap-6 overflow-hidden rounded-[32px] border-none">
+		<aside className="sticky top-0 hidden h-screen w-[320px] shrink-0 xl:flex">
+			<div className="flex h-full w-full flex-col gap-6 overflow-hidden border-none">
 				<div className="flex-1 space-y-6 overflow-y-auto px-6 py-6">
-					<section className="rounded-[24px] border border-border/60 bg-muted p-5">
+					<section className="rounded-3xl border border-border/60 bg-muted p-5">
 						<p className="text-xs uppercase tracking-[0.35em] text-muted-foreground">
 							Overview
 						</p>
 						<div className="mt-4 flex items-end justify-between">
 							<div>
-								<h3 className="text-2xl font-semibold text-foreground">
-									2.4K
-								</h3>
-								<p className="text-sm text-muted-foreground">
-									Interactions this week
-								</p>
+								<h3 className="text-2xl font-semibold text-foreground">2.4K</h3>
+								<p className="text-sm text-muted-foreground">Interactions this week</p>
 							</div>
 							<span className="rounded-full bg-emerald-200/30 px-3 py-1 text-xs font-medium text-emerald-500">
 								+12%
@@ -80,9 +76,7 @@ export function RightSidebar() {
 									className="flex w-full items-center justify-between rounded-2xl border border-border/60 bg-muted px-4 py-3 text-sm text-muted-foreground transition hover:bg-muted/80 hover:text-foreground"
 								>
 									<span>{topic.tag}</span>
-									<span className="text-xs text-emerald-500">
-										{topic.change}
-									</span>
+									<span className="text-xs text-emerald-500">{topic.change}</span>
 								</button>
 							))}
 						</div>
@@ -101,46 +95,34 @@ export function RightSidebar() {
 							</Link>
 						</div>
 						<div className="space-y-3">
-							{creatorSpotlights.map(
-								(creator) => (
-									<div
-										key={creator.handle}
-										className="flex items-center justify-between rounded-2xl border border-border/60 bg-muted px-3 py-3 text-sm text-muted-foreground transition hover:bg-muted/80 hover:text-foreground"
-									>
-										<span className="flex items-center gap-3">
-											<span className="relative h-10 w-10 overflow-hidden rounded-full border border-border/60">
-												<img
-													src={
-														creator.avatar
-													}
-													alt={
-														creator.name
-													}
-													className="h-full w-full object-cover"
-												/>
-											</span>
-											<span className="flex flex-col">
-												<strong className="text-foreground">
-													{
-														creator.name
-													}
-												</strong>
-												<span className="text-xs text-muted-foreground">
-													{
-														creator.category
-													}
-												</span>
+							{creatorSpotlights.map((creator) => (
+								<div
+									key={creator.handle}
+									className="flex items-center justify-between rounded-2xl border border-border/60 bg-muted px-3 py-3 text-sm text-muted-foreground transition hover:bg-muted/80 hover:text-foreground"
+								>
+									<span className="flex items-center gap-3">
+										<span className="relative h-10 w-10 overflow-hidden rounded-full border border-border/60">
+											<img
+												src={creator.avatar}
+												alt={creator.name}
+												className="h-full w-full object-cover"
+											/>
+										</span>
+										<span className="flex flex-col">
+											<strong className="text-foreground">{creator.name}</strong>
+											<span className="text-xs text-muted-foreground">
+												{creator.category}
 											</span>
 										</span>
-										<Link
-											href={`/messages?with=${creator.handle}`}
-											className="text-xs text-primary hover:text-primary/80"
-										>
-											Connect
-										</Link>
-									</div>
-								)
-							)}
+									</span>
+									<Link
+										href={`/messages?with=${creator.handle}`}
+										className="text-xs text-primary hover:text-primary/80"
+									>
+										Connect
+									</Link>
+								</div>
+							))}
 						</div>
 					</section>
 
@@ -154,12 +136,8 @@ export function RightSidebar() {
 									key={item.title}
 									className="rounded-2xl border border-border/60 bg-muted px-4 py-3 text-sm text-muted-foreground"
 								>
-									<p className="font-medium text-foreground">
-										{item.title}
-									</p>
-									<p className="text-xs text-muted-foreground/80">
-										{item.time}
-									</p>
+									<p className="font-medium text-foreground">{item.title}</p>
+									<p className="text-xs text-muted-foreground/80">{item.time}</p>
 									<Link
 										href="/calendar"
 										className="mt-3 inline-flex items-center text-xs font-semibold text-primary hover:text-primary/80"

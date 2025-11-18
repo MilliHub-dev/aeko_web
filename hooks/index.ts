@@ -8,3 +8,5 @@ export {
 	useResponsiveValue,
 	breakpoints
 } from "./use-media-query";
+export { useBodyScrollLock } from "./use-body-scroll-lock";
+export { useFocusTrap } from "./use-focus-trap";

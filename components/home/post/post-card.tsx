@@ -10,8 +10,28 @@ import { PostWrapper } from "./post-wrapper";
 import { PostPlayControl } from "./post-play-controls";
 import React from "react";
 import { PostProps } from "@/types/post";
+import { usePostsStore } from "@/features/posts/stores";
+import { useEffect } from "react";
 
 const PostCard = (post: PostProps) => {
+	// Sync post data with store
+	const updatePost = usePostsStore((state) => state.updatePost);
+	const storePost = usePostsStore((state) => 
+		state.posts.find((p) => p.id === post.id) || post
+	);
+
+	// Use store post if available, otherwise use prop
+	const currentPost = storePost.id === post.id ? storePost : post;
+
+	// Update store when post prop changes
+	useEffect(() => {
+		if (storePost.id !== post.id) {
+			// Post not in store yet, will be added by PostsInitializer
+			return;
+		}
+		// Sync any prop changes to store
+		updatePost(post.id, post);
+	}, [post.id, updatePost, storePost.id]);
 	const {
 		containerRef,
 		showOverlay,
@@ -31,27 +51,27 @@ const PostCard = (post: PostProps) => {
 	} = useVideoControls();
 
 	const footerProps = {
-		postId: post.id,
-		type: post.type,
-		content: post.content,
-		hashtags: post.hashtags,
-		taggedUsers: post.taggedUsers,
-		likes: post.likes,
-		shares: post.shares,
-		bookmarks: post.bookmarks,
-		comments: post.commentMetric
+		postId: currentPost.id,
+		type: currentPost.type,
+		content: currentPost.content,
+		hashtags: currentPost.hashtags,
+		taggedUsers: currentPost.taggedUsers,
+		likes: currentPost.likes,
+		shares: currentPost.shares,
+		bookmarks: currentPost.bookmarks,
+		comments: currentPost.commentMetric
 	};
 
 	const postWrapperProps = {
-		id: post.id,
-		handle: post.handle,
+		id: currentPost.id,
+		handle: currentPost.handle,
 		isMedia:
-			post.type === "image" || post.type === "video",
+			currentPost.type === "image" || currentPost.type === "video",
 		ref: containerRef,
-		likes: post.likes,
-		shares: post.shares,
-		bookmarks: post.bookmarks,
-		comments: post.commentMetric,
+		likes: currentPost.likes,
+		shares: currentPost.shares,
+		bookmarks: currentPost.bookmarks,
+		comments: currentPost.commentMetric,
 		onMouseMove: handleMouseMove,
 		onMouseLeave: handleMouseLeave,
 		onTouchStart: handleTouchStart,
@@ -59,19 +79,19 @@ const PostCard = (post: PostProps) => {
 	};
 
 	const isMedia =
-		post.type === "image" || post.type === "video";
+		currentPost.type === "image" || currentPost.type === "video";
 
 	return (
 		<PostWrapper {...postWrapperProps}>
 			{isMedia && <PostOverlay show={showOverlay} />}
 			<PostHeader
-				{...post}
+				{...currentPost}
 				isHovered={showOverlay}
 				isMuted={isMuted}
 				toggleMute={toggleMute}
 			/>
 			<PostMedia
-				{...post}
+				{...currentPost}
 				videoRef={videoRef}
 				progress={progress}
 			/>
@@ -79,7 +99,7 @@ const PostCard = (post: PostProps) => {
 				{...footerProps}
 				isHovered={showOverlay}
 			/>
-			{post.type === "video" && (
+			{currentPost.type === "video" && (
 				<PostPlayControl
 					togglePlaying={togglePlaying}
 					isPlaying={isPlaying}

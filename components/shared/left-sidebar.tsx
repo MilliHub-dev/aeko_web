@@ -29,104 +29,66 @@ const navItem = cva(
 
 const MAIN_LINK_COUNT = 5;
 
-const contactList = [
-	{
-		name: "Erik Gunsel",
-		avatar: "/users/mike-chen.jpg"
-	},
-	{
-		name: "Emily Smith",
-		avatar: "/users/sarah-johnson.jpeg"
-	},
-	{
-		name: "Arthur Adelak",
-		avatar: "/users/alex-rivera.jpg"
-	}
-];
 
 export function LeftSidebar() {
 	const pathname = usePathname();
 
 	const { mainLinks, secondaryLinks } = useMemo(() => {
 		return {
-			mainLinks: sidebarRoutes.slice(
-				0,
-				MAIN_LINK_COUNT
-			),
-			secondaryLinks:
-				sidebarRoutes.slice(MAIN_LINK_COUNT)
+			mainLinks: sidebarRoutes.slice(0, MAIN_LINK_COUNT),
+			secondaryLinks: sidebarRoutes.slice(MAIN_LINK_COUNT)
 		};
 	}, []);
 
 	return (
-		<aside className="sticky top-6 hidden h-[calc(100vh-3rem)] w-[300px] shrink-0 xl:flex">
-			<div className="relative flex h-full w-full flex-col overflow-hidden rounded-[32px]  bg-card">
-				<div className="space-y-4 px-6 pb-5 pt-6">
+		<aside className="sticky top-0 hidden h-screen w-[300px] shrink-0 xl:flex">
+			<div className="relative flex h-full w-full flex-col overflow-hidden bg-card space-y-4 p-6">
+				<div className="space-y-4">
 					<div className="flex items-center gap-3">
 						<Avatar className="h-14 w-14 border border-border/60">
 							<AvatarImage
 								src="/profile.jpeg"
 								alt="Andrew Smith"
 							/>
-							<AvatarFallback>
-								AS
-							</AvatarFallback>
+							<AvatarFallback>AS</AvatarFallback>
 						</Avatar>
 						<div className="space-y-1">
 							<p className="text-xs uppercase tracking-[0.35em] text-muted-foreground">
 								Product Designer
 							</p>
-							<p className="text-lg font-semibold">
-								Andrew Smith
-							</p>
+							<p className="text-lg font-semibold">Andrew Smith</p>
 						</div>
 					</div>
 				</div>
 
-				<div className="flex-1 px-6">
-					<div className="flex h-full flex-col justify-between gap-8 overflow-hidden pb-6">
-						<div className="space-y-8 pr-2">
+				<div className="flex-1">
+					<div className="flex h-full flex-col justify-between gap-4 overflow-hidden pb-6">
+						<div className="space-y-8">
 							<section className="space-y-3">
 								<p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
 									Main
 								</p>
 								<div className="space-y-2">
-									{mainLinks.map(
-										(route) => {
-											const Icon =
-												route.icon;
-											const active =
-												pathname.startsWith(
-													route.path
-												);
-											return (
-												<Link
-													key={
-														route.path
-													}
-													href={
-														route.path
-													}
-													className={navItem(
-														{
-															active
-														}
-													)}
-												>
-													<span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-muted text-primary transition group-hover:bg-muted/80 group-hover:text-foreground">
-														<Icon className="h-4 w-4" />
-													</span>
-													<div className="flex min-w-0 flex-col">
-														<span className="truncate text-lg">
-															{
-																route.name
-															}
-														</span>
-													</div>
-												</Link>
-											);
-										}
-									)}
+									{mainLinks.map((route) => {
+										const Icon = route.icon;
+										const active = pathname.startsWith(route.path);
+										return (
+											<Link
+												key={route.path}
+												href={route.path}
+												className={navItem({
+													active
+												})}
+											>
+												<span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-muted text-primary transition group-hover:bg-muted/80 group-hover:text-foreground">
+													<Icon className="h-4 w-4" />
+												</span>
+												<div className="flex min-w-0 flex-col">
+													<span className="truncate text-lg">{route.name}</span>
+												</div>
+											</Link>
+										);
+									})}
 								</div>
 							</section>
 
@@ -135,89 +97,24 @@ export function LeftSidebar() {
 									More
 								</p>
 								<div className="space-y-2">
-									{secondaryLinks.map(
-										(route) => {
-											const Icon =
-												route.icon;
-											const active =
-												pathname.startsWith(
-													route.path
-												);
-											return (
-												<Link
-													key={
-														route.path
-													}
-													href={
-														route.path
-													}
-													className={navItem(
-														{
-															active
-														}
-													)}
-												>
-													<span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-muted text-primary transition group-hover:bg-muted/80 group-hover:text-foreground">
-														<Icon className="h-4 w-4" />
-													</span>
-													<span className="truncate text-lg">
-														{
-															route.name
-														}
-													</span>
-												</Link>
-											);
-										}
-									)}
-								</div>
-							</section>
-
-							<section className="space-y-3">
-								<div className="flex items-center justify-between text-xs uppercase tracking-[0.35em] text-muted-foreground">
-									<span>Messages</span>
-									<button
-										type="button"
-										className="rounded-full bg-muted px-2 py-1 text-[11px] text-muted-foreground transition hover:bg-muted/80 hover:text-foreground"
-									>
-										New
-									</button>
-								</div>
-								<div className="space-y-3">
-									{contactList.map(
-										(contact) => (
-											<button
-												key={
-													contact.name
-												}
-												type="button"
-												className="flex w-full items-center justify-between rounded-2xl bg-muted px-3 py-2 text-left text-sm text-muted-foreground transition hover:bg-muted/80 hover:text-foreground"
+									{secondaryLinks.map((route) => {
+										const Icon = route.icon;
+										const active = pathname.startsWith(route.path);
+										return (
+											<Link
+												key={route.path}
+												href={route.path}
+												className={navItem({
+													active
+												})}
 											>
-												<span className="flex items-center gap-3">
-													<Avatar className="h-8 w-8 border border-border/50">
-														<AvatarImage
-															src={
-																contact.avatar
-															}
-															alt={
-																contact.name
-															}
-														/>
-														<AvatarFallback>
-															{contact.name.charAt(
-																0
-															)}
-														</AvatarFallback>
-													</Avatar>
-													<span className="truncate text-sm">
-														{
-															contact.name
-														}
-													</span>
+												<span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-muted text-primary transition group-hover:bg-muted/80 group-hover:text-foreground">
+													<Icon className="h-4 w-4" />
 												</span>
-												<span className="h-2 w-2 rounded-full bg-primary" />
-											</button>
-										)
-									)}
+												<span className="truncate text-lg">{route.name}</span>
+											</Link>
+										);
+									})}
 								</div>
 							</section>
 						</div>
@@ -227,8 +124,7 @@ export function LeftSidebar() {
 								Let&apos;s create something
 							</h3>
 							<p className="mt-1 text-sm text-muted-foreground">
-								Create a new post and share
-								what&apos;s trending.
+								Create a new post and share what&apos;s trending.
 							</p>
 							<Link
 								href="/home"

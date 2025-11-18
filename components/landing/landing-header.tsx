@@ -3,7 +3,7 @@ import { Logo } from "../logo";
 
 const LandingHeader = () => {
 	return (
-		<header className="relative mx-auto max-w-full p-6 lg:px-12 lg:py-4 flex items-center justify-between">
+		<header className="relative mx-auto w-full max-w-[1920px] p-6 lg:px-12 lg:py-4 flex items-center justify-between">
 			<div className="flex items-center gap-3">
 				<Link
 					href="/"
