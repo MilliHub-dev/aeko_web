@@ -9,29 +9,29 @@ import { PostOverlay } from "./post-overlay";
 import { PostWrapper } from "./post-wrapper";
 import { PostPlayControl } from "./post-play-controls";
 import React from "react";
-import { PostProps } from "@/types/post";
+import { FeedPost, PostProps } from "@/types/post";
 import { usePostsStore } from "@/features/posts/stores";
 import { useEffect } from "react";
 
-const PostCard = (post: PostProps) => {
+const PostCard = (post: FeedPost) => {
 	// Sync post data with store
 	const updatePost = usePostsStore((state) => state.updatePost);
-	const storePost = usePostsStore((state) => 
-		state.posts.find((p) => p.id === post.id) || post
+	const storePost = usePostsStore(
+		(state) => state.posts.find((p) => p._id === post._id) || post
 	);
 
 	// Use store post if available, otherwise use prop
-	const currentPost = storePost.id === post.id ? storePost : post;
+	const currentPost = storePost._id === post._id ? storePost : post;
 
 	// Update store when post prop changes
 	useEffect(() => {
-		if (storePost.id !== post.id) {
+		if (storePost._id !== post._id) {
 			// Post not in store yet, will be added by PostsInitializer
 			return;
 		}
 		// Sync any prop changes to store
-		updatePost(post.id, post);
-	}, [post.id, updatePost, storePost.id]);
+		updatePost(post._id, post);
+	}, [post._id, updatePost, storePost._id]);
 	const {
 		containerRef,
 		showOverlay,
@@ -41,45 +41,37 @@ const PostCard = (post: PostProps) => {
 		handleTouchEnd
 	} = useOverlayActions();
 
-	const {
-		videoRef,
-		progress,
-		isPlaying,
-		isMuted,
-		toggleMute,
-		togglePlaying
-	} = useVideoControls();
+	const { videoRef, progress, isPlaying, isMuted, toggleMute, togglePlaying } =
+		useVideoControls();
 
 	const footerProps = {
-		postId: currentPost.id,
+		postId: currentPost._id,
 		type: currentPost.type,
-		content: currentPost.content,
-		hashtags: currentPost.hashtags,
-		taggedUsers: currentPost.taggedUsers,
-		likes: currentPost.likes,
-		shares: currentPost.shares,
-		bookmarks: currentPost.bookmarks,
-		comments: currentPost.commentMetric
+		// content: currentPost.content,
+		// hashtags: currentPost.hashtags,
+		// taggedUsers: currentPost.taggedUsers,
+		likes: currentPost.likesCount
+		// shares: currentPost.shares,
+		// bookmarks: currentPost.bookmarks,
+		// comments: currentPost.commentsCount
 	};
 
 	const postWrapperProps = {
-		id: currentPost.id,
-		handle: currentPost.handle,
-		isMedia:
-			currentPost.type === "image" || currentPost.type === "video",
+		id: currentPost._id,
+		// handle: currentPost.handle,
+		isMedia: currentPost.type === "image" || currentPost.type === "video",
 		ref: containerRef,
-		likes: currentPost.likes,
-		shares: currentPost.shares,
-		bookmarks: currentPost.bookmarks,
-		comments: currentPost.commentMetric,
+		likes: currentPost.likesCount,
+		// shares: currentPost.shares,
+		// bookmarks: currentPost.bookmarks,
+		comments: currentPost.comments,
 		onMouseMove: handleMouseMove,
 		onMouseLeave: handleMouseLeave,
 		onTouchStart: handleTouchStart,
 		onTouchEnd: handleTouchEnd
 	};
 
-	const isMedia =
-		currentPost.type === "image" || currentPost.type === "video";
+	const isMedia = currentPost.type === "image" || currentPost.type === "video";
 
 	return (
 		<PostWrapper {...postWrapperProps}>

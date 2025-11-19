@@ -2,21 +2,18 @@
 
 import { useEffect } from "react";
 import { usePostsStore } from "@/features/posts/stores";
-import { PostProps } from "@/types/post";
+import { FeedPost, PostProps } from "@/types/post";
 
 interface PostsInitializerProps {
-	posts: PostProps[];
+	posts: Partial<FeedPost>[];
 	children: React.ReactNode;
 }
 
-export function PostsInitializer({
-	posts,
-	children
-}: PostsInitializerProps) {
+export function PostsInitializer({ posts, children }: PostsInitializerProps) {
 	const setPosts = usePostsStore((state) => state.setPosts);
 
 	useEffect(() => {
-		setPosts(posts);
+		setPosts(posts! as FeedPost[]);
 	}, [posts, setPosts]);
 
 	return <>{children}</>;

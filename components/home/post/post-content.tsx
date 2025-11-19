@@ -24,14 +24,10 @@ const PostMedia = ({
 	videoRef,
 	progress,
 	muted
-}: PostMediaProps) => {
+}: Partial<PostMediaProps>) => {
 	switch (type) {
 		case "image":
-			return (
-				<PostImage
-					backgroundImage={backgroundImage!}
-				/>
-			);
+			return <PostImage backgroundImage={backgroundImage!} />;
 		case "video":
 			return (
 				<PostVideo
@@ -139,9 +135,9 @@ const PostImage = ({
 
 interface PostTextProps {
 	content: string;
-	hashtags?: string[];
-	taggedUsers?: string[];
-	className?: string;
+	hashtags: string[];
+	taggedUsers: string[];
+	className: string;
 }
 
 const PostText = ({
@@ -149,17 +145,10 @@ const PostText = ({
 	hashtags,
 	taggedUsers,
 	className
-}: PostTextProps) => {
+}: Partial<PostTextProps>) => {
 	return (
-		<div
-			className={clsx(
-				"flex flex-col gap-4 py-6",
-				className
-			)}
-		>
-			<p className="text-xl md:text-3xl leading-relaxed">
-				{content}
-			</p>
+		<div className={clsx("flex flex-col gap-4 py-6", className)}>
+			<p className="text-xl md:text-3xl leading-relaxed">{content}</p>
 
 			{hashtags && hashtags.length > 0 && (
 				<div className="flex flex-wrap gap-2">

@@ -4,60 +4,46 @@ import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import React from "react";
 import { PostActions } from "./post-actions";
+import { Comment } from "@/types/comment";
 
 interface PostWrapperProps {
 	id: string;
-	handle: string;
+	// handle: string;
 	ref: React.Ref<HTMLDivElement>;
 	children?: React.ReactNode;
 	isMedia?: boolean;
-	likes: string;
-	shares: string;
-	bookmarks: string;
-	comments: string;
-	onMouseMove?: (
-		event: React.MouseEvent<HTMLDivElement>
-	) => void;
-	onMouseLeave?: (
-		event: React.MouseEvent<HTMLDivElement>
-	) => void;
-	onTouchStart?: (
-		event: React.TouchEvent<HTMLDivElement>
-	) => void;
-	onTouchEnd?: (
-		event: React.TouchEvent<HTMLDivElement>
-	) => void;
+	likes: number;
+	// shares: string;
+	// bookmarks: string;
+	comments: Comment[];
+	onMouseMove?: (event: React.MouseEvent<HTMLDivElement>) => void;
+	onMouseLeave?: (event: React.MouseEvent<HTMLDivElement>) => void;
+	onTouchStart?: (event: React.TouchEvent<HTMLDivElement>) => void;
+	onTouchEnd?: (event: React.TouchEvent<HTMLDivElement>) => void;
 }
 
 const PostWrapper = ({
 	children,
-	handle,
+	// handle,
 	isMedia,
 	id,
 	ref,
 	likes,
-	shares,
-	bookmarks,
+	// shares,
+	// bookmarks,
 	comments,
 	onMouseMove,
 	onMouseLeave,
 	onTouchStart,
 	onTouchEnd
-}: PostWrapperProps) => {
+}: Partial<PostWrapperProps>) => {
 	const router = useRouter();
 
-	const handleRoute = (
-		event: React.MouseEvent<HTMLDivElement>
-	) => {
-		if (
-			(event.target as HTMLElement).closest(
-				"button, a"
-			)
-		)
-			return;
+	const handleRoute = (event: React.MouseEvent<HTMLDivElement>) => {
+		if ((event.target as HTMLElement).closest("button, a")) return;
 		event.preventDefault();
 		event.stopPropagation();
-		router.push(`/${handle}/posts/${id}`);
+		// router.push(`/${handle}/posts/${id}`);
 	};
 
 	return (
@@ -80,9 +66,9 @@ const PostWrapper = ({
 				</div>
 				<PostActions
 					likes={likes}
-					shares={shares}
-					bookmarks={bookmarks}
-					comments={comments}
+					// shares={shares}
+					// bookmarks={bookmarks}
+					// comments={comments}
 					postId={id}
 				/>
 			</div>

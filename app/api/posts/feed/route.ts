@@ -1,12 +1,14 @@
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
 export async function GET() {
 	const res = await fetch("https://dev.aeko.social/api/posts/feed", {
+		// move secret token to env var instead of hardcoding
 		headers: {
-			Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MWFiY2NkNWFmNTQyYzMyMzc1NmJjZCIsImlhdCI6MTc2MzM2MDg0OSwiZXhwIjoxNzYzOTY1NjQ5fQ.45aIEN7XkwcAJHC8bHCdc-xx6webMjgs-p71b8GsuHw`
+			Authorization: `Bearer ${process.env.BACKEND_TOKEN}`
 		}
 	});
 	const data = await res.json();
 
-	return Response.json({ data });
+	// return the same shape you want clients to consume
+	return Response.json({ posts: data }); // or: return Response.json(data);
 }
