@@ -29,6 +29,7 @@
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "tailwind-merge": "^3.4.0",
+    "zod": "^4.1.12",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
@@ -37,6 +38,7 @@
     "@types/node": "^20.19.24",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
+    "baseline-browser-mapping": "^2.8.32",
     "embla-carousel": "^8.6.0",
     "embla-carousel-autoplay": "^8.6.0",
     "embla-carousel-react": "^8.6.0",

@@ -78,7 +78,7 @@ export function ExploreTrendingPosts({
 							sizes="(min-width: 1280px) 30vw, (min-width: 768px) 45vw, 100vw"
 							className="object-cover transition duration-500 group-hover:scale-[1.03]"
 						/>
-						<div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/50 to-black/90" />
+						<div className="absolute inset-0 bg-linear-to-b from-black/10 via-black/50 to-black/90" />
 						<div className="absolute inset-0 flex flex-col justify-between p-5 text-white">
 							<div className="flex items-start justify-between gap-3">
 								<div className="flex items-center gap-3">

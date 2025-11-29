@@ -1,12 +1,13 @@
 export interface EmailVerification {
-	isVerified: boolean;
+  isVerified: boolean;
 }
 
 export interface ProfileCompletion {
-	completionPercentage: number;
-	hasProfilePicture: boolean;
-	hasBio: boolean;
-	hasFollowers: boolean;
-	hasWalletConnected: boolean;
-	hasVerifiedEmail: boolean;
+  completionPercentage: number;
+  hasProfilePicture: boolean;
+  hasBio: boolean;
+  hasFollowers: boolean;
+  hasWalletConnected: boolean;
+  completedAt: string | null;
+  hasVerifiedEmail: boolean;
 }

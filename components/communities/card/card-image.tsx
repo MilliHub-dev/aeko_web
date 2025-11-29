@@ -31,7 +31,7 @@ const CardImage = ({
 
       {/* Overlay Gradient */}
       <motion.div
-        className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20"
+        className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-black/20"
         animate={{ opacity: showOverlay ? 1 : 0 }}
         transition={{ duration: 0.3 }}
         onMouseOver={() => setShowOverlay?.(true)}

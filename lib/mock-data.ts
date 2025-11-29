@@ -1,28 +1,40 @@
 import { Story, UserStoryGroup } from "@/types/story";
-import { PostProps } from "../types/post";
+import { FeedPost } from "../types/post";
 
-export const posts: PostProps[] = [
+export const posts: FeedPost[] = [
 	{
-		id: "1",
+		_id: "1",
 		type: "image",
-		username: "Lisa Wong",
-		handle: "lisawongdesigns",
-		profileImage: "/users/lisa-wong.jpeg",
-		backgroundImage: "/posts/interior-design-4x5.jpg",
-		content:
-			"Just finished this minimalist living room project! Love how the natural light plays with the neutral tones. Swipe for before photos ➡️ #InteriorDesign",
-		likes: "4.2K",
-		shares: "892",
-		bookmarks: "345",
-		commentMetric: "167",
-		hashtags: [
-			"interiordesign",
-			"minimalism",
-			"homedecor",
-			"design",
-			"architecture"
-		],
-		timePosted: "3h",
+		user: {
+			_id: "user1",
+			name: "Lisa Wong",
+			username: "lisawongdesigns",
+			email: "lisa@example.com",
+			profilePicture: "/users/lisa-wong.jpeg"
+		},
+		media: "/posts/interior-design-4x5.jpg",
+		text: "Just finished this minimalist living room project! Love how the natural light plays with the neutral tones. Swipe for before photos ➡️ #InteriorDesign #minimalism #homedecor #design #architecture",
+		likesCount: 4200,
+		commentsCount: 167,
+		engagement: {
+			totalShares: 892,
+			totalComments: 167,
+			totalLikes: 4200,
+			engagementRate: 5.2
+		},
+		ad: {
+			isPromoted: false,
+			budget: 0,
+			target: "",
+			startDate: null,
+			endDate: null
+		},
+		privacy: {
+			level: "public",
+			selectedUsers: [],
+			updatedAt: new Date().toISOString(),
+			updateHistory: []
+		},
 		comments: [
 			{
 				id: "1",
@@ -55,30 +67,56 @@ export const posts: PostProps[] = [
 				timeAgo: "2h",
 				liked: true
 			}
-		]
+		],
+		likes: [],
+		reposts: [],
+		originalPost: null,
+		views: 15000,
+		uniqueViewers: [],
+		isEligibleForNFT: false,
+		nftMinted: false,
+		nftTokenId: null,
+		nftMetadataUri: null,
+		isListedForSale: false,
+		salePrice: 0,
+		transferHistory: [],
+		createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(), // 3h ago
+		updatedAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+		__v: 0
 	},
 	{
-		id: "2",
+		_id: "2",
 		type: "video",
-		username: "Mike Chen",
-		handle: "chefmikechen",
-		profileImage: "/users/mike-chen.jpg",
-		backgroundImage: "/posts/cooking-thumbnail.jpg",
-		videoSrc: "/posts/ramen-recipe.mp4",
-		content:
-			"The secret to perfect tonkotsu ramen! � Been perfecting this recipe for months. Full recipe in bio! #Cooking",
-		likes: "89.4K",
-		shares: "12.3K",
-		bookmarks: "15.2K",
-		commentMetric: "3.4K",
-		hashtags: [
-			"cooking",
-			"foodie",
-			"ramen",
-			"recipe",
-			"chefsofinstagram"
-		],
-		timePosted: "5h",
+		user: {
+			_id: "user2",
+			name: "Mike Chen",
+			username: "chefmikechen",
+			email: "mike@example.com",
+			profilePicture: "/users/mike-chen.jpg"
+		},
+		media: "/posts/ramen-recipe.mp4",
+		text: "The secret to perfect tonkotsu ramen! 🍜 Been perfecting this recipe for months. Full recipe in bio! #cooking #foodie #ramen #recipe #chefsofinstagram",
+		likesCount: 89400,
+		commentsCount: 3400,
+		engagement: {
+			totalShares: 12300,
+			totalComments: 3400,
+			totalLikes: 89400,
+			engagementRate: 8.5
+		},
+		ad: {
+			isPromoted: false,
+			budget: 0,
+			target: "",
+			startDate: null,
+			endDate: null
+		},
+		privacy: {
+			level: "public",
+			selectedUsers: [],
+			updatedAt: new Date().toISOString(),
+			updateHistory: []
+		},
 		comments: [
 			{
 				id: "1",
@@ -87,7 +125,7 @@ export const posts: PostProps[] = [
 					avatar: "/users/john-doe.jpg",
 					isOnline: true
 				},
-				text: "Nice job on the project! I love the natural light and the neutral tones. Do you have any tips for improving the lighting in the room?",
+				text: "This looks amazing! Can't wait to try it!",
 				timeAgo: "2m",
 				liked: true
 			},
@@ -97,7 +135,7 @@ export const posts: PostProps[] = [
 					name: "Jane Smith",
 					avatar: "/users/jane-smith.jpg"
 				},
-				text: "Great job on the project! I love the natural light and the neutral tones. Do you have any tips for improving the lighting in the room?",
+				text: "What's the cooking time for the broth?",
 				timeAgo: "1h",
 				liked: false
 			},
@@ -107,32 +145,59 @@ export const posts: PostProps[] = [
 					name: "Mike Johnson",
 					avatar: "/users/mike-johnson.jpg"
 				},
-				text: "Great job on the project! I love the natural light and the neutral tones. Do you have any tips for improving the lighting in the room?",
+				text: "Best ramen tutorial I've seen!",
 				timeAgo: "2h",
 				liked: true
 			}
-		]
+		],
+		likes: [],
+		reposts: [],
+		originalPost: null,
+		views: 250000,
+		uniqueViewers: [],
+		isEligibleForNFT: true,
+		nftMinted: false,
+		nftTokenId: null,
+		nftMetadataUri: null,
+		isListedForSale: false,
+		salePrice: 0,
+		transferHistory: [],
+		createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5h ago
+		updatedAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+		__v: 0
 	},
 	{
-		id: "3",
+		_id: "3",
 		type: "text",
-		username: "Sarah Johnson",
-		handle: "sarahcodes",
-		profileImage: "/users/sarah-johnson.jpeg",
-		content:
-			"🎉 Big news! After 6 months of hard work, we've just open-sourced our React state management library. Already 2.5k stars on GitHub in just 24 hours! Check it out: github.com/statex/react\n\nProud of what our small team has accomplished. Threading some key features below... 🧵",
-		likes: "3.1K",
-		shares: "945",
-		bookmarks: "721",
-		commentMetric: "234",
-		hashtags: [
-			"opensource",
-			"reactjs",
-			"javascript",
-			"webdev",
-			"programming"
-		],
-		timePosted: "1h",
+		user: {
+			_id: "user3",
+			name: "Sarah Johnson",
+			username: "sarahcodes",
+			email: "sarah@example.com",
+			profilePicture: "/users/sarah-johnson.jpeg"
+		},
+		text: "🎉 Big news! After 6 months of hard work, we've just open-sourced our React state management library. Already 2.5k stars on GitHub in just 24 hours! Check it out: github.com/statex/react\n\nProud of what our small team has accomplished. Threading some key features below... 🧵 #opensource #reactjs #javascript #webdev #programming",
+		likesCount: 3100,
+		commentsCount: 234,
+		engagement: {
+			totalShares: 945,
+			totalComments: 234,
+			totalLikes: 3100,
+			engagementRate: 4.2
+		},
+		ad: {
+			isPromoted: false,
+			budget: 0,
+			target: "",
+			startDate: null,
+			endDate: null
+		},
+		privacy: {
+			level: "public",
+			selectedUsers: [],
+			updatedAt: new Date().toISOString(),
+			updateHistory: []
+		},
 		comments: [
 			{
 				id: "1",
@@ -141,7 +206,7 @@ export const posts: PostProps[] = [
 					avatar: "/users/john-doe.jpg",
 					isOnline: true
 				},
-				text: "Nice job on the project! I love the natural light and the neutral tones. Do you have any tips for improving the lighting in the room?",
+				text: "Congratulations! Will definitely check it out!",
 				timeAgo: "2m",
 				liked: true
 			},
@@ -151,7 +216,7 @@ export const posts: PostProps[] = [
 					name: "Jane Smith",
 					avatar: "/users/jane-smith.jpg"
 				},
-				text: "Great job on the project! I love the natural light and the neutral tones. Do you have any tips for improving the lighting in the room?",
+				text: "This is exactly what I needed for my project!",
 				timeAgo: "1h",
 				liked: false
 			},
@@ -161,34 +226,60 @@ export const posts: PostProps[] = [
 					name: "Mike Johnson",
 					avatar: "/users/mike-johnson.jpg"
 				},
-				text: "Great job on the project! I love the natural light and the neutral tones. Do you have any tips for improving the lighting in the room?",
+				text: "Amazing work! How does it compare to Zustand?",
 				timeAgo: "2h",
 				liked: true
 			}
-		]
+		],
+		likes: [],
+		reposts: [],
+		originalPost: null,
+		views: 8500,
+		uniqueViewers: [],
+		isEligibleForNFT: false,
+		nftMinted: false,
+		nftTokenId: null,
+		nftMetadataUri: null,
+		isListedForSale: false,
+		salePrice: 0,
+		transferHistory: [],
+		createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(), // 1h ago
+		updatedAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+		__v: 0
 	},
 	{
-		id: "4",
+		_id: "4",
 		type: "image",
-		username: "Alex Rivera",
-		handle: "arivera.photo",
-		profileImage: "/users/alex-rivera.jpg",
-		backgroundImage:
-			"/posts/street-photography-4x5.jpg",
-		content:
-			"Rainy evening in Tokyo. The neon lights reflecting off the wet streets create such a cyberpunk atmosphere. Shot on Sony A7IV, 35mm f/1.4 📸",
-		likes: "12.5K",
-		shares: "2.8K",
-		bookmarks: "1.9K",
-		commentMetric: "428",
-		hashtags: [
-			"photography",
-			"tokyo",
-			"streetphotography",
-			"nightlife",
-			"urban"
-		],
-		timePosted: "8h",
+		user: {
+			_id: "user4",
+			name: "Alex Rivera",
+			username: "arivera.photo",
+			email: "alex@example.com",
+			profilePicture: "/users/alex-rivera.jpg"
+		},
+		media: "/posts/street-photography-4x5.jpg",
+		text: "Rainy evening in Tokyo. The neon lights reflecting off the wet streets create such a cyberpunk atmosphere. Shot on Sony A7IV, 35mm f/1.4 📸 #photography #tokyo #streetphotography #nightlife #urban",
+		likesCount: 12500,
+		commentsCount: 428,
+		engagement: {
+			totalShares: 2800,
+			totalComments: 428,
+			totalLikes: 12500,
+			engagementRate: 6.8
+		},
+		ad: {
+			isPromoted: false,
+			budget: 0,
+			target: "",
+			startDate: null,
+			endDate: null
+		},
+		privacy: {
+			level: "public",
+			selectedUsers: [],
+			updatedAt: new Date().toISOString(),
+			updateHistory: []
+		},
 		comments: [
 			{
 				id: "1",
@@ -197,7 +288,7 @@ export const posts: PostProps[] = [
 					avatar: "/users/john-doe.jpg",
 					isOnline: true
 				},
-				text: "Nice job on the project! I love the natural light and the neutral tones. Do you have any tips for improving the lighting in the room?",
+				text: "Stunning shot! The colors are incredible!",
 				timeAgo: "2m",
 				liked: true
 			},
@@ -207,7 +298,7 @@ export const posts: PostProps[] = [
 					name: "Jane Smith",
 					avatar: "/users/jane-smith.jpg"
 				},
-				text: "Great job on the project! I love the natural light and the neutral tones. Do you have any tips for improving the lighting in the room?",
+				text: "Tokyo at night is unmatched!",
 				timeAgo: "1h",
 				liked: false
 			},
@@ -217,32 +308,59 @@ export const posts: PostProps[] = [
 					name: "Mike Johnson",
 					avatar: "/users/mike-johnson.jpg"
 				},
-				text: "Great job on the project! I love the natural light and the neutral tones. Do you have any tips for improving the lighting in the room?",
+				text: "What settings did you use?",
 				timeAgo: "2h",
 				liked: true
 			}
-		]
+		],
+		likes: [],
+		reposts: [],
+		originalPost: null,
+		views: 45000,
+		uniqueViewers: [],
+		isEligibleForNFT: true,
+		nftMinted: false,
+		nftTokenId: null,
+		nftMetadataUri: null,
+		isListedForSale: false,
+		salePrice: 0,
+		transferHistory: [],
+		createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(), // 8h ago
+		updatedAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
+		__v: 0
 	},
 	{
-		id: "5",
+		_id: "5",
 		type: "text",
-		username: "Dr. Emily Carter",
-		handle: "dr_carter",
-		profileImage: "/users/emily-carter.jpg",
-		content:
-			"Just published our research on AI-assisted cancer detection in Nature Medicine! Our model achieved 94% accuracy, potentially reducing diagnostic time by 60%.\n\nThank you to my amazing team and all the healthcare workers who helped validate the results. 🧬🔬\n\nLink to paper: nature.com/articles/s41591...",
-		likes: "15.7K",
-		shares: "8.9K",
-		bookmarks: "6.2K",
-		commentMetric: "892",
-		hashtags: [
-			"science",
-			"AI",
-			"healthcare",
-			"research",
-			"medicine"
-		],
-		timePosted: "12h",
+		user: {
+			_id: "user5",
+			name: "Dr. Emily Carter",
+			username: "dr_carter",
+			email: "emily@example.com",
+			profilePicture: "/users/emily-carter.jpg"
+		},
+		text: "Just published our research on AI-assisted cancer detection in Nature Medicine! Our model achieved 94% accuracy, potentially reducing diagnostic time by 60%.\n\nThank you to my amazing team and all the healthcare workers who helped validate the results. 🧬🔬\n\nLink to paper: nature.com/articles/s41591... #science #AI #healthcare #research #medicine",
+		likesCount: 15700,
+		commentsCount: 892,
+		engagement: {
+			totalShares: 8900,
+			totalComments: 892,
+			totalLikes: 15700,
+			engagementRate: 12.5
+		},
+		ad: {
+			isPromoted: false,
+			budget: 0,
+			target: "",
+			startDate: null,
+			endDate: null
+		},
+		privacy: {
+			level: "public",
+			selectedUsers: [],
+			updatedAt: new Date().toISOString(),
+			updateHistory: []
+		},
 		comments: [
 			{
 				id: "1",
@@ -251,7 +369,7 @@ export const posts: PostProps[] = [
 					avatar: "/users/john-doe.jpg",
 					isOnline: true
 				},
-				text: "Nice job on the project! I love the natural light and the neutral tones. Do you have any tips for improving the lighting in the room?",
+				text: "This is groundbreaking! Congratulations!",
 				timeAgo: "2m",
 				liked: true
 			},
@@ -261,7 +379,7 @@ export const posts: PostProps[] = [
 					name: "Jane Smith",
 					avatar: "/users/jane-smith.jpg"
 				},
-				text: "Great job on the project! I love the natural light and the neutral tones. Do you have any tips for improving the lighting in the room?",
+				text: "Amazing work! This will save so many lives!",
 				timeAgo: "1h",
 				liked: false
 			},
@@ -271,11 +389,26 @@ export const posts: PostProps[] = [
 					name: "Mike Johnson",
 					avatar: "/users/mike-johnson.jpg"
 				},
-				text: "Great job on the project! I love the natural light and the neutral tones. Do you have any tips for improving the lighting in the room?",
+				text: "Can't wait to read the full paper!",
 				timeAgo: "2h",
 				liked: true
 			}
-		]
+		],
+		likes: [],
+		reposts: [],
+		originalPost: null,
+		views: 125000,
+		uniqueViewers: [],
+		isEligibleForNFT: false,
+		nftMinted: false,
+		nftTokenId: null,
+		nftMetadataUri: null,
+		isListedForSale: false,
+		salePrice: 0,
+		transferHistory: [],
+		createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(), // 12h ago
+		updatedAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+		__v: 0
 	}
 ];
 

@@ -1,54 +1,40 @@
 "use client";
 
-import { ArrowLeft, MoreVertical, Search } from "lucide-react";
-import { Button } from "../ui/button";
-import { useChat } from "@/contexts/ChatContext"; // 🔑 import context
+import { ArrowLeft, MoreHorizontal } from "lucide-react";
+import { useChat } from "@/contexts/ChatContext";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { useRouter } from "next/navigation";
 
 const ChatHeader = () => {
-  const { selectedChat, showChatList, setShowChatList } = useChat(); // 🔑 get active chat
+  const router = useRouter();
+  const { selectedChat } = useChat();
+
+  if (!selectedChat) return null;
 
   return (
-    <header className="sticky top-0 z-50 bg-transparent backdrop-blur-md py-3 space-y-8 border-b border-gray-200 -mx-4 px-4">
-      <div className="flex items-center justify-between">
-        {/* Left button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="rounded-full bg-secondary hover:bg-primary hover:text-secondary h-15 w-15 md:h-13 md:w-13 border"
-          onClick={() => setShowChatList?.(!showChatList)}
-        >
-          <ArrowLeft className="size-6" />
-        </Button>
-
-        {/* Center content */}
-        <div className="flex items-center">
-          <img
-            src={selectedChat?.avatar}
-            alt={selectedChat?.name}
-            className="w-10 h-10 rounded-full"
-          />
-          <span className="ml-2 font-bold text-xl">{selectedChat?.name}</span>
-        </div>
-
-        {/* Right icons */}
-        <div className="flex space-x-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full bg-secondary hover:bg-primary hover:text-secondary h-15 w-15 md:h-13 md:w-13 border"
-          >
-            <Search className="size-6" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full bg-secondary hover:bg-primary hover:text-secondary h-15 w-15 md:h-13 md:w-13 border"
-          >
-            <MoreVertical className="size-6" />
-          </Button>
-        </div>
+    <div className="border-b border-border p-4 flex items-center gap-3">
+      <button
+        onClick={() => router.back()}
+        className="p-2 hover:bg-secondary/80 rounded-full transition-colors"
+        aria-label="Back to chat list">
+        <ArrowLeft size={20} />
+      </button>
+      <Avatar className="h-10 w-10">
+        <AvatarImage src={selectedChat.avatar} alt={selectedChat.name} />
+        <AvatarFallback>{selectedChat.name[0]}</AvatarFallback>
+      </Avatar>
+      <div className="flex-1 min-w-0">
+        <h2 className="font-semibold text-foreground truncate">
+          {selectedChat.name}
+        </h2>
+        <p className="text-sm text-muted-foreground truncate">
+          @{selectedChat.username}
+        </p>
       </div>
-    </header>
+      <button className="p-2 hover:bg-secondary/80 rounded-full transition-colors">
+        <MoreHorizontal size={20} />
+      </button>
+    </div>
   );
 };
 

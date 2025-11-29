@@ -539,7 +539,7 @@ function FeaturedStoryCard({
 				sizes="(min-width: 1024px) 50vw, 100vw"
 				className="object-cover transition duration-500 group-hover:scale-[1.03]"
 			/>
-			<div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/55 to-black/90" />
+			<div className="absolute inset-0 bg-linear-to-b from-black/10 via-black/55 to-black/90" />
 			<div className="relative z-10 flex h-full flex-col justify-between p-6 text-white">
 				<div className="flex items-center gap-2 text-xs font-semibold uppercase">
 					{story.badge && (
@@ -583,7 +583,7 @@ function CreatorSpotlightCard({
 					sizes="(min-width: 1280px) 30vw, (min-width: 768px) 40vw, 100vw"
 					className="object-cover"
 				/>
-				<div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/70" />
+				<div className="absolute inset-0 bg-linear-to-b from-black/10 via-black/30 to-black/70" />
 				<div className="absolute inset-x-0 bottom-0 flex items-center justify-between px-5 py-4 text-white">
 					<span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
 						{creator.category}

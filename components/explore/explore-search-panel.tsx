@@ -113,7 +113,7 @@ export function ExploreSearchResults({
 								alt={post.title}
 								className="object-cover transition duration-300 group-hover:scale-[1.03]"
 							/>
-							<div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
+							<div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/40 to-transparent" />
 							<div className="absolute inset-0 flex flex-col justify-end p-3 text-left text-white">
 								<p className="text-sm font-semibold leading-tight">
 									{post.title}

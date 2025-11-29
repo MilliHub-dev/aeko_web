@@ -195,7 +195,7 @@ export function ExploreContent() {
 							className="border border-border dark:border-border/30 bg-background/95 backdrop-blur-md rounded-2xl overflow-hidden hover:shadow-md transition-shadow"
 						>
 							{/* Topic Image */}
-							<div className="relative aspect-[16/9] bg-gradient-to-br from-blue-gem-300 to-blue-gem-500 dark:from-green-yellow-300 dark:to-green-yellow-500">
+							<div className="relative aspect-[16/9] bg-linear-to-br from-blue-gem-300 to-blue-gem-500 dark:from-green-yellow-300 dark:to-green-yellow-500">
 								{/* Image would go here */}
 							</div>
 

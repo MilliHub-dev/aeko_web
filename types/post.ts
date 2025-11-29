@@ -84,6 +84,32 @@ export interface FeedPost
 	__v: number;
 }
 
+// Legacy type for mock data - will be replaced with FeedPost
+export interface PostProps {
+	id?: string;
+	_id?: string;
+	type: PostType;
+	username?: string;
+	handle?: string;
+	profileImage?: string;
+	backgroundImage?: string;
+	videoSrc?: string;
+	content?: string;
+	text?: string;
+	media?: string;
+	likes?: string | number;
+	likesCount?: number;
+	shares?: string;
+	bookmarks?: string;
+	commentMetric?: string;
+	commentsCount?: number;
+	hashtags?: string[];
+	taggedUsers?: string[];
+	timePosted?: string;
+	comments?: Comment[];
+	user?: Pick<User, "_id" | "name" | "username" | "email" | "profilePicture">;
+}
+
 const userPost: FeedPost = {
 	engagement: {
 		totalShares: 0,

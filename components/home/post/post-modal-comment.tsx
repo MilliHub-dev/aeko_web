@@ -162,7 +162,7 @@ export function CommentSection({
 								transition={{ duration: 0.2 }}
 								className="flex gap-2"
 							>
-								<Avatar className="w-8 h-8 flex-shrink-0">
+								<Avatar className="w-8 h-8 shrink-0">
 									<AvatarImage
 										src={comment.user.avatar}
 										alt={`${comment.user.name}'s avatar`}
@@ -182,7 +182,7 @@ export function CommentSection({
 											{comment.timeAgo}
 										</span>
 									</div>
-									<p className="text-sm break-words">
+									<p className="text-sm wrap-break-word">
 										{comment.text}
 									</p>
 									<div className="flex items-center gap-4 mt-1">

@@ -12,7 +12,7 @@ export function CommentsPanel() {
 	const { commentsPanel, closeCommentsPanel } = usePostUIStore();
 	const { isOpen, postId } = commentsPanel;
 	const posts = usePostsStore((state) => state.posts);
-	const post = posts.find((p) => p.id === postId);
+	const post = posts.find((p) => p._id === postId);
 	const focusTrapRef = useFocusTrap(isOpen);
 
 	// Lock body scroll when panel is open
@@ -75,13 +75,13 @@ export function CommentsPanel() {
 											id="comments-panel-description"
 											className="text-sm text-muted-foreground truncate"
 										>
-											@{post.handle}
+											@{post.user.username}
 										</p>
 									)}
 								</div>
 								<button
 									aria-label="Close comments panel"
-									className="rounded-full p-2 hover:bg-secondary ml-2 flex-shrink-0"
+									className="rounded-full p-2 hover:bg-secondary ml-2 shrink-0"
 									onClick={closeCommentsPanel}
 									type="button"
 								>

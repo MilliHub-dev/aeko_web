@@ -14,41 +14,41 @@ import { MobileMenuProvider } from "./mobile-menu-context";
 import { MobileMenuDrawer } from "./mobile-menu-drawer";
 
 interface BaseLayoutProps {
-	children: React.ReactNode;
+  children: React.ReactNode;
 }
 
 export function BaseLayout({ children }: BaseLayoutProps) {
-	const path = usePathname();
-	const { variant, showMobileHeader } = getLayoutConfig(path);
-	const isSimpleLayout = variant === "simple";
+  const path = usePathname();
+  const { variant, showMobileHeader } = getLayoutConfig(path);
+  const isSimpleLayout = variant === "simple";
 
-	// Grid column configurations for better maintainability
-	const gridColsClass = isSimpleLayout
-		? LAYOUT_CONSTANTS.GRID_COLS_SIMPLE
-		: LAYOUT_CONSTANTS.GRID_COLS_FULL;
+  // Grid column configurations for better maintainability
+  const gridColsClass = isSimpleLayout
+    ? LAYOUT_CONSTANTS.GRID_COLS_SIMPLE
+    : LAYOUT_CONSTANTS.GRID_COLS_FULL;
 
-	return (
-		<MobileMenuProvider>
-			<div className="relative w-full max-w-full bg-background">
-				{showMobileHeader && <MobileHeader />}
-				<div className={`xl:px-8 grid min-h-screen items-start ${gridColsClass}`}>
-					<MobileLeftSidebar />
-					<LeftSidebar />
-					{/* {!isSimpleLayout && <Stories />} */}
-					<main className="relative">{children}</main>
-					{!isSimpleLayout && <RightSidebar />}
-				</div>
-				{/* Comments drawer overlays the right sidebar on xl screens */}
-				{!isSimpleLayout && <CommentsPanel />}
-				{/* Mobile full-screen comments modal */}
-				<CommentsMobileModal />
-				{/* Mobile hamburger right sidebar */}
-				<div className="md:hidden">
-					<MobileMenuDrawer />
-				</div>
-				<MobileNavbar />
-			</div>
-		</MobileMenuProvider>
-	);
+  return (
+    <MobileMenuProvider>
+      <div className="relative w-full max-w-full bg-background">
+        {showMobileHeader && <MobileHeader />}
+        <div
+          className={`xl:px-0 grid min-h-screen items-start ${gridColsClass}`}>
+          <MobileLeftSidebar />
+          <LeftSidebar />
+          {/* {!isSimpleLayout && <Stories />} */}
+          <main className="relative">{children}</main>
+          {!isSimpleLayout && <RightSidebar />}
+        </div>
+        {/* Comments drawer overlays the right sidebar on xl screens */}
+        {!isSimpleLayout && <CommentsPanel />}
+        {/* Mobile full-screen comments modal */}
+        <CommentsMobileModal />
+        {/* Mobile hamburger right sidebar */}
+        <div className="md:hidden">
+          <MobileMenuDrawer />
+        </div>
+        <MobileNavbar />
+      </div>
+    </MobileMenuProvider>
+  );
 }
-

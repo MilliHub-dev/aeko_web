@@ -97,7 +97,7 @@ const PostVideoPlayer = ({
 
 			{/* Overlay gradient */}
 			<motion.div
-				className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40"
+				className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-black/40"
 				animate={{ opacity: showOverlay && !isPlaying ? 1 : 0 }}
 				transition={{ duration: 0.3 }}
 			/>

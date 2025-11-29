@@ -10,7 +10,7 @@ export const LAYOUT_CONSTANTS = {
   // Grid column configurations
   GRID_COLS_SIMPLE: "md:grid-cols-[5.625rem_1fr] xl:grid-cols-[24rem_1fr]",
   GRID_COLS_FULL:
-    "md:grid-cols-[5.625rem_1fr] xl:grid-cols-[24rem_minmax(0,1fr)_28rem]",
+    "md:grid-cols-[5.625rem_1fr] xl:grid-cols-[24rem_minmax(0,1fr)_24rem]",
 
   // Standard padding
   PADDING_X: "px-6 sm:px-8 lg:px-12",
@@ -19,36 +19,38 @@ export const LAYOUT_CONSTANTS = {
 
 // Centralized layout decisions based on pathname
 export function getLayoutConfig(path: string): {
-	variant: LayoutVariant;
-	isUserPostsRoute: boolean;
-	isLandingPage: boolean;
-	showMobileHeader: boolean;
-	showMobileNavbar: boolean;
+  variant: LayoutVariant;
+  isUserPostsRoute: boolean;
+  isLandingPage: boolean;
+  showMobileHeader: boolean;
+  showMobileNavbar: boolean;
 } {
-	// Matches /{handle}/posts/{id} OR /home/{handle}/posts/{id}
-	const isUserPostsRoute =
-		/^\/[^/]+\/posts\/[^/]+$/.test(path) || /^\/home\/[^/]+\/posts\/[^/]+$/.test(path);
+  // Matches /{handle}/posts/{id} OR /home/{handle}/posts/{id}
+  const isUserPostsRoute =
+    /^\/[^/]+\/posts\/[^/]+$/.test(path) ||
+    /^\/home\/[^/]+\/posts\/[^/]+$/.test(path);
 
-	const isSimpleRoute =
-		/^\/(explore|communities|wallet|nft-marketplace|messages|notifications|settings)(\/|$)/.test(
-			path
-		) || /^\/live-streams(\/|$)/.test(path);
+  const isSimpleRoute =
+    /^\/(explore|communities|wallet|nft-marketplace|messages|notifications|settings)(\/|$)/.test(
+      path
+    ) || /^\/live-streams(\/|$)/.test(path);
 
-	const isLandingPage = /^\/$|^\/.+\/?$/.test(path);
+  const isLandingPage = /^\/$|^\/.+\/?$/.test(path);
 
-	const variant: LayoutVariant = isSimpleRoute ? "simple" : "full";
+  const variant: LayoutVariant = isSimpleRoute ? "simple" : "full";
 
-	// Keep behavior consistent with existing components:
-	// - MobileHeader is not shown on /messages (component further hides on user-posts)
-	// - MobileNavbar hides on user-posts route
-	const showMobileHeader = path !== "/messages" && !isUserPostsRoute;
-	const showMobileNavbar = !isUserPostsRoute;
+  // Keep behavior consistent with existing components:
+  // - MobileHeader is not shown on /messages (component further hides on user-posts)
+  // - MobileNavbar hides on user-posts route
+  const showMobileHeader =
+    path !== "/messages" && !isUserPostsRoute && path !== "/wallet";
+  const showMobileNavbar = !isUserPostsRoute;
 
-	return {
-		variant,
-		isUserPostsRoute,
-		isLandingPage,
-		showMobileHeader,
-		showMobileNavbar
-	};
+  return {
+    variant,
+    isUserPostsRoute,
+    isLandingPage,
+    showMobileHeader,
+    showMobileNavbar,
+  };
 }

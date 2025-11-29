@@ -11,9 +11,10 @@ import { Comment } from "@/types/comment";
 
 interface PostActionsProps {
 	likes: number;
-	shares: string;
-	bookmarks: string;
-	// comments: Comment[];
+	shares: number;
+	bookmarks: number;
+	comments: number;
+	reposts: number;
 	postId: string;
 }
 
@@ -21,7 +22,8 @@ const PostActions = ({
 	likes,
 	shares,
 	bookmarks,
-	// comments,
+	comments,
+	reposts,
 	postId
 }: Partial<PostActionsProps>) => {
 	const { openCommentsPanel } = usePostUIStore();
@@ -38,10 +40,10 @@ const PostActions = ({
 
 	// Get current post from store if available, otherwise use props
 	const storePost = posts.find((p) => p._id === postId);
-	const currentLikes = storePost?.likesCount || likes;
-	// const currentShares = storePost?.shares || shares;
-	// const currentBookmarks = storePost?.bookmarks || bookmarks;
-	const currentComments = storePost?.commentsCount || 0;
+	const currentLikes = storePost?.likesCount ?? likes ?? 0;
+	const currentShares = storePost?.engagement?.totalShares ?? shares ?? 0;
+	const currentComments = storePost?.commentsCount ?? comments ?? 0;
+	const currentReposts = storePost?.reposts?.length ?? reposts ?? 0;
 
 	return (
 		<div className="hidden lg:flex lg:items-center lg:justify-between">
@@ -54,14 +56,14 @@ const PostActions = ({
 				/>
 				<Metric
 					icon={<Share2 className="w-8 h-8" />}
-					value={20}
-					// onClick={() => incrementShare(postId)}
+					value={currentShares}
+					onClick={() => incrementShare && incrementShare(postId!)}
 					className="cursor-pointer hover:opacity-80 transition-opacity"
 				/>
 				<Metric
 					icon={<Bookmark className={`w-8 h-8 ${isBookmarked ? "fill-current" : ""}`} />}
-					value={25}
-					// onClick={() => toggleBookmark(postId)}
+					value={""}
+					onClick={() => toggleBookmark && toggleBookmark(postId!)}
 					className="cursor-pointer hover:opacity-80 transition-opacity"
 				/>
 				<Metric
@@ -72,7 +74,7 @@ const PostActions = ({
 				/>
 				<Metric
 					icon={<ReAeko strokeWidth={4} />}
-					value={120}
+					value={currentReposts}
 					className="cursor-pointer hover:opacity-80 transition-opacity"
 				/>
 			</div>

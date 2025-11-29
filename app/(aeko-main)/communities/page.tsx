@@ -421,7 +421,7 @@ function CommunityCard({
 					sizes="(max-width: 768px) 100vw, 50vw"
 					className="object-cover"
 				/>
-				<div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
+				<div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/30 to-black/10" />
 				<div className="absolute inset-x-4 top-4 flex items-center justify-between">
 					<Badge className="rounded-full bg-primary/80 px-3 py-1 text-xs font-semibold text-primary-foreground">
 						{community.category}
@@ -470,7 +470,7 @@ function ExploreCommunityCard({
 					sizes="(max-width: 768px) 100vw, 50vw"
 					className="object-cover"
 				/>
-				<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
+				<div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-black/10" />
 				<div className="absolute inset-x-4 top-4 flex items-center justify-between text-xs font-semibold text-white">
 					<Badge className="rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white">
 						{community.category}
@@ -521,7 +521,7 @@ function TrendingPostCard({
 					sizes="(max-width: 768px) 100vw, 50vw"
 					className="object-cover"
 				/>
-				<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+				<div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent" />
 				<div className="absolute inset-x-4 top-4 flex items-center justify-between text-white">
 					<div className="flex items-center gap-2 rounded-full bg-black/50 px-4 py-2">
 						<Avatar className="h-8 w-8 border-2 border-white/80">

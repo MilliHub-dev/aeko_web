@@ -1,49 +1,59 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback } from "react";
 
 export function useOverlayActions() {
-	const containerRef = useRef<HTMLDivElement>(null);
-	const [showOverlay, setShowOverlay] = useState(true);
-	const holdTimer = useRef<NodeJS.Timeout | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [showOverlay, setShowOverlay] = useState(true);
+  const holdTimer = useRef<NodeJS.Timeout | null>(null);
 
-	// 🖱️ Desktop
-	const handleMouseMove = (
-		e: React.MouseEvent<HTMLDivElement>
-	) => {
-		const rect =
-			containerRef.current?.getBoundingClientRect();
-		if (!rect) return;
-		const mouseY = e.clientY - rect.top;
-		setShowOverlay(
-			mouseY < rect.height * 0.2 ||
-				mouseY > rect.height * 0.7
-		);
-	};
+  // Cleanup helper
+  const clearHoldTimer = useCallback(() => {
+    if (holdTimer.current) {
+      clearTimeout(holdTimer.current);
+      holdTimer.current = null;
+    }
+  }, []);
 
-	const handleMouseLeave = () => {
-		setShowOverlay(true);
-	};
+  // 🖱️ Desktop
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const mouseY = e.clientY - rect.top;
+    setShowOverlay(mouseY < rect.height * 0.2 || mouseY > rect.height * 0.7);
+  }, []);
 
-	// 📱 Mobile tap & hold → simpler: anywhere triggers overlay
-	const handleTouchStart = () => {
-		holdTimer.current = setTimeout(() => {
-			setShowOverlay(false); // always show overlay on hold
-		}, 150); // slight delay for "press & hold" feel
-	};
+  const handleMouseLeave = useCallback(() => {
+    setShowOverlay(true);
+  }, []);
 
-	const handleTouchEnd = () => {
-		if (holdTimer.current) {
-			clearTimeout(holdTimer.current);
-			holdTimer.current = null;
-		}
-		setShowOverlay(true); // hide overlay when released
-	};
+  // 📱 Mobile tap & hold
+  const handleTouchStart = useCallback(() => {
+    // Clear any existing timer first
+    clearHoldTimer();
 
-	return {
-		containerRef,
-		showOverlay,
-		handleMouseMove,
-		handleMouseLeave,
-		handleTouchStart,
-		handleTouchEnd
-	};
+    // Start new timer to hide overlay after hold
+    holdTimer.current = setTimeout(() => {
+      setShowOverlay(false);
+      holdTimer.current = null; // Clear ref after timeout fires
+    }, 150);
+  }, [clearHoldTimer]);
+
+  const handleTouchEnd = useCallback(() => {
+    clearHoldTimer();
+    setShowOverlay(true); // Show overlay when released
+  }, [clearHoldTimer]);
+
+  const handleTouchCancel = useCallback(() => {
+    clearHoldTimer();
+    setShowOverlay(true); // Show overlay when touch is cancelled
+  }, [clearHoldTimer]);
+
+  return {
+    containerRef,
+    showOverlay,
+    handleMouseMove,
+    handleMouseLeave,
+    handleTouchStart,
+    handleTouchEnd,
+    handleTouchCancel,
+  };
 }

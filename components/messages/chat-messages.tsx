@@ -1,201 +1,102 @@
 "use client";
 
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
-import { ScrollArea } from "@base-ui-components/react/scroll-area";
+import { Send, Image, Smile } from "lucide-react";
 import { useChat } from "@/contexts/ChatContext";
 import { useState } from "react";
 import { ChatHeader } from "./chat-header";
+import { getMockMessages, type Message } from "@/lib/mock-chats";
 
-const ChatMessages = () => {
-  const { showChatList } = useChat();
+interface MessageBubbleProps {
+  message: Message;
+}
+
+const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => (
+  <div className={`flex ${message.sent ? "justify-end" : "justify-start"}`}>
+    <div
+      className={`max-w-xs lg:max-w-md ${
+        message.sent ? "order-2" : "order-1"
+      }`}>
+      <div
+        className={`rounded-2xl px-4 py-2 ${
+          message.sent
+            ? "bg-primary text-primary-foreground rounded-br-sm"
+            : "bg-secondary text-foreground rounded-bl-sm"
+        }`}>
+        <p>{message.text}</p>
+      </div>
+      <p className="text-xs text-muted-foreground mt-1 px-2">{message.time}</p>
+    </div>
+  </div>
+);
+
+interface MessageListProps {
+  messages: Message[];
+}
+
+const MessageList: React.FC<MessageListProps> = ({ messages }) => (
+  <div className="flex-1 overflow-y-auto p-4 space-y-4">
+    {messages.map((msg) => (
+      <MessageBubble key={msg.id} message={msg} />
+    ))}
+  </div>
+);
+
+const MessageInput: React.FC = () => {
   const [message, setMessage] = useState("");
 
-  const mockMessages = [
-    {
-      id: 1,
-      sender: "John Doe",
-      content: "Hey, how are you?",
-      timestamp: "10:30 AM",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    {
-      id: 2,
-      sender: "Me",
-      content: "I'm good, thanks! How about you?",
-      timestamp: "10:32 AM",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    {
-      id: 3,
-      sender: "John Doe",
-      content: "I'm doing well, thanks! What about you?",
-      timestamp: "10:33 AM",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    {
-      id: 4,
-      sender: "Me",
-      content: "I'm doing well, thanks! What about you?",
-      timestamp: "10:34 AM",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    {
-      id: 5,
-      sender: "John Doe",
-      content: "I'm doing well, thanks! What about you?",
-      timestamp: "10:35 AM",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    {
-      id: 6,
-      sender: "Me",
-      content: "I'm doing well, thanks! What about you?",
-      timestamp: "10:36 AM",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    {
-      id: 7,
-      sender: "John Doe",
-      content: "I'm doing well, thanks! What about you?",
-      timestamp: "10:37 AM",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    {
-      id: 8,
-      sender: "Me",
-      content: "I'm doing well, thanks! What about you?",
-      timestamp: "10:38 AM",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    {
-      id: 9,
-      sender: "John Doe",
-      content: "I'm doing well, thanks! What about you?",
-      timestamp: "10:39 AM",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    {
-      id: 10,
-      sender: "Me",
-      content: "I'm doing well, thanks! What about you?",
-      timestamp: "10:40 AM",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    {
-      id: 11,
-      sender: "John Doe",
-      content: "I'm doing well, thanks! What about you?",
-      timestamp: "10:41 AM",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    {
-      id: 12,
-      sender: "Me",
-      content: "I'm doing well, thanks! What about you?",
-      timestamp: "10:42 AM",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    {
-      id: 13,
-      sender: "John Doe",
-      content: "I'm doing well, thanks! What about you?",
-      timestamp: "10:43 AM",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    {
-      id: 14,
-      sender: "Me",
-      content: "I'm doing well, thanks! What about you?",
-      timestamp: "10:44 AM",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    {
-      id: 15,
-      sender: "John Doe",
-      content: "I'm doing well, thanks! What about you?",
-      timestamp: "10:45 AM",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    {
-      id: 16,
-      sender: "Me",
-      content: "I'm doing well, thanks! What about you?",
-      timestamp: "10:46 AM",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-  ];
+  return (
+    <div className="border-t border-border p-4">
+      <div className="flex items-center gap-2 bg-secondary rounded-full px-4 py-2">
+        <button className="p-1 hover:bg-secondary/80 rounded-full transition-colors">
+          <Image size={20} className="text-primary" />
+        </button>
+        <button className="p-1 hover:bg-secondary/80 rounded-full transition-colors">
+          <Smile size={20} className="text-primary" />
+        </button>
+        <input
+          type="text"
+          placeholder="Start a new message"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          className="flex-1 bg-transparent focus:outline-none px-2 text-foreground placeholder:text-muted-foreground"
+        />
+        <button className="p-1 hover:bg-secondary/80 rounded-full transition-colors">
+          <Send size={20} className="text-primary" />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const EmptyState: React.FC = () => (
+  <div className="hidden lg:flex flex-col items-center justify-center h-full bg-background">
+    <div className="text-6xl mb-4">💬</div>
+    <h2 className="text-2xl font-bold text-foreground mb-2">
+      Select a message
+    </h2>
+    <p className="text-muted-foreground">
+      Choose from your existing conversations or start a new one
+    </p>
+  </div>
+);
+
+const ChatMessages = () => {
+  const { selectedChat, showChatList } = useChat();
+
+  if (!selectedChat) {
+    return <EmptyState />;
+  }
+
+  const messages = getMockMessages(selectedChat.id);
 
   return (
     <div
-      className={`
-        ${showChatList ? "hidden" : "flex"} 
-        flex 
-        flex-1 flex-col 
-        bg-white
-        relative
-        px-4
-        h-[calc(100vh-6rem)]
-        md:h-screen
-      `}
-    >
+      className={`${
+        showChatList ? "hidden" : "flex"
+      } lg:flex flex-col h-full bg-background`}>
       <ChatHeader />
-      {/* Messages List */}
-      <ScrollArea.Root className="">
-        <ScrollArea.Viewport className="h-[calc(100vh-14rem)] md:h-[calc(100vh-6rem)]">
-          <div className="space-y-4 md:space-y-6 py-3">
-            {mockMessages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex items-start gap-2 md:gap-3 ${
-                  msg.sender === "Me" ? "flex-row-reverse" : ""
-                }`}
-              >
-                <div
-                  className={`flex flex-col max-w-[75%] md:max-w-[60%] ${
-                    msg.sender === "Me" ? "items-end" : ""
-                  }`}
-                >
-                  <div
-                    className={`px-3 py-2 md:px-4 md:py-3 ${
-                      msg.sender === "Me"
-                        ? "bg-primary text-secondary rounded-l-2xl rounded-tr-2xl"
-                        : "bg-muted rounded-r-2xl rounded-tl-2xl"
-                    }`}
-                  >
-                    <p className="text-lg md:text-base">{msg.content}</p>
-                  </div>
-                  <span className="text-sm text-muted-foreground mt-1">
-                    {msg.timestamp}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </ScrollArea.Viewport>
-      </ScrollArea.Root>
-
-      {/* Chat Input */}
-      <div className="absolute bottom-0 left-0 right-0 border-t bg-white py-4 px-6 md:p-4 md:mx-0">
-        <form
-          className="flex gap-2 md:gap-3"
-          onSubmit={(e) => e.preventDefault()}
-        >
-          <Input
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Type your message..."
-            className="flex-1 h-15 text-xl md:text-base rounded-full px-4"
-          />
-          <Button
-            type="submit"
-            size="sm"
-            className="px-4 md:px-6 h-15 text-secondary"
-          >
-            Send
-          </Button>
-        </form>
-      </div>
+      <MessageList messages={messages} />
+      <MessageInput />
     </div>
   );
 };

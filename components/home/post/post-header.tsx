@@ -27,6 +27,13 @@ interface PostHeaderProps {
 	username?: string;
 	handle?: string;
 	profileImage?: string;
+	user?: {
+		_id?: string;
+		name?: string;
+		username?: string;
+		email?: string;
+		profilePicture?: string;
+	};
 	className?: string;
 	isHovered?: boolean;
 	isMuted?: boolean;
@@ -38,11 +45,17 @@ const PostHeader = ({
 	username,
 	handle,
 	profileImage,
+	user,
 	className,
 	isHovered = false,
 	isMuted = false,
 	toggleMute
 }: PostHeaderProps) => {
+	// Extract user info from either flat props or nested user object
+	const displayName = user?.name || username || "Unknown User";
+	const displayHandle = user?.username || handle || "";
+	const displayProfileImage = user?.profilePicture || profileImage || "";
+
 	// shared style sets
 	const isText = type === "text";
 	const glassStyles =
@@ -77,7 +90,7 @@ const PostHeader = ({
 				)}
 			>
 				<Avatar className="h-10 w-10 aspect-square outline-2 outline-offset-2 outline-normal-active">
-					<AvatarImage src={profileImage} />
+					<AvatarImage src={displayProfileImage} />
 					<AvatarFallback>You</AvatarFallback>
 				</Avatar>
 				<div
@@ -87,10 +100,10 @@ const PostHeader = ({
 					)}
 				>
 					<span className="font-semibold text-lg">
-						{username}
+						{displayName}
 					</span>
 					<span className="text-sm">
-						{handle}
+						{displayHandle}
 					</span>
 				</div>
 			</div>

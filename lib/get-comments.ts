@@ -5,8 +5,8 @@ export const getPostComments = (
 	postId: string
 ): Comment[] => {
 	const postComments = posts.find(
-		(post) => post.id === postId
+		(post) => post._id === postId
 	)?.comments as Comment[];
 
-	return postComments;
+	return postComments || [];
 };
