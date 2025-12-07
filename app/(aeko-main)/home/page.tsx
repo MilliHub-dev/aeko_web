@@ -11,8 +11,6 @@ export default function Home() {
   const [activeIndex, setActiveIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // console.log(posts[7]);
-
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;

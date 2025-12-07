@@ -30,7 +30,7 @@ const MobileNavbar = () => {
               key={item.id}
               href={item.path}
               className={`flex flex-col items-center justify-center p-3 rounded-full hover:bg-accent text-gray-100/60 hover:text-primary transition-colors ${
-                item.label === routeName ? "bg-white !text-primary" : "bg-none"
+                item.label === routeName ? "bg-white text-primary!" : "bg-none"
               }`}>
               <IconComponent strokeWidth={1.5} size={24} />
             </Link>

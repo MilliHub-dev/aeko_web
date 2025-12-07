@@ -17,7 +17,7 @@ interface PostDetailHeaderProps {
 
 export function PostDetailHeader({ onBack }: PostDetailHeaderProps) {
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+    <div className="sticky top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
       <div className="flex items-center justify-between px-4 h-16">
         {/* Back Button */}
         <Link

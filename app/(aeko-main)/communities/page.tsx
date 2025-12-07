@@ -1,609 +1,401 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import type { FocusEvent } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import {
-	Avatar,
-	AvatarFallback,
-	AvatarImage
-} from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { Grid3x3, ChevronRight, Loader2, Plus } from "lucide-react";
+import { ExploreSearchBar } from "@/components/explore/explore-search-bar";
+import { SearchResultsDropdown } from "@/components/explore/search-results-dropdown";
+import { CommunityCard } from "@/components/communities/community-card";
+import { CreateCommunityDialog } from "@/components/communities/create-community-dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import {
-	Search,
-	UserPlus,
-	LayoutGrid,
-	Share2,
-	ChevronRight,
-	Heart,
-	MessageCircle,
-	Bookmark
-} from "lucide-react";
+import type { ExploreCommunity, CommunitiesApiResponse } from "@/types/explore";
 
-interface CommunitySummary {
-	slug: string;
-	name: string;
-	category: string;
-	description: string;
-	members: string;
-	cover: string;
-	isFollowing: boolean;
-}
-
-interface ExploreCommunity extends CommunitySummary {
-	growth: string;
-}
-
-interface TrendingPost {
-	id: string;
-	community: string;
-	user: string;
-	handle: string;
-	avatar: string;
-	image: string;
-	likes: string;
-	comments: string;
-	shares: string;
-}
-
-const myCommunities: CommunitySummary[] = [
-	{
-		slug: "christian-prayer",
-		name: "Christian Prayer & Fasting",
-		category: "Faith",
-		description:
-			"If one could have faith as small as a mustard seed, we can tell a mountain to move.",
-		members: "+ 11k others",
-		cover: "/communities/faith.jpg",
-		isFollowing: true
-	},
-	{
-		slug: "piano-life",
-		name: "Piano",
-		category: "Music",
-		description: "Piano is life.",
-		members: "+ 30k others",
-		cover: "/communities/piano.jpg",
-		isFollowing: true
-	},
-	{
-		slug: "creative-arts",
-		name: "Creative Arts Studio",
-		category: "Creative",
-		description:
-			"Daily sketch sprints, live critiques, and supply swaps.",
-		members: "+ 8k others",
-		cover: "/communities/creative.jpg",
-		isFollowing: true
-	}
-];
-
-const exploreCommunities: ExploreCommunity[] = [
-	{
-		slug: "sports-hub",
-		name: "Sports Hub",
-		category: "Sports",
-		description:
-			"Skating is not just a sport, it's a lifestyle.",
-		members: "+ 11k others",
-		cover: "/communities/sports.jpg",
-		growth: "+6.2% weekly",
-		isFollowing: false
-	},
-	{
-		slug: "music-makers",
-		name: "Music Makers",
-		category: "Music",
-		description:
-			"Studio workflows, mixes, and collaborative jams.",
-		members: "+ 9k others",
-		cover: "/communities/music.jpg",
-		growth: "+4.4% weekly",
-		isFollowing: false
-	},
-	{
-		slug: "dao-builders",
-		name: "DAO Builders Circle",
-		category: "DeFi",
-		description:
-			"Operational excellence for tokenised communities.",
-		members: "+ 12k others",
-		cover: "/communities/dao-builders.jpg",
-		growth: "+5.1% weekly",
-		isFollowing: false
-	}
-];
-
-const trendingPosts: TrendingPost[] = [
-	{
-		id: "post-1",
-		community: "Christian Prayer & Fasting",
-		user: "Joshua Martins",
-		handle: "@dJoshmart",
-		avatar: "/users/alex-rivera.jpg",
-		image: "/posts/prayer-cap.jpg",
-		likes: "120K",
-		comments: "200",
-		shares: "25"
-	},
-	{
-		id: "post-2",
-		community: "Sports Hub",
-		user: "Debby",
-		handle: "@finegirllikedebs",
-		avatar: "/users/emily-carter.jpg",
-		image: "/posts/tennis-action.jpg",
-		likes: "18.4K",
-		comments: "340",
-		shares: "56"
-	}
-];
-
-const exploreFilters = [
-	"For You",
-	"DeFi",
-	"NFTs",
-	"Trading",
-	"Technology"
-];
+const exploreFilters = ["For You", "DeFi", "NFTs", "Trading", "Technology"];
 
 export default function CommunitiesPage() {
-	const [searchOpen, setSearchOpen] = useState(false);
-	const [searchQuery, setSearchQuery] = useState("");
-	const [primaryTab, setPrimaryTab] = useState<
-		"my" | "explore"
-	>("my");
-	const [exploreFilter, setExploreFilter] =
-		useState<string>(exploreFilters[0]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [primaryTab, setPrimaryTab] = useState<"my" | "explore">("my");
+  const [exploreFilter, setExploreFilter] = useState(exploreFilters[0]);
 
-	const filteredExploreCommunities = useMemo(() => {
-		if (exploreFilter === "For You")
-			return exploreCommunities;
-		return exploreCommunities.filter(
-			(community) =>
-				community.category === exploreFilter
-		);
-	}, [exploreFilter]);
+  // Search results state
+  const [searchCommunities, setSearchCommunities] = useState<
+    ExploreCommunity[]
+  >([]);
+  const [isSearching, setIsSearching] = useState(false);
 
-	return (
-		<div className="relative min-h-screen overflow-hidden bg-background">
-			<div
-				className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_10%,hsla(var(--primary),0.18),transparent_60%),radial-gradient(circle_at_90%_0%,hsla(var(--muted-foreground),0.12),transparent_55%),linear-gradient(180deg,rgba(6,12,24,0.85),rgba(6,12,24,0.95))]"
-				aria-hidden="true"
-			/>
-			<div className="relative z-10 mx-auto w-full px-4 pb-24 pt-8 sm:px-6 lg:px-8">
-				<header className="flex items-center justify-between gap-3 px-4 py-3">
-					<div className="flex items-center gap-4">
-						<h1 className="text-3xl font-semibold tracking-tight text-foreground">
-							Communities
-						</h1>
-					</div>
-					<div className="flex items-center gap-2">
-						<button
-							className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary"
-							onClick={() =>
-								setSearchOpen(
-									(prev) => !prev
-								)
-							}
-							aria-label="Search communities"
-						>
-							<Search className="h-5 w-5" />
-						</button>
-					</div>
-				</header>
+  // API state
+  const [communities, setCommunities] = useState<ExploreCommunity[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-				{searchOpen && (
-					<div className="mt-4 rounded-[24px] border border-border/50 bg-card/90 p-4 shadow-lg backdrop-blur">
-						<div className="flex items-center gap-3 rounded-full border border-border/60 bg-background/80 px-4 py-2">
-							<Search className="h-4 w-4 text-muted-foreground" />
-							<Input
-								autoFocus
-								value={searchQuery}
-								onChange={(event) =>
-									setSearchQuery(
-										event.target.value
-									)
-								}
-								placeholder="Search communities, hosts, topics"
-								className="flex-1 border-0 bg-transparent p-0 text-sm focus-visible:ring-0"
-							/>
-							<button
-								className="text-xs font-semibold text-primary"
-								onClick={() =>
-									setSearchQuery("")
-								}
-							>
-								Clear
-							</button>
-						</div>
-						{searchQuery ? (
-							<p className="mt-3 text-xs text-muted-foreground">
-								Showing quick matches for
-								&quot;{searchQuery}&quot;
-							</p>
-						) : (
-							<p className="mt-3 text-xs text-muted-foreground">
-								Type to see recent searches
-								and suggested hosts.
-							</p>
-						)}
-					</div>
-				)}
+  // Debounced search function
+  const searchCommunitiesFunc = useCallback(async (query: string) => {
+    if (!query.trim()) {
+      setSearchCommunities([]);
+      return;
+    }
 
-				<div className="mt-6 flex mx-auto w-full max-w-4xl items-center rounded-full border border-border/60 bg-card/80 p-1 text-sm font-semibold text-muted-foreground">
-					{(["my", "explore"] as const).map(
-						(tab) => (
-							<button
-								key={tab}
-								onClick={() =>
-									setPrimaryTab(tab)
-								}
-								className={cn(
-									"flex-1 rounded-full px-4 py-2 transition",
-									primaryTab === tab
-										? "bg-primary text-primary-foreground shadow-sm"
-										: "text-muted-foreground hover:text-primary"
-								)}
-							>
-								{tab === "my"
-									? "My Communities"
-									: "Explore"}
-							</button>
-						)
-					)}
-				</div>
+    setIsSearching(true);
+    try {
+      const response = await fetch(
+        `/api/communities?q=${encodeURIComponent(query)}`
+      );
+      const communitiesData: CommunitiesApiResponse = await response.json();
 
-				<div className="mt-8 grid gap-12 lg:grid-cols-[minmax(0,1fr)_320px]">
-					<main className="space-y-12">
-						{primaryTab === "my" ? (
-							<section className="space-y-6">
-								<div className="flex items-center justify-between">
-									<div>
-										<h2 className="text-lg font-semibold text-foreground">
-											Communities you
-											follow
-										</h2>
-										<p className="text-sm text-muted-foreground">
-											Manage the
-											circles you
-											contribute to
-											regularly.
-										</p>
-									</div>
-									<Link
-										href="/communities/following"
-										className="text-sm font-semibold text-primary"
-									>
-										See all
-									</Link>
-								</div>
-								<div className="grid gap-4 md:grid-cols-2">
-									{myCommunities.map(
-										(community) => (
-											<CommunityCard
-												key={
-													community.slug
-												}
-												community={
-													community
-												}
-											/>
-										)
-									)}
-								</div>
-							</section>
-						) : (
-							<section className="space-y-6">
-								<div className="flex flex-wrap items-center justify-between gap-3">
-									<div>
-										<h2 className="text-lg font-semibold text-foreground">
-											Featured
-											communities
-										</h2>
-										<p className="text-sm text-muted-foreground">
-											Tailored picks
-											based on what
-											you engage with.
-										</p>
-									</div>
-									<div className="flex items-center gap-2">
-										{exploreFilters.map(
-											(filter) => (
-												<button
-													key={
-														filter
-													}
-													onClick={() =>
-														setExploreFilter(
-															filter
-														)
-													}
-													className={cn(
-														"rounded-full px-3 py-1 text-xs font-semibold transition",
-														exploreFilter ===
-															filter
-															? "bg-primary text-primary-foreground"
-															: "border border-border/50 bg-background/80 text-muted-foreground hover:border-primary/30 hover:text-primary"
-													)}
-												>
-													{filter}
-												</button>
-											)
-										)}
-									</div>
-								</div>
-								<div className="grid gap-4 md:grid-cols-2">
-									{filteredExploreCommunities.map(
-										(community) => (
-											<ExploreCommunityCard
-												key={
-													community.slug
-												}
-												community={
-													community
-												}
-											/>
-										)
-									)}
-								</div>
-							</section>
-						)}
+      // Handle communities - API returns { success: true, data: [...] }
+      if (communitiesData.success && Array.isArray(communitiesData.data)) {
+        const mappedCommunities: ExploreCommunity[] = communitiesData.data.map(
+          (community) => ({
+            _id: community._id,
+            name: community.name,
+            description: community.description,
+            category: community.category || "General",
+            cover: community.profile?.coverPhoto || "/communities/default.jpg",
+            profile: community.profile,
+            memberCount: community.memberCount,
+            membersCount: community.memberCount,
+            memberAvatars: [],
+            isFollowing: false,
+            slug: community._id,
+          })
+        );
+        setSearchCommunities(mappedCommunities);
+      } else {
+        setSearchCommunities([]);
+      }
+    } catch (error) {
+      console.error("Search error:", error);
+      setSearchCommunities([]);
+    } finally {
+      setIsSearching(false);
+    }
+  }, []);
 
-						{/* <section className="space-y-6">
-							<div className="flex items-center justify-between">
-								<h2 className="text-lg font-semibold text-foreground">
-									Trending posts from
-									communities
-								</h2>
-								<button className="inline-flex items-center gap-2 text-sm font-semibold text-primary">
-									View feed
-									<ChevronRight className="h-4 w-4" />
-								</button>
-							</div>
-							<div className="space-y-4">
-								{trendingPosts.map(
-									(post) => (
-										<TrendingPostCard
-											key={post.id}
-											post={post}
-										/>
-									)
-								)}
-							</div>
-						</section> */}
-					</main>
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery) {
+        searchCommunitiesFunc(searchQuery);
+      } else {
+        setSearchCommunities([]);
+      }
+    }, 300);
 
-					<aside className="space-y-6">
-						<div className="rounded-[28px] border border-border/60 bg-card/80 p-6 shadow-sm">
-							<h3 className="text-sm font-semibold text-foreground">
-								Host a live moment
-							</h3>
-							<p className="mt-2 text-xs text-muted-foreground">
-								Spin up a room for AMAs,
-								prayer circles, or creative
-								sessions.
-							</p>
-							<Button className="mt-4 w-full rounded-full text-sm">
-								Create community
-							</Button>
-						</div>
-						<div className="rounded-[28px] border border-border/60 bg-primary/10 p-6 text-sm text-primary">
-							Keep an eye on safety guidelines
-							and signal moderators if you
-							spot anything suspicious.
-						</div>
-					</aside>
-				</div>
-			</div>
-		</div>
-	);
-}
+    return () => clearTimeout(timer);
+  }, [searchQuery, searchCommunitiesFunc]);
 
-function CommunityCard({
-	community
-}: {
-	community: CommunitySummary;
-}) {
-	return (
-		<Link
-			href={`/communities/${community.slug}`}
-			className="relative overflow-hidden rounded-[28px] border border-border/50 bg-background/80 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
-		>
-			<div className="relative aspect-[4/3]">
-				<Image
-					src={community.cover}
-					alt={community.name}
-					fill
-					sizes="(max-width: 768px) 100vw, 50vw"
-					className="object-cover"
-				/>
-				<div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/30 to-black/10" />
-				<div className="absolute inset-x-4 top-4 flex items-center justify-between">
-					<Badge className="rounded-full bg-primary/80 px-3 py-1 text-xs font-semibold text-primary-foreground">
-						{community.category}
-					</Badge>
-					<Button
-						variant="secondary"
-						size="sm"
-						className="rounded-full px-4 text-xs font-semibold"
-					>
-						{community.isFollowing
-							? "Unfollow"
-							: "Follow"}
-					</Button>
-				</div>
-				<div className="absolute inset-x-4 bottom-4 space-y-2 text-white">
-					<h3 className="text-lg font-semibold">
-						{community.name}
-					</h3>
-					<p className="text-xs text-white/80">
-						{community.description}
-					</p>
-					<AvatarStack
-						members={community.members}
-					/>
-				</div>
-			</div>
-		</Link>
-	);
-}
+  // Fetch communities from API
+  useEffect(() => {
+    const fetchCommunities = async () => {
+      setIsLoading(true);
+      setError(null);
 
-function ExploreCommunityCard({
-	community
-}: {
-	community: ExploreCommunity;
-}) {
-	return (
-		<Link
-			href={`/communities/${community.slug}`}
-			className="relative overflow-hidden rounded-[28px] border border-border/50 bg-background/80 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
-		>
-			<div className="relative aspect-[4/3]">
-				<Image
-					src={community.cover}
-					alt={community.name}
-					fill
-					sizes="(max-width: 768px) 100vw, 50vw"
-					className="object-cover"
-				/>
-				<div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-black/10" />
-				<div className="absolute inset-x-4 top-4 flex items-center justify-between text-xs font-semibold text-white">
-					<Badge className="rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white">
-						{community.category}
-					</Badge>
-					<Badge className="rounded-full bg-primary/80 px-3 py-1 text-xs font-semibold text-primary-foreground">
-						{community.growth}
-					</Badge>
-				</div>
-				<div className="absolute inset-x-4 bottom-4 space-y-2 text-white">
-					<h3 className="text-lg font-semibold">
-						{community.name}
-					</h3>
-					<p className="text-xs text-white/80">
-						{community.description}
-					</p>
-					<div className="flex items-center justify-between text-xs">
-						<AvatarStack
-							members={community.members}
-						/>
-						<Button
-							variant="secondary"
-							size="sm"
-							className="rounded-full bg-white/90 px-4 text-xs font-semibold text-foreground"
-						>
-							{community.isFollowing
-								? "Unfollow"
-								: "Follow"}
-						</Button>
-					</div>
-				</div>
-			</div>
-		</Link>
-	);
-}
+      try {
+        const response = await fetch("/api/communities");
+        const data: CommunitiesApiResponse = await response.json();
 
-function TrendingPostCard({
-	post
-}: {
-	post: TrendingPost;
-}) {
-	return (
-		<article className="relative overflow-hidden rounded-[32px] border border-border/60 bg-card/80 shadow-md">
-			<div className="relative aspect-[4/5]">
-				<Image
-					src={post.image}
-					alt={post.user}
-					fill
-					sizes="(max-width: 768px) 100vw, 50vw"
-					className="object-cover"
-				/>
-				<div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent" />
-				<div className="absolute inset-x-4 top-4 flex items-center justify-between text-white">
-					<div className="flex items-center gap-2 rounded-full bg-black/50 px-4 py-2">
-						<Avatar className="h-8 w-8 border-2 border-white/80">
-							<AvatarImage
-								src={post.avatar}
-								alt={post.user}
-							/>
-							<AvatarFallback>
-								{post.user.slice(0, 2)}
-							</AvatarFallback>
-						</Avatar>
-						<div className="leading-tight">
-							<p className="text-sm font-semibold">
-								{post.user}
-							</p>
-							<p className="text-xs text-white/70">
-								{post.handle}
-							</p>
-						</div>
-					</div>
-					<Button
-						variant="secondary"
-						size="sm"
-						className="rounded-full bg-black/50 px-4 text-xs text-white"
-					>
-						<UserPlus className="mr-2 h-4 w-4" />
-						Follow
-					</Button>
-				</div>
-				<div className="absolute inset-x-4 bottom-4">
-					<div className="flex items-center gap-2 text-xs text-white/80">
-						<Badge className="rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white">
-							{post.community}
-						</Badge>
-					</div>
-				</div>
-			</div>
-			<div className="flex items-center justify-between gap-4 px-5 py-4 text-sm text-muted-foreground">
-				<div className="flex items-center gap-4">
-					<span className="flex items-center gap-1 text-rose-500">
-						<Heart className="h-4 w-4" />
-						{post.likes}
-					</span>
-					<span className="flex items-center gap-1">
-						<MessageCircle className="h-4 w-4" />
-						{post.comments}
-					</span>
-					<span className="flex items-center gap-1">
-						<Bookmark className="h-4 w-4" />
-						{post.shares}
-					</span>
-				</div>
-				<button className="text-xs font-semibold text-primary">
-					Report
-				</button>
-			</div>
-		</article>
-	);
-}
+        if (data.success && data.data) {
+          // Map API response to ExploreCommunity format
+          const mappedCommunities: ExploreCommunity[] = data.data.map(
+            (community) => ({
+              _id: community._id,
+              name: community.name,
+              description: community.description,
+              category: community.category || "General",
+              cover:
+                community.profile?.coverPhoto || "/communities/default.jpg",
+              profile: community.profile,
+              memberCount: community.memberCount,
+              membersCount: community.memberCount,
+              memberAvatars: [], // Can be populated from members if needed
+              isFollowing: false, // Would need to check current user's membership
+              slug: community._id,
+              owner: community.owner,
+              moderators: community.moderators,
+              settings: community.settings,
+              isActive: community.isActive,
+              createdAt: community.createdAt,
+              updatedAt: community.updatedAt,
+            })
+          );
 
-function AvatarStack({ members }: { members: string }) {
-	return (
-		<div className="flex items-center gap-3 text-xs text-white/80">
-			<div className="flex -space-x-3">
-				{[
-					"/users/mike-chen.jpg",
-					"/users/sarah-johnson.jpeg",
-					"/users/lisa-wong.jpeg"
-				].map((avatar, index) => (
-					<Avatar
-						key={avatar + index}
-						className="h-8 w-8 border-2 border-white"
-					>
-						<AvatarImage
-							src={avatar}
-							alt="Community member"
-						/>
-						<AvatarFallback>CM</AvatarFallback>
-					</Avatar>
-				))}
-			</div>
-			<span>{members}</span>
-		</div>
-	);
+          setCommunities(mappedCommunities);
+        } else {
+          setError("Failed to load communities");
+        }
+      } catch (err) {
+        console.error("Error fetching communities:", err);
+        setError("Failed to load communities");
+        setCommunities([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCommunities();
+  }, []);
+
+  const handleFollowToggle = (communityId: string, isFollowing: boolean) => {
+    console.log(`Toggle follow for ${communityId}: ${isFollowing}`);
+    // TODO: Implement API call to follow/unfollow
+    setCommunities((prev) =>
+      prev.map((c) => (c._id === communityId ? { ...c, isFollowing } : c))
+    );
+  };
+
+  const handleSearchFocus = () => {
+    setIsSearchOpen(true);
+  };
+
+  const handleSearchBlur = (event: FocusEvent<HTMLDivElement>) => {
+    const relatedTarget = event.relatedTarget as Node | null;
+
+    if (!relatedTarget || !event.currentTarget.contains(relatedTarget)) {
+      // Delay to allow clicking on results
+      setTimeout(() => {
+        setIsSearchOpen(false);
+      }, 200);
+    }
+  };
+
+  const handleSearchClear = () => {
+    setSearchQuery("");
+    setIsSearchOpen(false);
+    setSearchCommunities([]);
+  };
+
+  const showSearchOverlay = isSearchOpen && searchQuery.trim().length > 0;
+
+  // Separate communities by following status (would come from API in real implementation)
+  const myCommunities = communities.filter((c) => c.isFollowing);
+  const exploreCommunities = communities.filter((c) => !c.isFollowing);
+
+  const filteredExploreCommunities =
+    exploreFilter === "For You"
+      ? exploreCommunities
+      : exploreCommunities.filter((c) => c.category === exploreFilter);
+
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-background">
+      {/* Background gradient */}
+      <div
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_10%,hsla(var(--primary),0.12),transparent_50%),radial-gradient(circle_at_90%_0%,hsla(var(--muted-foreground),0.08),transparent_45%)]"
+        aria-hidden="true"
+      />
+
+      <div className="relative z-10 mx-auto w-full px-4 pb-24 pt-8 sm:px-6 lg:px-8">
+        {/* Header */}
+        <header className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-card/80 text-foreground transition hover:bg-card lg:hidden"
+              aria-label="Grid view">
+              <Grid3x3 className="h-5 w-5" />
+            </button>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+              Communities
+            </h1>
+          </div>
+          {/* Mobile Create Button */}
+          <div className="lg:hidden">
+            <CreateCommunityDialog
+              trigger={
+                <Button size="sm" className="rounded-full">
+                  <Plus className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Create</span>
+                </Button>
+              }
+            />
+          </div>
+        </header>
+
+        {/* Search bar - Same style as explore page */}
+        <div tabIndex={-1} onBlur={handleSearchBlur} className="relative mb-8">
+          <ExploreSearchBar
+            value={searchQuery}
+            onChange={setSearchQuery}
+            onFocus={handleSearchFocus}
+            onClear={handleSearchClear}
+            showCancel={showSearchOverlay}
+          />
+          {showSearchOverlay && (
+            <SearchResultsDropdown
+              users={[]} // Only show communities, not users
+              communities={searchCommunities}
+              isLoading={isSearching}
+              query={searchQuery}
+              className="absolute left-0 right-0 top-full z-30 mt-4"
+            />
+          )}
+        </div>
+
+        {/* Tab switcher */}
+        <div className="mx-auto mb-8 flex w-full max-w-md items-center rounded-full border border-border/60 bg-card/80 p-1 text-sm font-semibold">
+          {(["my", "explore"] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setPrimaryTab(tab)}
+              className={cn(
+                "flex-1 rounded-full px-4 py-2 transition-all",
+                primaryTab === tab
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-primary"
+              )}>
+              {tab === "my" ? "My Communities" : "Explore"}
+            </button>
+          ))}
+        </div>
+
+        {/* Loading state */}
+        {isLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : error ? (
+          <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6 text-center">
+            <p className="font-medium text-destructive">{error}</p>
+            <Button
+              onClick={() => window.location.reload()}
+              variant="outline"
+              className="mt-4">
+              Retry
+            </Button>
+          </div>
+        ) : (
+          /* Desktop grid layout */
+          <div className="grid gap-12 lg:grid-cols-[1fr_320px]">
+            <main className="space-y-12">
+              {primaryTab === "my" ? (
+                <section className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-lg font-semibold text-foreground">
+                        Communities you follow
+                      </h2>
+                      <p className="text-sm text-muted-foreground">
+                        Manage the circles you contribute to regularly.
+                      </p>
+                    </div>
+                    {myCommunities.length > 0 && (
+                      <Link
+                        href="/communities/following"
+                        className="text-sm font-semibold text-primary hover:underline">
+                        See All
+                      </Link>
+                    )}
+                  </div>
+                  {myCommunities.length > 0 ? (
+                    <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                      {myCommunities.map((community) => (
+                        <CommunityCard
+                          key={community._id}
+                          community={community}
+                          onFollowToggle={handleFollowToggle}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="py-20 text-center">
+                      <div className="mb-4 inline-flex rounded-full bg-primary/10 p-6">
+                        <svg
+                          className="h-12 w-12 text-primary"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={1.5}
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                          />
+                        </svg>
+                      </div>
+                      <h3 className="text-xl font-semibold text-foreground">
+                        No communities yet
+                      </h3>
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        Start exploring and join communities that match your
+                        interests.
+                      </p>
+                      <Button
+                        onClick={() => setPrimaryTab("explore")}
+                        className="mt-6">
+                        Explore Communities
+                      </Button>
+                    </div>
+                  )}
+                </section>
+              ) : (
+                <section className="space-y-6">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                      <h2 className="text-lg font-semibold text-foreground">
+                        Featured communities
+                      </h2>
+                      <p className="text-sm text-muted-foreground">
+                        Discover communities based on your interests.
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {exploreFilters.map((filter) => (
+                        <button
+                          key={filter}
+                          onClick={() => setExploreFilter(filter)}
+                          className={cn(
+                            "rounded-full px-3 py-1.5 text-xs font-semibold transition",
+                            exploreFilter === filter
+                              ? "bg-primary text-primary-foreground shadow-sm"
+                              : "border border-border/50 bg-background/80 text-muted-foreground hover:border-primary/30 hover:text-primary"
+                          )}>
+                          {filter}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {filteredExploreCommunities.length > 0 ? (
+                    <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                      {filteredExploreCommunities.map((community) => (
+                        <CommunityCard
+                          key={community._id}
+                          community={community}
+                          variant="explore"
+                          onFollowToggle={handleFollowToggle}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="py-20 text-center">
+                      <p className="text-muted-foreground">
+                        No communities found in this category
+                      </p>
+                    </div>
+                  )}
+                </section>
+              )}
+            </main>
+
+            {/* Sidebar - Desktop only */}
+            <aside className="hidden space-y-6 lg:block">
+              <div className="rounded-[28px] border border-border/60 bg-card/80 p-6 shadow-sm">
+                <h3 className="text-sm font-semibold text-foreground">
+                  Build your own community
+                </h3>
+                <p className="my-2 text-xs leading-relaxed text-muted-foreground">
+                  Spin up a room for AMAs, prayer circles, or creative sessions.
+                </p>
+                <CreateCommunityDialog />
+              </div>
+              <div className="rounded-[28px] border border-border/60 bg-primary/10 p-6 text-sm leading-relaxed text-primary">
+                Keep an eye on safety guidelines and signal moderators if you
+                spot anything suspicious.
+              </div>
+            </aside>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }

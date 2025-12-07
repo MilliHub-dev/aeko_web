@@ -27,8 +27,11 @@ const navItem = cva(
 
 const MAIN_LINK_COUNT = 5;
 
+import { useUser } from "./user-context";
+
 export function LeftSidebar() {
   const pathname = usePathname();
+  const { user } = useUser();
 
   const { mainLinks, secondaryLinks } = useMemo(() => {
     return {
@@ -43,14 +46,17 @@ export function LeftSidebar() {
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <Avatar className="h-14 w-14 border border-border/60">
-              <AvatarImage src="/profile.jpeg" alt="Andrew Smith" />
-              <AvatarFallback>AS</AvatarFallback>
+              <AvatarImage
+                src={user?.profilePicture}
+                alt={user?.name || "User"}
+              />
+              <AvatarFallback>{user?.name?.charAt(0) || "U"}</AvatarFallback>
             </Avatar>
             <div className="space-y-1">
-              <p className="text-xs uppercase tracking-[0.35em] text-muted-foreground">
-                Product Designer
+              <p className="text-xs tracking-[0.35em] text-muted-foreground">
+                {user?.username ? `@${user.username}` : "Welcome"}
               </p>
-              <p className="text-lg font-semibold">Andrew Smith</p>
+              <p className="text-lg font-semibold">{user?.name}</p>
             </div>
           </div>
         </div>

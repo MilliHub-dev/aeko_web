@@ -29,12 +29,12 @@ export default async function PostDetailPage({
   const isMedia = post.type === "image" || post.type === "video";
 
   return (
-    <div className="bg-background min-h-screen">
+    <div className="relative bg-background min-h-screen">
       {/* Header */}
       <PostDetailHeader />
 
       {/* Content (conditional based on type) */}
-      <div className="pt-16">
+      <div className="pt-0">
         {isMedia ? (
           <PostDetailMedia post={post} />
         ) : (

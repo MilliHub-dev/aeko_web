@@ -42,27 +42,31 @@ export const sidebarRoutes = [
     path: "/messages",
     icon: ChatIcon,
   },
-
+  // {
+  //   name: "Notifications",
+  //   path: "/notifications",
+  //   icon: BellIcon,
+  // },
+  // {
+  //   name: "Aeko Wallet",
+  //   path: "/wallet",
+  //   icon: WalletOutline,
+  // },
+  // {
+  //   name: "NFT Marketplace",
+  //   path: "/nft-marketplace",
+  //   icon: CoinsIcon,
+  // },
   {
-    name: "Notifications",
-    path: "/notifications",
-    icon: BellIcon,
+    name: "Profile",
+    path: "/profile",
+    icon: UserOutline,
   },
-  {
-    name: "Aeko Wallet",
-    path: "/wallet",
-    icon: WalletOutline,
-  },
-  {
-    name: "NFT Marketplace",
-    path: "/nft-marketplace",
-    icon: CoinsIcon,
-  },
-  {
-    name: "Settings",
-    path: "/settings",
-    icon: SettingsIcon,
-  },
+  // {
+  //   name: "Settings",
+  //   path: "/settings",
+  //   icon: SettingsIcon,
+  // },
 ];
 
 export const mobileRoutes = [

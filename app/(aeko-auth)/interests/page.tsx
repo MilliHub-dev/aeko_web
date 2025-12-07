@@ -84,34 +84,6 @@ export default function InterestsPage() {
     }
   };
 
-  // Color variants for interest pills matching the design
-  const colorVariants = [
-    "bg-[#5B7FE8] hover:bg-[#4B6FD8]", // Blue (Fitness)
-    "bg-transparent border-2 border-secondary hover:bg-secondary/10", // Outlined (Gaming)
-    "bg-transparent border-2 border-secondary hover:bg-secondary/10", // Outlined (Travels)
-    "bg-[#FF9B7A] hover:bg-[#FF8B6A]", // Orange (Food)
-    "bg-transparent border-2 border-secondary hover:bg-secondary/10", // Outlined (Photography)
-    "bg-transparent border-2 border-secondary hover:bg-secondary/10", // Outlined (Education)
-    "bg-[#E85B9F] hover:bg-[#D84B8F]", // Pink (Fashion)
-    "bg-transparent border-2 border-secondary hover:bg-secondary/10", // Outlined (Finance)
-    "bg-transparent border-2 border-secondary hover:bg-secondary/10", // Outlined (Music)
-    "bg-transparent border-2 border-secondary hover:bg-secondary/10", // Outlined (Health)
-    "bg-[#F5C842] hover:bg-[#E5B832]", // Yellow (Job)
-    "bg-[#1A1A1A] hover:bg-[#2A2A2A]", // Dark (Motivation)
-    "bg-transparent border-2 border-secondary hover:bg-secondary/10", // Outlined (Technology)
-    "bg-transparent border-2 border-secondary hover:bg-secondary/10", // Outlined (News)
-    "bg-[#42F5E8] hover:bg-[#32E5D8]", // Cyan (Web3)
-  ];
-
-  const getVariant = (index: number, isSelected: boolean) => {
-    if (isSelected) {
-      // When selected, use filled colors
-      return colorVariants[index % colorVariants.length];
-    }
-    // When not selected, always use outlined style
-    return "bg-transparent border-2 border-secondary hover:bg-secondary/10";
-  };
-
   if (loading) {
     return (
       <main className="min-h-screen relative overflow-hidden bg-[radial-gradient(120%_120%_at_30%_10%,#007F6D,#003B33)] flex items-center justify-center">
@@ -121,22 +93,10 @@ export default function InterestsPage() {
   }
 
   return (
-    <main className="min-h-screen relative overflow-hidden bg-[radial-gradient(120%_120%_at_30%_10%,#007F6D,#003B33)]">
+    <main className="min-h-screen relative overflow-hidden flex justify-center items-center bg-[radial-gradient(120%_120%_at_30%_10%,#007F6D,#003B33)]">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_80%_at_70%_0%,transparent,rgba(0,0,0,0.04))]" />
 
       <div className="relative mx-auto max-w-2xl px-6 py-8 sm:py-12">
-        {/* Progress indicator */}
-        <div className="flex gap-2 mb-8 sm:mb-12 justify-center">
-          {[...Array(7)].map((_, i) => (
-            <div
-              key={i}
-              className={`h-1 rounded-full transition-all ${
-                i === 1 ? "bg-secondary w-12" : "bg-secondary/30 w-8"
-              }`}
-            />
-          ))}
-        </div>
-
         {/* Heading */}
         <div className="text-center mb-8 sm:mb-12">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-secondary mb-3">
@@ -158,14 +118,29 @@ export default function InterestsPage() {
         <div className="flex flex-wrap gap-3 mb-8 sm:mb-12 justify-center">
           {interests.map((interest, index) => {
             const isSelected = selectedInterests.has(interest._id);
+
+            // Define a separate set of distinct filled colors for selected state
+            const distinctFilledColors = [
+              "bg-[#5B7FE8] hover:bg-[#4B6FD8]", // Blue
+              "bg-[#FF9B7A] hover:bg-[#FF8B6A]", // Orange
+              "bg-[#E85B9F] hover:bg-[#D84B8F]", // Pink
+              "bg-[#F5C842] hover:bg-[#E5B832]", // Yellow
+              "bg-[#1A1A1A] hover:bg-[#2A2A2A]", // Dark
+              "bg-[#42F5E8] hover:bg-[#32E5D8]", // Cyan
+            ];
+
+            // Use outlined style for unselected, and a distinct filled color for selected
+            const variantClass = isSelected
+              ? distinctFilledColors[index % distinctFilledColors.length]
+              : "bg-transparent border-2 border-secondary hover:bg-secondary/10";
+
             return (
               <button
                 key={interest._id}
                 onClick={() => toggleInterest(interest._id)}
-                className={`px-6 py-3 rounded-full text-secondary font-medium transition-all transform hover:scale-105 active:scale-95 flex items-center gap-2 ${getVariant(
-                  index,
-                  isSelected
-                )} ${isSelected ? "shadow-lg" : ""}`}>
+                className={`px-6 py-3 rounded-full text-secondary font-medium transition-all transform hover:scale-105 active:scale-95 flex items-center gap-2 ${variantClass} ${
+                  isSelected ? "shadow-lg" : ""
+                }`}>
                 {interest.icon && <span>{interest.icon}</span>}
                 <span>{interest.displayName}</span>
               </button>

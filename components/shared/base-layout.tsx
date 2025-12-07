@@ -12,6 +12,7 @@ import { CommentsPanel } from "@/components/home/post/comments-panel";
 import { CommentsMobileModal } from "@/components/home/post/comments-mobile-modal";
 import { MobileMenuProvider } from "./mobile-menu-context";
 import { MobileMenuDrawer } from "./mobile-menu-drawer";
+import { UserProvider } from "./user-context";
 
 interface BaseLayoutProps {
   children: React.ReactNode;
@@ -29,26 +30,28 @@ export function BaseLayout({ children }: BaseLayoutProps) {
 
   return (
     <MobileMenuProvider>
-      <div className="relative w-full max-w-full bg-background">
-        {showMobileHeader && <MobileHeader />}
-        <div
-          className={`xl:px-0 grid min-h-screen items-start ${gridColsClass}`}>
-          <MobileLeftSidebar />
-          <LeftSidebar />
-          {/* {!isSimpleLayout && <Stories />} */}
-          <main className="relative">{children}</main>
-          {!isSimpleLayout && <RightSidebar />}
+      <UserProvider>
+        <div className="relative w-full max-w-full bg-background">
+          {showMobileHeader && <MobileHeader />}
+          <div
+            className={`xl:px-0 grid min-h-screen items-start ${gridColsClass}`}>
+            <MobileLeftSidebar />
+            <LeftSidebar />
+            {/* {!isSimpleLayout && <Stories />} */}
+            <main className="relative">{children}</main>
+            {!isSimpleLayout && <RightSidebar />}
+          </div>
+          {/* Comments drawer overlays the right sidebar on xl screens */}
+          {!isSimpleLayout && <CommentsPanel />}
+          {/* Mobile full-screen comments modal */}
+          <CommentsMobileModal />
+          {/* Mobile hamburger right sidebar */}
+          <div className="md:hidden">
+            <MobileMenuDrawer />
+          </div>
+          <MobileNavbar />
         </div>
-        {/* Comments drawer overlays the right sidebar on xl screens */}
-        {!isSimpleLayout && <CommentsPanel />}
-        {/* Mobile full-screen comments modal */}
-        <CommentsMobileModal />
-        {/* Mobile hamburger right sidebar */}
-        <div className="md:hidden">
-          <MobileMenuDrawer />
-        </div>
-        <MobileNavbar />
-      </div>
+      </UserProvider>
     </MobileMenuProvider>
   );
 }

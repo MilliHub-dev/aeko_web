@@ -7,6 +7,7 @@ import { sidebarRoutes } from "@/lib/routes";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { LogOut } from "lucide-react";
 import { logoutAction } from "@/app/(aeko-auth)/actions";
+import { useUser } from "./user-context";
 
 const contactList = [
   { name: "Erik Gunsel", avatar: "/users/mike-chen.jpg" },
@@ -22,10 +23,18 @@ const contactList = [
 
 export function MobileLeftSidebar() {
   const pathname = usePathname();
+  const { user } = useUser();
 
   return (
     <aside className="sticky top-0 hidden h-screen w-full shrink-0 md:flex xl:hidden border-r">
       <div className="relative flex h-full w-full flex-col items-center overflow-hidden rounded-[32px] bg-card pb-4 text-muted-foreground">
+        <div className="flex h-20 w-full items-center justify-center border-b px-4">
+          <Avatar className="h-16 w-16 ">
+            <AvatarImage src={user?.profilePicture} alt="User Avatar" />
+            <AvatarFallback>{user?.name.charAt(0)}</AvatarFallback>
+          </Avatar>
+        </div>
+
         <nav className="mt-6 flex flex-1 flex-col items-center gap-4">
           {sidebarRoutes.map((route) => {
             const Icon = route.icon;
@@ -51,22 +60,6 @@ export function MobileLeftSidebar() {
             <LogOut className="h-6 w-6" />
           </button>
         </nav>
-
-        <div className="mt-4 w-full space-y-4 px-4">
-          <p className="text-[6.5px] text-center font-semibold uppercase tracking-[0.35em] text-muted-foreground">
-            Messages
-          </p>
-          <div className="flex flex-col items-center gap-3 text-muted-foreground">
-            {contactList.map((contact) => (
-              <Avatar
-                key={contact.name}
-                className="h-12 w-12 border border-border/60">
-                <AvatarImage src={contact.avatar} alt={contact.name} />
-                <AvatarFallback>{contact.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-            ))}
-          </div>
-        </div>
       </div>
     </aside>
   );

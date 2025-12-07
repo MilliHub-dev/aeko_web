@@ -80,10 +80,6 @@ export default function LoginPage() {
                 )}
               </div>
               <div className="flex items-center justify-between text-sm">
-                <label className="inline-flex items-center gap-2 text-secondary/90">
-                  <input type="checkbox" className="accent-current" /> Remember
-                  me
-                </label>
                 <Link
                   href="#"
                   className="underline text-secondary/90 hover:text-secondary">

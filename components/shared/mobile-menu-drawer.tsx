@@ -13,12 +13,17 @@ import {
   LifeBuoy,
   LogOut,
   Coins,
+  User,
 } from "lucide-react";
 import { useMobileMenu } from "./mobile-menu-context";
 import { logoutAction } from "@/app/(aeko-auth)/actions";
 
+import { useUser } from "./user-context";
+import { HomeIcon } from "@/lib/icons";
+
 export function MobileMenuDrawer() {
   const { open, closeMenu } = useMobileMenu();
+  const { user } = useUser();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
@@ -43,19 +48,21 @@ export function MobileMenuDrawer() {
   }, [open]);
 
   const items = [
-    { label: "Saved", href: "/#", icon: Bookmark },
-    { label: "Wallet", href: "/wallet", icon: Wallet2 },
+    { label: "Home", href: "/home", icon: HomeIcon },
+    // { label: "Explore", href: "/explore", icon: },
+    { label: "Profile", href: "/profile", icon: User },
+    // { label: "Wallet", href: "/wallet", icon: Wallet2 },
     {
       label: "Community",
       href: "/communities",
       icon: Users,
     },
-    {
-      label: "NFT marketplace",
-      href: "/nft-marketplace",
-      icon: Coins,
-    },
-    { label: "Support", href: "/#", icon: LifeBuoy },
+    // {
+    //   label: "NFT marketplace",
+    //   href: "/nft-marketplace",
+    //   icon: Coins,
+    // },
+    // { label: "Support", href: "/#", icon: LifeBuoy },
     { label: "Logout", href: "/#", icon: LogOut },
   ];
 
@@ -100,24 +107,34 @@ export function MobileMenuDrawer() {
             <div className="px-6">
               <div className="flex flex-col items-center gap-3 pb-4">
                 <Avatar className="h-20 w-20 outline-2 outline-offset-2 outline-primary">
-                  <AvatarImage src="/users/sarah-johnson.jpeg" />
-                  <AvatarFallback>TT</AvatarFallback>
+                  <AvatarImage
+                    src={user?.profilePicture || "/users/sarah-johnson.jpeg"}
+                  />
+                  <AvatarFallback>
+                    {user?.name?.charAt(0) || "U"}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="text-center">
-                  <p className="text-lg font-semibold">Tola Thompson</p>
+                  <p className="text-lg font-semibold">
+                    {user?.name || "Guest"}
+                  </p>
                 </div>
                 <div className="flex items-center gap-8 text-center text-sm">
                   <div>
-                    <p className="font-semibold">46</p>
+                    <p className="font-semibold">{user?.posts?.length || 0}</p>
                     <p className="text-muted-foreground">Posts</p>
                   </div>
                   <div>
-                    <p className="font-semibold">2.8K</p>
+                    <p className="font-semibold">
+                      {user?.followers?.length || 0}
+                    </p>
                     <p className="text-muted-foreground">Followers</p>
                   </div>
                   <div>
-                    <p className="font-semibold">200</p>
-                    <p className="text-muted-foreground">Followers</p>
+                    <p className="font-semibold">
+                      {user?.following?.length || 0}
+                    </p>
+                    <p className="text-muted-foreground">Following</p>
                   </div>
                 </div>
               </div>

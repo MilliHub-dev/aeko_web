@@ -1,5 +1,9 @@
 export interface EmailVerification {
   isVerified: boolean;
+  verificationCode: string | null;
+  codeExpiresAt: string | null;
+  codeAttempts: number;
+  lastCodeSent: string | null;
 }
 
 export interface ProfileCompletion {

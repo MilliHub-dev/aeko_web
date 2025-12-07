@@ -1,10 +1,12 @@
-import type { ReactNode } from "react";
+"use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
-import { Heart, MessageCircle, Share2, Users, Bell } from "lucide-react";
+import { Users, Bell, Play } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface LiveStream {
   id: number;
@@ -23,177 +25,180 @@ interface LiveStream {
   tags?: string[];
 }
 
-const PosterShell = ({
-  children,
-}: {
-  children: ReactNode;
-}) => (
-  <div className="relative overflow-hidden rounded-[22px]">
-    <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,hsla(var(--primary),0.3),transparent_60%),radial-gradient(circle_at_80%_15%,hsla(var(--muted-foreground),0.22),transparent_55%),linear-gradient(180deg,rgba(6,12,24,0.88),rgba(6,12,24,0.92))]" />
-    {children}
-  </div>
-);
-
 const LiveStreamCard = ({ stream }: { stream: LiveStream }) => {
   return (
-    <article className="group relative flex h-full flex-col overflow-hidden rounded-[26px] border border-border/60 bg-card/80 shadow-lg shadow-primary/5 transition duration-300 hover:-translate-y-1 hover:shadow-xl">
-      <Link href={`/live-streams/${stream.id}`} className="relative block">
-        <PosterShell>
-          <div className="relative aspect-[9/16]">
-            <div className="absolute inset-0" />
-            <div className="absolute inset-x-0 top-4 flex items-center gap-2 px-4">
-              <Badge className="rounded-full bg-red-500/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
-                Live
-              </Badge>
-              <Badge className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white">
-                <Users className="mr-1 h-3 w-3" />
-                {stream.viewers.toLocaleString()} watching
-              </Badge>
+    <Link
+      href={`/live-streams/${stream.id}`}
+      className={cn(
+        "group relative block overflow-hidden rounded-[28px] border border-border/50 bg-background/80 shadow-sm transition-all duration-300",
+        "hover:-translate-y-2 hover:shadow-xl hover:border-primary/30"
+      )}>
+      {/* Thumbnail */}
+      <div className="relative aspect-[16/9]">
+        <Image
+          src={stream.thumbnail || "/placeholder.svg"}
+          alt={stream.title}
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
+
+        {/* Top badges */}
+        <div className="absolute inset-x-4 top-4 flex items-center justify-between">
+          <Badge className="rounded-full bg-red-500/90 px-3 py-1 text-xs font-semibold text-white shadow-lg">
+            LIVE
+          </Badge>
+          <Badge className="rounded-full border border-white/20 bg-black/30 px-3 py-1 text-xs font-medium text-white backdrop-blur-md shadow-lg">
+            <Users className="mr-1.5 h-3 w-3" />
+            {stream.viewers.toLocaleString()}
+          </Badge>
+        </div>
+
+        {/* Play button overlay on hover */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/20 backdrop-blur-md">
+            <Play className="h-8 w-8 text-white fill-white" />
+          </div>
+        </div>
+
+        {/* Bottom content on image */}
+        <div className="absolute inset-x-4 bottom-4 space-y-2 text-white">
+          <div className="flex items-center gap-2">
+            <Avatar className="h-8 w-8 border-2 border-white/30">
+              <AvatarImage
+                src={stream.streamer.avatar}
+                alt={stream.streamer.name}
+              />
+              <AvatarFallback className="text-xs">
+                {stream.streamer.name.substring(0, 2)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold leading-tight line-clamp-1 drop-shadow-md">
+                {stream.streamer.name}
+              </p>
+              <p className="text-xs text-white/80 leading-tight drop-shadow-md">
+                {stream.streamer.username}
+              </p>
             </div>
           </div>
-        </PosterShell>
-      </Link>
 
-      <div className="flex flex-1 flex-col gap-4 px-5 py-6">
-        <div className="flex items-center justify-between gap-3">
-          <Badge
-            variant="outline"
-            className="rounded-full border-primary/40 px-3 py-1 text-xs font-medium uppercase tracking-wide text-primary"
-          >
-            {stream.category}
-          </Badge>
-          <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Live for {new Date().getMinutes()} min
-          </span>
-        </div>
-
-        <Link href={`/live-streams/${stream.id}`} className="space-y-2">
-          <h3 className="text-lg font-semibold text-foreground transition-colors group-hover:text-primary">
+          <h3 className="text-base font-semibold leading-tight line-clamp-2 drop-shadow-md">
             {stream.title}
           </h3>
-          <p className="text-sm text-muted-foreground">{stream.description}</p>
-        </Link>
 
-        <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10 border border-border">
-            <AvatarImage src={stream.streamer.avatar} alt={stream.streamer.name} />
-            <AvatarFallback>{stream.streamer.name.substring(0, 2)}</AvatarFallback>
-          </Avatar>
-          <div className="leading-tight">
-            <p className="text-sm font-semibold text-foreground">{stream.streamer.name}</p>
-            <p className="text-xs text-muted-foreground">{stream.streamer.username}</p>
-          </div>
-        </div>
-
-        {stream.tags && stream.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {stream.tags.map((tag) => (
+          <div className="flex items-center gap-2">
+            <Badge className="rounded-full bg-primary/90 px-2.5 py-0.5 text-xs font-semibold text-primary-foreground shadow-lg">
+              {stream.category}
+            </Badge>
+            {stream.tags && stream.tags.length > 0 && (
               <Badge
-                key={tag}
                 variant="outline"
-                className="rounded-full border-border/60 px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground"
-              >
-                #{tag}
+                className="rounded-full border-white/30 bg-white/10 px-2.5 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
+                #{stream.tags[0]}
               </Badge>
-            ))}
+            )}
           </div>
-        )}
-
-        <div className="mt-auto flex items-center justify-between">
-          <div className="flex items-center gap-3 text-muted-foreground">
-            <button className="rounded-full border border-border/60 p-2 transition hover:border-primary/50 hover:text-primary">
-              <Heart className="h-4 w-4" />
-            </button>
-            <button className="rounded-full border border-border/60 p-2 transition hover:border-primary/50 hover:text-primary">
-              <MessageCircle className="h-4 w-4" />
-            </button>
-            <button className="rounded-full border border-border/60 p-2 transition hover:border-primary/50 hover:text-primary">
-              <Share2 className="h-4 w-4" />
-            </button>
-          </div>
-          <Button size="sm" className="rounded-full px-5 text-sm">
-            Watch live
-          </Button>
         </div>
       </div>
-    </article>
+
+      {/* Desktop hover effect overlay */}
+      <div className="absolute inset-0 bg-primary/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 hidden md:block pointer-events-none" />
+    </Link>
   );
 };
 
 const UpcomingStreamCard = ({ stream }: { stream: LiveStream }) => {
   return (
-    <article className="group relative flex h-full flex-col overflow-hidden rounded-[26px] border border-border/60 bg-card/70 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg">
-      <PosterShell>
-        <div className="relative aspect-[9/16]">
-          <div className="absolute inset-x-0 top-4 flex items-center justify-between px-4">
-            <Badge className="rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
-              Upcoming
-            </Badge>
-            <Badge className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium text-white">
-              {stream.scheduledFor}
-            </Badge>
-          </div>
-        </div>
-      </PosterShell>
+    <Link
+      href={`/live-streams/${stream.id}`}
+      className={cn(
+        "group relative block overflow-hidden rounded-[28px] border border-border/50 bg-background/80 shadow-sm transition-all duration-300",
+        "hover:-translate-y-2 hover:shadow-xl hover:border-primary/30"
+      )}>
+      {/* Thumbnail */}
+      <div className="relative aspect-[16/9]">
+        <Image
+          src={stream.thumbnail || "/placeholder.svg"}
+          alt={stream.title}
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+        {/* Gradient overlay - slightly lighter for upcoming */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
 
-      <div className="flex flex-1 flex-col gap-4 px-5 py-6">
-        <div className="flex items-center justify-between gap-3">
-          <Badge
-            variant="outline"
-            className="rounded-full border-border/60 px-3 py-1 text-xs font-medium uppercase tracking-wide text-muted-foreground"
-          >
-            {stream.category}
+        {/* Top badges */}
+        <div className="absolute inset-x-4 top-4 flex items-center justify-between">
+          <Badge className="rounded-full bg-primary/90 px-3 py-1 text-xs font-semibold text-primary-foreground shadow-lg">
+            UPCOMING
           </Badge>
-          <span className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground">
-            <Bell className="h-4 w-4" />
-            Reminder ready
-          </span>
+          <Badge className="rounded-full border border-white/20 bg-black/30 px-3 py-1 text-xs font-medium text-white backdrop-blur-md shadow-lg">
+            <Bell className="mr-1.5 h-3 w-3" />
+            {stream.scheduledFor}
+          </Badge>
         </div>
 
-        <Link href={`/live-streams/${stream.id}`} className="space-y-2">
-          <h3 className="text-lg font-semibold text-foreground transition-colors group-hover:text-primary">
-            {stream.title}
-          </h3>
-          <p className="text-sm text-muted-foreground">{stream.description}</p>
-        </Link>
-
-        <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10 border border-border">
-            <AvatarImage src={stream.streamer.avatar} alt={stream.streamer.name} />
-            <AvatarFallback>{stream.streamer.name.substring(0, 2)}</AvatarFallback>
-          </Avatar>
-          <div className="leading-tight">
-            <p className="text-sm font-semibold text-foreground">{stream.streamer.name}</p>
-            <p className="text-xs text-muted-foreground">{stream.streamer.username}</p>
-          </div>
-        </div>
-
-        {stream.tags && stream.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {stream.tags.map((tag) => (
-              <Badge
-                key={tag}
-                variant="outline"
-                className="rounded-full border-border/60 px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground"
-              >
-                #{tag}
-              </Badge>
-            ))}
-          </div>
-        )}
-
-        <div className="mt-auto flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">Receive a push alert when we go live</span>
+        {/* Notify button overlay on hover */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           <Button
-            size="sm"
-            variant="outline"
-            className="rounded-full border-border/70 px-5 text-sm text-foreground"
-          >
-            Notify me
+            size="lg"
+            className="rounded-full shadow-xl backdrop-blur-sm"
+            onClick={(e) => {
+              e.preventDefault();
+              // Handle notification
+            }}>
+            <Bell className="mr-2 h-4 w-4" />
+            Remind Me
           </Button>
         </div>
+
+        {/* Bottom content on image */}
+        <div className="absolute inset-x-4 bottom-4 space-y-2 text-white">
+          <div className="flex items-center gap-2">
+            <Avatar className="h-8 w-8 border-2 border-white/30">
+              <AvatarImage
+                src={stream.streamer.avatar}
+                alt={stream.streamer.name}
+              />
+              <AvatarFallback className="text-xs">
+                {stream.streamer.name.substring(0, 2)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold leading-tight line-clamp-1 drop-shadow-md">
+                {stream.streamer.name}
+              </p>
+              <p className="text-xs text-white/80 leading-tight drop-shadow-md">
+                {stream.streamer.username}
+              </p>
+            </div>
+          </div>
+
+          <h3 className="text-base font-semibold leading-tight line-clamp-2 drop-shadow-md">
+            {stream.title}
+          </h3>
+
+          <div className="flex items-center gap-2">
+            <Badge className="rounded-full bg-primary/90 px-2.5 py-0.5 text-xs font-semibold text-primary-foreground shadow-lg">
+              {stream.category}
+            </Badge>
+            {stream.tags && stream.tags.length > 0 && (
+              <Badge
+                variant="outline"
+                className="rounded-full border-white/30 bg-white/10 px-2.5 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
+                #{stream.tags[0]}
+              </Badge>
+            )}
+          </div>
+        </div>
       </div>
-    </article>
+
+      {/* Desktop hover effect overlay */}
+      <div className="absolute inset-0 bg-primary/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 hidden md:block pointer-events-none" />
+    </Link>
   );
 };
 
