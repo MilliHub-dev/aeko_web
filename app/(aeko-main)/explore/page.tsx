@@ -228,7 +228,7 @@ export default function ExplorePage() {
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-background">
-      <div className="relative z-10 mx-auto w-full px-4 pb-24 pt-8 sm:px-6 lg:px-8">
+      <div className="relative mx-auto w-full px-4 pb-24 pt-8 sm:px-6 lg:px-8">
         <header className="hidden md:flex mb-6 items-center justify-between">
           <div className="flex items-center gap-4">
             <button

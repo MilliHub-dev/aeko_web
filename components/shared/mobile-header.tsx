@@ -30,6 +30,7 @@ const MobileHeader = () => {
   const isHome = path === "/home";
   const isProfile = path == "/profile";
   const isLiveStream = path == "/live-streams";
+  const isExplore = path == "/explore";
 
   const renderLeft = () => {
     if (isWallet) {
@@ -89,6 +90,7 @@ const MobileHeader = () => {
       );
     }
     if (isLiveStream) return;
+    if (isExplore) return <div className="flex items-center gap-2 ml-12"></div>;
     if (isHome) return <div className="flex items-center gap-2 ml-12"></div>;
     if (isCommunities) {
       return (
@@ -130,14 +132,18 @@ const MobileHeader = () => {
       className={
         isUserPostsRoute
           ? "hidden "
-          : "fixed top-0 left-0 right-0 bg-transparent mask-b-from-80% mask-radial-[70%_100%] mask-radial-from-100% backdrop-blur-sm px-4 py-3 md:hidden z-10 isolate"
+          : `fixed top-0 left-0 right-0 ${
+              isProfile || isHome || isLiveStream
+                ? "bg-transparent mask-b-from-80% mask-radial-[70%_100%] mask-radial-from-100% backdrop-blur-sm"
+                : "bg-white"
+            } px-4 py-3 md:hidden z-10 isolate`
       }>
       <div className="flex items-center justify-between">
         {/* Left Icon */}
         {renderLeft()}
 
         {/* Center Logo/Title */}
-        <div className="flex-shrink-0">{renderCenter()}</div>
+        <div className="shrink-0">{renderCenter()}</div>
 
         {/* Right Icons */}
         {renderRight()}

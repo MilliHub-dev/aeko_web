@@ -79,14 +79,14 @@ export function MobileMenuDrawer() {
       {open && (
         <>
           <motion.div
-            className="fixed inset-0 z-[100] bg-black/40 md:hidden"
+            className="fixed inset-0 z-100 bg-black/40 md:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={closeMenu}
           />
           <motion.aside
-            className="fixed left-0 top-0 bottom-0 z-[101] w-[85vw] max-w-[22rem] bg-white md:hidden shadow-2xl border-r border-black/10"
+            className="fixed left-0 top-0 bottom-0 z-101 w-[85vw] max-w-88 bg-white md:hidden shadow-2xl border-r border-black/10"
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
