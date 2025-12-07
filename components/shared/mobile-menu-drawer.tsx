@@ -14,12 +14,13 @@ import {
   LogOut,
   Coins,
   User,
+  SearchIcon,
 } from "lucide-react";
 import { useMobileMenu } from "./mobile-menu-context";
 import { logoutAction } from "@/app/(aeko-auth)/actions";
 
 import { useUser } from "./user-context";
-import { HomeIcon } from "@/lib/icons";
+import { HomeIcon, RadioSolid } from "@/lib/icons";
 
 export function MobileMenuDrawer() {
   const { open, closeMenu } = useMobileMenu();
@@ -49,8 +50,13 @@ export function MobileMenuDrawer() {
 
   const items = [
     { label: "Home", href: "/home", icon: HomeIcon },
-    // { label: "Explore", href: "/explore", icon: },
+    { label: "Explore", href: "/explore", icon: SearchIcon },
     { label: "Profile", href: "/profile", icon: User },
+    {
+      label: "Live Streams",
+      href: "/live-streams",
+      icon: RadioSolid,
+    },
     // { label: "Wallet", href: "/wallet", icon: Wallet2 },
     {
       label: "Community",
@@ -107,12 +113,8 @@ export function MobileMenuDrawer() {
             <div className="px-6">
               <div className="flex flex-col items-center gap-3 pb-4">
                 <Avatar className="h-20 w-20 outline-2 outline-offset-2 outline-primary">
-                  <AvatarImage
-                    src={user?.profilePicture || "/users/sarah-johnson.jpeg"}
-                  />
-                  <AvatarFallback>
-                    {user?.name?.charAt(0) || "U"}
-                  </AvatarFallback>
+                  <AvatarImage src={user?.profilePicture} />
+                  <AvatarFallback>{user?.name?.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div className="text-center">
                   <p className="text-lg font-semibold">

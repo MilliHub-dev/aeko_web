@@ -38,7 +38,10 @@ export function BaseLayout({ children }: BaseLayoutProps) {
             <MobileLeftSidebar />
             <LeftSidebar />
             {/* {!isSimpleLayout && <Stories />} */}
-            <main className="relative">{children}</main>
+            <main
+              className={`relative ${showMobileHeader ? "pt-24 md:pt-0" : ""}`}>
+              {children}
+            </main>
             {!isSimpleLayout && <RightSidebar />}
           </div>
           {/* Comments drawer overlays the right sidebar on xl screens */}

@@ -9,6 +9,7 @@ interface UseCameraOptions {
 
 export function useCamera({ onError }: UseCameraOptions = {}) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
   const [devices, setDevices] = useState<MediaDeviceOption[]>([]);
   const [selectedCamera, setSelectedCamera] = useState<string>("");
@@ -64,8 +65,8 @@ export function useCamera({ onError }: UseCameraOptions = {}) {
       setIsLoading(true);
 
       // Stop existing stream
-      if (mediaStream) {
-        mediaStream.getTracks().forEach((track) => track.stop());
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
       }
 
       const constraints: MediaStreamConstraints = {
@@ -77,6 +78,7 @@ export function useCamera({ onError }: UseCameraOptions = {}) {
 
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       setMediaStream(stream);
+      streamRef.current = stream;
       setHasPermission(true);
 
       // Attach stream to video element
@@ -123,8 +125,8 @@ export function useCamera({ onError }: UseCameraOptions = {}) {
     requestMediaAccess();
 
     return () => {
-      if (mediaStream) {
-        mediaStream.getTracks().forEach((track) => track.stop());
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
       }
     };
   }, []);

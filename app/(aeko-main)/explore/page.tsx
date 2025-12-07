@@ -229,7 +229,7 @@ export default function ExplorePage() {
   return (
     <main className="relative min-h-screen overflow-hidden bg-background">
       <div className="relative z-10 mx-auto w-full px-4 pb-24 pt-8 sm:px-6 lg:px-8">
-        <header className="mb-6 flex items-center justify-between">
+        <header className="hidden md:flex mb-6 items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-card/80 text-foreground transition hover:bg-card lg:hidden"

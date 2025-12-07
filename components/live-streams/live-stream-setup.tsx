@@ -141,7 +141,7 @@ export function LiveStreamSetup({
   const microphones = camera.devices.filter((d) => d.kind === "audioinput");
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-black">
+    <div className="relative h-screen -mt-24 w-full overflow-hidden bg-black">
       {/* Camera Feed Background */}
       <div className="absolute inset-0">
         {camera.hasPermission ? (
@@ -169,19 +169,8 @@ export function LiveStreamSetup({
       </div>
 
       {/* Top Header */}
-      <header className="relative z-20 flex items-center justify-between px-4 py-4 safe-top">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => router.back()}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 backdrop-blur-md transition-colors hover:bg-black/60"
-            disabled={isSubmitting}>
-            <X className="h-5 w-5 text-white" />
-          </button>
-          <h1 className="text-xl font-semibold text-white drop-shadow-md">
-            Setup Livestream
-          </h1>
-        </div>
-
+      <header className="relative z-10 flex items-center justify-between px-4 py-4 safe-top">
+        <h2 className="text-xl font-semibold text-white">Setup Livestream</h2>
         <div className="flex items-center gap-2">
           <button
             onClick={camera.toggleMute}
@@ -253,7 +242,7 @@ export function LiveStreamSetup({
       )}
 
       {/* Main Form - Centered Overlay */}
-      <div className="absolute inset-x-0 bottom-0 z-20 px-4 pb-safe-bottom safe-bottom">
+      <div className="absolute inset-x-0 translate-y-10 md:bottom-0 z-20 px-4 md:pb-safe-bottom md:safe-bottom">
         <form
           onSubmit={handleSubmit}
           className="mx-auto max-w-lg space-y-3 pb-6">

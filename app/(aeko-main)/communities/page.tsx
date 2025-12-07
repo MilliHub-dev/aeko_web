@@ -188,7 +188,7 @@ export default function CommunitiesPage() {
 
       <div className="relative z-10 mx-auto w-full px-4 pb-24 pt-8 sm:px-6 lg:px-8">
         {/* Header */}
-        <header className="mb-6 flex items-center justify-between">
+        <header className="hidden md:flex mb-6 items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-card/80 text-foreground transition hover:bg-card lg:hidden"
@@ -339,7 +339,7 @@ export default function CommunitiesPage() {
                         Discover communities based on your interests.
                       </p>
                     </div>
-                    <div className="flex flex-wrap items-center gap-2">
+                    {/* <div className="flex flex-wrap items-center gap-2">
                       {exploreFilters.map((filter) => (
                         <button
                           key={filter}
@@ -353,7 +353,7 @@ export default function CommunitiesPage() {
                           {filter}
                         </button>
                       ))}
-                    </div>
+                    </div> */}
                   </div>
                   {filteredExploreCommunities.length > 0 ? (
                     <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">

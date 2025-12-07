@@ -27,9 +27,9 @@ export default async function ProfilePage() {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen pb-20 md:pb-0 bg-background">
+    <div className="flex flex-col min-h-screen -mt-24 pb-20 md:pb-0 md:mt-0 bg-background">
       {/* Header / Cover */}
-      <div className="relative h-48 md:h-64 w-full">
+      <div className="relative h-60 md:h-64 w-full">
         <Image
           src="/cover.png" // You might want to add a real placeholder image to public/users/
           alt="Cover"
@@ -37,13 +37,6 @@ export default async function ProfilePage() {
           className="object-cover"
           priority
         />
-        <div className="absolute top-4 left-4 z-10 md:hidden">
-          <Link
-            href="/home"
-            className="p-2 bg-black/20 backdrop-blur-sm rounded-full text-white inline-flex">
-            <ArrowLeft className="h-6 w-6" />
-          </Link>
-        </div>
       </div>
 
       <div className="px-4 relative">

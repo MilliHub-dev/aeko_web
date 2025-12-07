@@ -196,7 +196,7 @@ export function LiveStreamBroadcast({
         )}
 
         {/* Dark gradient overlay for readability */}
-        <div className="absolute inset-0 bg-linear-to-b from-black/40 via-transparent to-black/60" />
+        <div className="absolute inset-0 bg-linear-to-b from-black/60 via-transparent to-black/90" />
       </div>
 
       {/* Top Header */}

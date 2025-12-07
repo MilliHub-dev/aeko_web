@@ -42,8 +42,7 @@ export function getLayoutConfig(path: string): {
   // Keep behavior consistent with existing components:
   // - MobileHeader is not shown on /messages (component further hides on user-posts)
   // - MobileNavbar hides on user-posts route
-  const showMobileHeader =
-    path !== "/messages" && !isUserPostsRoute && path !== "/wallet";
+  const showMobileHeader = path !== "/messages" && !isUserPostsRoute;
   const showMobileNavbar = !isUserPostsRoute;
 
   return {

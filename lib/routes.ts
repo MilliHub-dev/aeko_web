@@ -37,11 +37,11 @@ export const sidebarRoutes = [
     path: "/live-streams",
     icon: RadioSolid,
   },
-  {
-    name: "Messages",
-    path: "/messages",
-    icon: ChatIcon,
-  },
+  // {
+  //   name: "Messages",
+  //   path: "/messages",
+  //   icon: ChatIcon,
+  // },
   // {
   //   name: "Notifications",
   //   path: "/notifications",

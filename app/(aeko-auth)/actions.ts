@@ -3,6 +3,7 @@
 import { createSessionToken, deleteSessionToken } from "@/lib/token";
 import { User } from "@/types/user";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { z } from "zod";
 
 const loginSchema = z.object({
@@ -32,36 +33,6 @@ type SignupResponse = {
   >;
   error?: string;
 };
-
-// const response: SignupResponse = {
-//   success: true,
-//   message: "Login successful",
-//   token:
-//     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MWFiY2NkNWFmNTQyYzMyMzc1NmJjZCIsImlhdCI6MTc2MzcwODE2NCwiZXhwIjoxNzY0MzEyOTY0fQ.ZB90-shdYNrrTFpoG56HzrsbK5rW35xcOOViGx0Howw",
-//   user: {
-//     _id: "691abccd5af542c323756bcd",
-//     name: "John Smith",
-//     username: "johnsmith",
-//     email: "maikmatt@outlook.com",
-//     profilePicture: "",
-//     bio: "",
-//     blueTick: false,
-//     goldenTick: false,
-//     aekoBalance: 0,
-//     emailVerification: { isVerified: true },
-//     profileCompletion: {
-//       hasProfilePicture: false,
-//       hasBio: false,
-//       hasFollowers: false,
-//       hasWalletConnected: false,
-//       hasVerifiedEmail: true,
-//       completedAt: null,
-//       completionPercentage: 25,
-//     },
-//     isAdmin: false,
-//     twoFactorEnabled: false,
-//   },
-// };
 
 export type LoginState = {
   message: string;
@@ -204,7 +175,101 @@ export async function signupAction(
       success: false,
     };
   }
+
+  // Redirect to verify-email with email as query param
+  redirect(`/verify-email?email=${encodeURIComponent(email as string)}`);
+}
+
+export async function verifyEmailAction(
+  prevState: { message: string; success: boolean },
+  formData: FormData
+) {
+  const code = formData.get("code");
+  const email = formData.get("email");
+
+  if (!code || typeof code !== "string" || code.length !== 4) {
+    return {
+      message: "Please enter a valid 4-digit code",
+      success: false,
+    };
+  }
+
+  try {
+    const token = (await cookies()).get("token")?.value;
+
+    const response = await fetch(
+      "https://dev.aeko.social/api/auth/verify-email",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          code,
+          email,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return {
+        message: data.message || data.error || "Verification failed",
+        success: false,
+      };
+    }
+
+    // Update session or user state if needed?
+    // Usually verification updates the user status in DB.
+  } catch (error) {
+    console.error("Verification error:", error);
+    return {
+      message: "An unexpected error occurred",
+      success: false,
+    };
+  }
+
   redirect("/interests");
+}
+
+export async function resendVerificationAction(email: string) {
+  try {
+    const token = (await cookies()).get("token")?.value;
+
+    const response = await fetch(
+      "https://dev.aeko.social/api/auth/resend-verification",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ email }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return {
+        message: data.message || data.error || "Failed to resend code",
+        success: false,
+      };
+    }
+
+    return {
+      message: "Code sent successfully",
+      success: true,
+    };
+  } catch (error) {
+    console.error("Resend error:", error);
+    return {
+      message: "An unexpected error occurred",
+      success: false,
+    };
+  }
 }
 
 export async function logoutAction() {
