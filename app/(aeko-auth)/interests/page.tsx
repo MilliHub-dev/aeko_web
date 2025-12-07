@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { Interest } from "@/types/interest";
 import { Button } from "@/components/ui/button";
 
+import Link from "next/link";
+import { Logo } from "@/components/logo";
+
 export default function InterestsPage() {
   const router = useRouter();
   const [interests, setInterests] = useState<Interest[]>([]);
@@ -93,77 +96,87 @@ export default function InterestsPage() {
   }
 
   return (
-    <main className="min-h-screen relative overflow-hidden flex justify-center items-center bg-[radial-gradient(120%_120%_at_30%_10%,#007F6D,#003B33)]">
+    <main className="min-h-screen relative overflow-hidden flex flex-col bg-[radial-gradient(120%_120%_at_30%_10%,#007F6D,#003B33)]">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_80%_at_70%_0%,transparent,rgba(0,0,0,0.04))]" />
 
-      <div className="relative mx-auto max-w-2xl px-6 py-8 sm:py-12">
-        {/* Heading */}
-        <div className="text-center mb-8 sm:mb-12">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-secondary mb-3">
-            Choose your vibe
-          </h1>
-          <p className="text-secondary/80 text-base sm:text-lg">
-            Aeko is here to give you an amazing experience!
-          </p>
+      <header className="relative z-20 mx-auto w-full max-w-[1920px] p-6 lg:px-12 lg:py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Link href="/" className="w-16 lg:w-24">
+            <Logo />
+          </Link>
         </div>
+      </header>
 
-        {/* Error message */}
-        {error && (
-          <div className="mb-6 p-4 rounded-xl bg-red-500/20 border border-red-500/30 text-red-100 text-sm">
-            {error}
+      <div className="flex-1 flex items-center justify-center">
+        <div className="relative mx-auto max-w-2xl px-6 py-8 sm:py-12">
+          {/* Heading */}
+          <div className="text-center mb-8 sm:mb-12">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-secondary mb-3">
+              Choose your vibe
+            </h1>
+            <p className="text-secondary/80 text-base sm:text-lg">
+              Aeko is here to give you an amazing experience!
+            </p>
           </div>
-        )}
 
-        {/* Interests grid */}
-        <div className="flex flex-wrap gap-3 mb-8 sm:mb-12 justify-center">
-          {interests.map((interest, index) => {
-            const isSelected = selectedInterests.has(interest._id);
+          {/* Error message */}
+          {error && (
+            <div className="mb-6 p-4 rounded-xl bg-red-500/20 border border-red-500/30 text-red-100 text-sm">
+              {error}
+            </div>
+          )}
 
-            // Define a separate set of distinct filled colors for selected state
-            const distinctFilledColors = [
-              "bg-[#5B7FE8] hover:bg-[#4B6FD8]", // Blue
-              "bg-[#FF9B7A] hover:bg-[#FF8B6A]", // Orange
-              "bg-[#E85B9F] hover:bg-[#D84B8F]", // Pink
-              "bg-[#F5C842] hover:bg-[#E5B832]", // Yellow
-              "bg-[#1A1A1A] hover:bg-[#2A2A2A]", // Dark
-              "bg-[#42F5E8] hover:bg-[#32E5D8]", // Cyan
-            ];
+          {/* Interests grid */}
+          <div className="flex flex-wrap gap-3 mb-8 sm:mb-12 justify-center">
+            {interests.map((interest, index) => {
+              const isSelected = selectedInterests.has(interest._id);
 
-            // Use outlined style for unselected, and a distinct filled color for selected
-            const variantClass = isSelected
-              ? distinctFilledColors[index % distinctFilledColors.length]
-              : "bg-transparent border-2 border-secondary hover:bg-secondary/10";
+              // Define a separate set of distinct filled colors for selected state
+              const distinctFilledColors = [
+                "bg-[#5B7FE8] hover:bg-[#4B6FD8]", // Blue
+                "bg-[#FF9B7A] hover:bg-[#FF8B6A]", // Orange
+                "bg-[#E85B9F] hover:bg-[#D84B8F]", // Pink
+                "bg-[#F5C842] hover:bg-[#E5B832]", // Yellow
+                "bg-[#1A1A1A] hover:bg-[#2A2A2A]", // Dark
+                "bg-[#42F5E8] hover:bg-[#32E5D8]", // Cyan
+              ];
 
-            return (
-              <button
-                key={interest._id}
-                onClick={() => toggleInterest(interest._id)}
-                className={`px-6 py-3 rounded-full text-secondary font-medium transition-all transform hover:scale-105 active:scale-95 flex items-center gap-2 ${variantClass} ${
-                  isSelected ? "shadow-lg" : ""
-                }`}>
-                {interest.icon && <span>{interest.icon}</span>}
-                <span>{interest.displayName}</span>
-              </button>
-            );
-          })}
+              // Use outlined style for unselected, and a distinct filled color for selected
+              const variantClass = isSelected
+                ? distinctFilledColors[index % distinctFilledColors.length]
+                : "bg-transparent border-2 border-secondary hover:bg-secondary/10";
+
+              return (
+                <button
+                  key={interest._id}
+                  onClick={() => toggleInterest(interest._id)}
+                  className={`px-6 py-3 rounded-full text-secondary font-medium transition-all transform hover:scale-105 active:scale-95 flex items-center gap-2 ${variantClass} ${
+                    isSelected ? "shadow-lg" : ""
+                  }`}>
+                  {interest.icon && <span>{interest.icon}</span>}
+                  <span>{interest.displayName}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Continue button */}
+          <div className="flex justify-center">
+            <Button
+              onClick={handleContinue}
+              disabled={selectedInterests.size === 0 || submitting}
+              className="w-full max-w-md btn-glass rounded-xl h-14 text-lg disabled:opacity-50 disabled:cursor-not-allowed">
+              {submitting ? "Saving..." : "Continue"}
+            </Button>
+          </div>
+
+          {/* Helper text */}
+          {selectedInterests.size === 0 && (
+            <p className="text-center text-secondary/60 text-sm mt-4">
+              Select at least one interest to continue
+            </p>
+          )}
         </div>
-
-        {/* Continue button */}
-        <div className="flex justify-center">
-          <Button
-            onClick={handleContinue}
-            disabled={selectedInterests.size === 0 || submitting}
-            className="w-full max-w-md btn-glass rounded-xl h-14 text-lg disabled:opacity-50 disabled:cursor-not-allowed">
-            {submitting ? "Saving..." : "Continue"}
-          </Button>
-        </div>
-
-        {/* Helper text */}
-        {selectedInterests.size === 0 && (
-          <p className="text-center text-secondary/60 text-sm mt-4">
-            Select at least one interest to continue
-          </p>
-        )}
       </div>
     </main>
   );
