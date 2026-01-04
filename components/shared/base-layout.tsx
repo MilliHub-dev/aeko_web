@@ -23,6 +23,8 @@ export function BaseLayout({ children }: BaseLayoutProps) {
   const { variant, showMobileHeader } = getLayoutConfig(path);
   const isSimpleLayout = variant === "simple";
 
+  console.log("show mobile header", showMobileHeader);
+
   // Grid column configurations for better maintainability
   const gridColsClass = isSimpleLayout
     ? LAYOUT_CONSTANTS.GRID_COLS_SIMPLE

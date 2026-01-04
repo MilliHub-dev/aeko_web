@@ -9,6 +9,7 @@ import { sidebarRoutes } from "@/lib/routes";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { LogOut } from "lucide-react";
 import { logoutAction } from "@/app/(aeko-auth)/actions";
+import { CreatePost } from "../home/create-post";
 
 const navItem = cva(
   "group relative flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition",
@@ -134,11 +135,13 @@ export function LeftSidebar() {
               <p className="mt-1 text-sm text-muted-foreground">
                 Create a new post and share what&apos;s trending.
               </p>
-              <Link
-                href="/home"
-                className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/30 transition hover:bg-primary/90">
-                Add New Post
-              </Link>
+              <CreatePost
+                trigger={
+                  <button className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/30 transition hover:bg-primary/90">
+                    Add New Post
+                  </button>
+                }
+              />
             </div>
           </div>
         </div>

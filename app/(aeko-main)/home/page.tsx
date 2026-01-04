@@ -38,7 +38,7 @@ export default function Home() {
       <ClientPostsFetcher />
       <div
         ref={containerRef}
-        className="h-dvh flex flex-col items-center overflow-y-auto snap-y snap-mandatory scrollbar-none"
+        className="h-dvh flex flex-col items-center overflow-y-auto snap-y snap-mandatory scrollbar-none -my-24 md:my-0"
         style={{
           scrollbarWidth: "none",
           msOverflowStyle: "none",

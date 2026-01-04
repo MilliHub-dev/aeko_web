@@ -22,7 +22,7 @@ type SignupResponse = {
   success: boolean;
   message: string;
   token: string;
-  user: Omit<
+  user?: Omit<
     User,
     | "status"
     | "botEnabled"
@@ -31,6 +31,7 @@ type SignupResponse = {
     | "createdAt"
     | "updatedAt"
   >;
+  userId?: string;
   error?: string;
 };
 
@@ -131,6 +132,8 @@ export async function signupAction(
     };
   }
 
+  let userId: string | undefined;
+
   try {
     const response = await fetch("https://dev.aeko.social/api/auth/signup", {
       method: "POST",
@@ -163,6 +166,8 @@ export async function signupAction(
       };
     }
 
+    userId = data.userId;
+
     // Auto-login after successful signup
     if (data.token) {
       await createSessionToken(data.token);
@@ -176,18 +181,26 @@ export async function signupAction(
     };
   }
 
-  // Redirect to verify-email with email as query param
-  redirect(`/verify-email?email=${encodeURIComponent(email as string)}`);
+  // Redirect to verify-email with email and userId as query param
+  redirect(
+    `/verify-email?email=${encodeURIComponent(
+      email as string
+    )}&userId=${encodeURIComponent(userId || "")}`
+  );
 }
 
 export async function verifyEmailAction(
   prevState: { message: string; success: boolean },
   formData: FormData
 ) {
-  const code = formData.get("code");
-  const email = formData.get("email");
+  const verificationCode = formData.get("verificationCode");
+  const userId = formData.get("userId");
 
-  if (!code || typeof code !== "string" || code.length !== 4) {
+  if (
+    !verificationCode ||
+    typeof verificationCode !== "string" ||
+    verificationCode.length !== 4
+  ) {
     return {
       message: "Please enter a valid 4-digit code",
       success: false,
@@ -206,8 +219,8 @@ export async function verifyEmailAction(
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          code,
-          email,
+          verificationCode,
+          userId,
         }),
       }
     );
@@ -234,7 +247,7 @@ export async function verifyEmailAction(
   redirect("/interests");
 }
 
-export async function resendVerificationAction(email: string) {
+export async function resendVerificationAction(userId: string) {
   try {
     const token = (await cookies()).get("token")?.value;
 
@@ -246,7 +259,7 @@ export async function resendVerificationAction(email: string) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ userId }),
       }
     );
 

@@ -15,6 +15,7 @@ const initialState = {
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
+  const userId = searchParams.get("userId");
   const [state, formAction, isPending] = useActionState(
     verifyEmailAction,
     initialState
@@ -66,11 +67,11 @@ function VerifyEmailContent() {
   };
 
   const handleResend = async () => {
-    if (!email) return;
+    if (!userId) return;
     setIsResending(true);
     setResendMessage("");
 
-    const result = await resendVerificationAction(email);
+    const result = await resendVerificationAction(userId);
     setResendMessage(result.message);
     setIsResending(false);
   };
@@ -88,8 +89,8 @@ function VerifyEmailContent() {
       </p>
 
       <form action={formAction} className="space-y-8">
-        <input type="hidden" name="email" value={email || ""} />
-        <input type="hidden" name="code" value={otp.join("")} />
+        <input type="hidden" name="userId" value={userId || ""} />
+        <input type="hidden" name="verificationCode" value={otp.join("")} />
 
         <div className="flex justify-center gap-4">
           {otp.map((digit, index) => (

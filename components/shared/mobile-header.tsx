@@ -9,7 +9,7 @@ import {
   UserPlus,
   ChevronDown,
 } from "lucide-react";
-import { Button } from "../ui/button"; // Adjust to your actual Button import
+import { Button } from "../ui/button";
 import { Logo } from "../logo";
 import { useRouteName } from "@/hooks";
 import { usePathname } from "next/navigation";

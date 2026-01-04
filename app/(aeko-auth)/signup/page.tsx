@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useActionState } from "react";
 import { LandingHeader } from "@/components/landing/landing-header";
@@ -7,6 +8,7 @@ import { FloatingCards } from "@/components/landing/floating-cards";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Eye, EyeOff } from "lucide-react";
 import { signupAction, SignupState } from "../actions";
 
 const initialState: SignupState = {
@@ -16,6 +18,8 @@ const initialState: SignupState = {
 };
 
 export default function SignupPage() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const images = [
     "/posts/street-photography.jpg",
     "/users/sarah-johnson.jpeg",
@@ -101,14 +105,26 @@ export default function SignupPage() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    placeholder="••••••••"
-                    required
-                    className="h-12 md:h-12 lg:h-14 text-base lg:text-lg px-4 placeholder:text-secondary/80"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      required
+                      className="h-12 md:h-12 lg:h-14 text-base lg:text-lg px-4 pr-10 placeholder:text-secondary/80"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary/70 hover:text-secondary focus:outline-none">
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
                   {state?.errors?.password && (
                     <p className="text-red-300 text-sm">
                       {state.errors.password[0]}
@@ -117,14 +133,28 @@ export default function SignupPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="confirm">Confirm password</Label>
-                  <Input
-                    id="confirm"
-                    name="confirm"
-                    type="password"
-                    placeholder="••••••••"
-                    required
-                    className="h-12 md:h-12 lg:h-14 text-base lg:text-lg px-4 placeholder:text-secondary/80"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="confirm"
+                      name="confirm"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      required
+                      className="h-12 md:h-12 lg:h-14 text-base lg:text-lg px-4 pr-10 placeholder:text-secondary/80"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary/70 hover:text-secondary focus:outline-none">
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
               <div className="text-sm text-secondary/90">
