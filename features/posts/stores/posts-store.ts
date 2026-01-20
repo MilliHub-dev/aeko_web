@@ -9,7 +9,7 @@ const CACHE_DURATION = 5 * 60 * 1000;
 interface PostState {
   posts: FeedPost[];
   selectedPost: FeedPost | null;
-  likedPosts: Set<string>;
+
   bookmarkedPosts: Set<string>;
   lastFetchedAt: number | null;
   isFetching: boolean;
@@ -18,7 +18,7 @@ interface PostState {
   setPosts: (posts: FeedPost[]) => void;
   setSelectedPost: (post: FeedPost | null) => void;
   updatePost: (id: string, updates: Partial<FeedPost>) => void;
-  toggleLike: (postId: string) => void;
+  toggleLike: (postId: string, userId: string) => void;
   toggleBookmark?: (postId: string) => void;
   incrementComment: (postId: string) => void;
   incrementShare?: (postId: string) => void;
@@ -32,7 +32,7 @@ export const usePostsStore = create<PostState>()(
     (set, get) => ({
       posts: [],
       selectedPost: null,
-      likedPosts: new Set(),
+
       bookmarkedPosts: new Set(),
       lastFetchedAt: null,
       isFetching: false,
@@ -45,7 +45,7 @@ export const usePostsStore = create<PostState>()(
       updatePost: (id, updates) =>
         set((state) => ({
           posts: state.posts.map((post) =>
-            post._id === id ? { ...post, ...updates } : post
+            post._id === id ? { ...post, ...updates } : post,
           ),
           selectedPost:
             state.selectedPost?._id === id
@@ -53,38 +53,57 @@ export const usePostsStore = create<PostState>()(
               : state.selectedPost,
         })),
 
-      toggleLike: (postId) =>
+      toggleLike: async (postId, userId) => {
+        const state = get();
+        const previousPosts = [...state.posts];
+        const previousSelectedPost = state.selectedPost
+          ? { ...state.selectedPost }
+          : null;
+
+        // Optimistic update
         set((state) => {
-          const isLiked = state.likedPosts.has(postId);
-          const newLikedPosts = new Set(state.likedPosts);
-
-          if (isLiked) {
-            newLikedPosts.delete(postId);
-          } else {
-            newLikedPosts.add(postId);
-          }
-
           const updatePostLikes = (post: FeedPost) => {
             if (post._id === postId) {
-              const currentLikes = post.likesCount || 0;
+              const currentLikes = post.likes || [];
+              const isLiked = currentLikes.includes(userId);
+              const newLikes = isLiked
+                ? currentLikes.filter((id) => id !== userId)
+                : [...currentLikes, userId];
+
               return {
                 ...post,
-                likesCount: isLiked
-                  ? Math.max(0, currentLikes - 1)
-                  : currentLikes + 1,
+                likes: newLikes,
+                likesCount: newLikes.length,
               };
             }
             return post;
           };
 
           return {
-            likedPosts: newLikedPosts,
             posts: state.posts.map(updatePostLikes),
             selectedPost: state.selectedPost
               ? updatePostLikes(state.selectedPost)
               : null,
           };
-        }),
+        });
+
+        try {
+          const response = await fetch(`/api/posts/like/${postId}`, {
+            method: "POST",
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to toggle like");
+          }
+        } catch (error) {
+          console.error("Error toggling like:", error);
+          // Revert changes on error
+          set({
+            posts: previousPosts,
+            selectedPost: previousSelectedPost,
+          });
+        }
+      },
 
       toggleBookmark: (postId) =>
         set((state) => {
@@ -189,7 +208,6 @@ export const usePostsStore = create<PostState>()(
     {
       name: "posts-storage",
       partialize: (state) => ({
-        likedPosts: Array.from(state.likedPosts),
         bookmarkedPosts: Array.from(state.bookmarkedPosts),
         posts: state.posts,
         lastFetchedAt: state.lastFetchedAt,
@@ -203,7 +221,7 @@ export const usePostsStore = create<PostState>()(
             ...parsed,
             state: {
               ...parsed.state,
-              likedPosts: new Set(parsed.state?.likedPosts || []),
+
               bookmarkedPosts: new Set(parsed.state?.bookmarkedPosts || []),
             },
           };
@@ -213,6 +231,6 @@ export const usePostsStore = create<PostState>()(
         },
         removeItem: (name) => localStorage.removeItem(name),
       },
-    }
-  )
+    },
+  ),
 );
