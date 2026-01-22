@@ -4,6 +4,11 @@ import { PostCard } from "@/components/home/post/post-card";
 import { usePostsStore } from "@/features/posts/stores";
 import { ClientPostsFetcher } from "@/components/home/post/client-posts-fetcher";
 import { useState, useRef, useEffect } from "react";
+// import type { Viewport } from "next";
+
+// export const viewport: Viewport = {
+//   themeColor: "black",
+// };
 
 export default function Home() {
   const posts = usePostsStore((state) => state.posts);
@@ -20,11 +25,7 @@ export default function Home() {
       const windowHeight = container.clientHeight;
       const newIndex = Math.round(scrollTop / windowHeight);
 
-      if (
-        newIndex !== activeIndex &&
-        newIndex >= 0 &&
-        newIndex < posts.length
-      ) {
+      if (newIndex !== activeIndex && newIndex >= 0 && newIndex < posts.length) {
         setActiveIndex(newIndex);
       }
     };
@@ -42,7 +43,8 @@ export default function Home() {
         style={{
           scrollbarWidth: "none",
           msOverflowStyle: "none",
-        }}>
+        }}
+      >
         {isFetching && posts.length === 0 ? (
           <div className="flex items-center justify-center p-8 h-full">
             <p className="text-muted-foreground">Loading posts...</p>
