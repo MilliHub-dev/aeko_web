@@ -22,12 +22,7 @@ interface StoryViewerProps {
 const STORY_DURATION = 5000; // 5 seconds default for images
 const VIDEO_BUFFER_TIME = 500; // Extra time after video ends
 
-const StoryViewer = ({
-  userStories,
-  storyId,
-  prevUser,
-  nextUser,
-}: StoryViewerProps) => {
+const StoryViewer = ({ userStories, storyId, prevUser, nextUser }: StoryViewerProps) => {
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -41,18 +36,18 @@ const StoryViewer = ({
   // Lock body scroll when viewer is open
   useBodyScrollLock(true);
 
-  const currentStoryIndex = userStories.stories.findIndex(
-    (s) => s.id === storyId
-  );
+  const currentStoryIndex = userStories.stories.findIndex((s) => s.id === storyId);
   const currentStory = userStories.stories[currentStoryIndex];
 
   // Define handleClose before it's used in useEffect
   const handleClose = useCallback(() => {
-    // Clear any intervals
     if (progressIntervalRef.current) {
       clearInterval(progressIntervalRef.current);
     }
-    router.back();
+    // Log the reason – helpful during debugging
+    console.info("[StoryViewer] close button → navigating to /home");
+    // Navigate to a safe, authenticated route instead of “back”
+    router.push("/home");
   }, [router]);
 
   // Error handling: if story not found, close viewer
@@ -80,9 +75,7 @@ const StoryViewer = ({
     const nextStory = userStories.stories[currentStoryIndex + 1];
 
     if (nextStory) {
-      router.replace(
-        `/home/stories/${userStories.username}/story/${nextStory.id}`
-      );
+      router.replace(`/home/stories/${userStories.username}/story/${nextStory.id}`);
     } else {
       // At last story of user - pause (Instagram behavior: stops here, doesn't auto-advance to next user)
       setIsPaused(true);
@@ -100,14 +93,8 @@ const StoryViewer = ({
 
     if (nextStory) {
       // Next story in current user
-      router.replace(
-        `/home/stories/${userStories.username}/story/${nextStory.id}`
-      );
-    } else if (
-      nextUser &&
-      Array.isArray(nextUser.stories) &&
-      nextUser.stories.length > 0
-    ) {
+      router.replace(`/home/stories/${userStories.username}/story/${nextStory.id}`);
+    } else if (nextUser && Array.isArray(nextUser.stories) && nextUser.stories.length > 0) {
       // Move to first story of next user
       const firstNextId = nextUser.stories[0].id;
       router.replace(`/home/stories/${nextUser.username}/story/${firstNextId}`);
@@ -127,19 +114,11 @@ const StoryViewer = ({
 
     if (prevStory) {
       // Previous story in current user
-      router.replace(
-        `/home/stories/${userStories.username}/story/${prevStory.id}`
-      );
-    } else if (
-      prevUser &&
-      Array.isArray(prevUser.stories) &&
-      prevUser.stories.length > 0
-    ) {
+      router.replace(`/home/stories/${userStories.username}/story/${prevStory.id}`);
+    } else if (prevUser && Array.isArray(prevUser.stories) && prevUser.stories.length > 0) {
       // Move to last story of previous user
       const lastStory = prevUser.stories[prevUser.stories.length - 1];
-      router.replace(
-        `/home/stories/${prevUser.username}/story/${lastStory.id}`
-      );
+      router.replace(`/home/stories/${prevUser.username}/story/${lastStory.id}`);
     } else {
       // No previous stories - close viewer
       handleClose();
@@ -160,7 +139,8 @@ const StoryViewer = ({
           if (prev >= 100) {
             clearInterval(progressIntervalRef.current!);
             // Use goNextStory (only advances within user, stops at last story)
-            goNextStory();
+            // Defer navigation to avoid router.replace during render
+            setTimeout(() => goNextStory(), 0);
             return 100;
           }
           return prev + increment;
@@ -297,7 +277,8 @@ const StoryViewer = ({
       defaultOpen={true}
       onOpenChange={(open) => {
         if (!open) handleClose();
-      }}>
+      }}
+    >
       <Dialog.Portal>
         <Dialog.Backdrop className="isolate relative">
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
@@ -307,7 +288,8 @@ const StoryViewer = ({
           ref={focusTrapRef}
           role="dialog"
           aria-modal="true"
-          aria-labelledby="story-viewer-title">
+          aria-labelledby="story-viewer-title"
+        >
           {/* Close Button */}
           <div className="fixed top-8 right-12 z-10">
             <Dialog.Close
@@ -315,7 +297,8 @@ const StoryViewer = ({
               className="bg-black/30 backdrop-blur-md border border-white/20 shadow-[inset_0_1px_4px_rgba(255,255,255,0.25),0_4px_10px_rgba(0,0,0,0.35),0_0_12px_rgba(255,255,255,0.15)] w-16 h-16 rounded-full flex items-center justify-center cursor-pointer select-none focus-visible:outline-2 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
               onClick={handleClose}
               aria-label="Close story viewer"
-              type="button">
+              type="button"
+            >
               <X className="w-5 h-5 text-white" />
             </Dialog.Close>
           </div>
@@ -326,7 +309,8 @@ const StoryViewer = ({
             onClick={goPrev}
             className="bg-black/30 backdrop-blur-md border border-white/20 shadow-[inset_0_1px_4px_rgba(255,255,255,0.25),0_4px_10px_rgba(0,0,0,0.35),0_0_12px_rgba(255,255,255,0.15)] w-16 h-16 rounded-full flex items-center justify-center cursor-pointer hover:bg-black/40 transition-colors z-10"
             aria-label="Previous story"
-            type="button">
+            type="button"
+          >
             <ArrowLeft className="w-6 h-6 text-white" />
           </Button>
 
@@ -338,7 +322,8 @@ const StoryViewer = ({
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
             role="region"
-            aria-label={`Story by ${userStories.username}`}>
+            aria-label={`Story by ${userStories.username}`}
+          >
             {/* Progress Bar */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-black/30 z-20">
               <div
@@ -363,16 +348,12 @@ const StoryViewer = ({
                     className="object-cover"
                   />
                 </div>
-                <span
-                  id="story-viewer-title"
-                  className="text-white font-semibold text-sm truncate">
+                <span id="story-viewer-title" className="text-white font-semibold text-sm truncate">
                   {userStories.username}
                 </span>
               </div>
               {isPaused && (
-                <div className="text-white text-xs bg-black/30 px-2 py-1 rounded">
-                  Paused
-                </div>
+                <div className="text-white text-xs bg-black/30 px-2 py-1 rounded">Paused</div>
               )}
             </div>
 
@@ -414,9 +395,7 @@ const StoryViewer = ({
                         ? "bg-white flex-1"
                         : "bg-white/30 flex-1 max-w-[40px]"
                     }`}
-                    aria-label={`Story ${index + 1} of ${
-                      userStories.stories.length
-                    }`}
+                    aria-label={`Story ${index + 1} of ${userStories.stories.length}`}
                   />
                 ))}
               </div>
@@ -429,7 +408,8 @@ const StoryViewer = ({
             onClick={goNext}
             className="bg-black/30 backdrop-blur-md border border-white/20 shadow-[inset_0_1px_4px_rgba(255,255,255,0.25),0_4px_10px_rgba(0,0,0,0.35),0_0_12px_rgba(255,255,255,0.15)] w-16 h-16 rounded-full flex items-center justify-center cursor-pointer hover:bg-black/40 transition-colors z-10"
             aria-label="Next story"
-            type="button">
+            type="button"
+          >
             <ArrowRight className="w-6 h-6 text-white" />
           </Button>
         </Dialog.Popup>

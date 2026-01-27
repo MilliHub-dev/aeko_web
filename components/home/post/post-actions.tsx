@@ -34,6 +34,7 @@ const PostActions = ({
 
   const currentLikes = storePost?.likesCount ?? likes ?? 0;
   const currentShares = storePost?.engagement?.totalShares ?? shares ?? 0;
+  const currentBookmarks = storePost?.bookmarksCount ?? bookmarks ?? 0;
   const currentComments = storePost?.commentsCount ?? comments ?? 0;
   const currentReposts = storePost?.reposts?.length ?? reposts ?? 0;
 
@@ -58,16 +59,16 @@ const PostActions = ({
           onClick={() => incrementShare && incrementShare(postId!)}
           className="cursor-pointer hover:opacity-80 transition-opacity"
         />
-        {/* <Metric
+        <Metric
           icon={
             <Bookmark
               className={`w-8 h-8 ${isBookmarked ? "fill-current" : ""}`}
             />
           }
-          value={""}
+          value={currentBookmarks}
           onClick={() => toggleBookmark && toggleBookmark(postId!)}
           className="cursor-pointer hover:opacity-80 transition-opacity"
-        /> */}
+        />
         <Metric
           icon={<MessageCircle className="w-8 h-8" />}
           value={currentComments}

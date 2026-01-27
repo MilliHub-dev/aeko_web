@@ -75,10 +75,12 @@ export interface FeedPost extends Pick<
   user: Pick<User, "_id" | "name" | "username" | "email" | "profilePicture">;
   comments: Comment[];
   likes: string[];
+  bookmarks: string[];
   reposts: [];
   originalPost: null | FeedPost;
   likesCount: number;
   commentsCount: number;
+  bookmarksCount: number;
   nftMetadataUri?: string | null;
   __v: number;
 }
@@ -141,6 +143,7 @@ const userPost: FeedPost = {
   media: "",
   type: "text",
   likes: [],
+  bookmarks: [],
   reposts: [],
   originalPost: null,
   comments: [],
@@ -158,4 +161,5 @@ const userPost: FeedPost = {
   __v: 0,
   likesCount: 0,
   commentsCount: 0,
+  bookmarksCount: 0,
 };
