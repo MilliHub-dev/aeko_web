@@ -23,8 +23,6 @@ export function BaseLayout({ children }: BaseLayoutProps) {
   const { variant, showMobileHeader } = getLayoutConfig(path);
   const isSimpleLayout = variant === "simple";
 
-  console.log("show mobile header", showMobileHeader);
-
   // Grid column configurations for better maintainability
   const gridColsClass = isSimpleLayout
     ? LAYOUT_CONSTANTS.GRID_COLS_SIMPLE
@@ -35,13 +33,15 @@ export function BaseLayout({ children }: BaseLayoutProps) {
       <UserProvider>
         <div className="relative w-full max-w-full bg-background">
           {showMobileHeader && <MobileHeader />}
-          <div
-            className={`xl:px-0 grid min-h-screen items-start ${gridColsClass}`}>
+          <div className={`xl:px-0 grid min-h-screen items-start ${gridColsClass}`}>
             <MobileLeftSidebar />
             <LeftSidebar />
-            {/* {!isSimpleLayout && <Stories />} */}
-            <main
-              className={`relative ${showMobileHeader ? "pt-24 md:pt-0" : ""}`}>
+            {!isSimpleLayout && (
+              <div className="mx-auto hidden xl:block ">
+                <Stories />
+              </div>
+            )}
+            <main className={`relative ${showMobileHeader ? "pt-24 md:pt-0" : ""}`}>
               {children}
             </main>
             {!isSimpleLayout && <RightSidebar />}

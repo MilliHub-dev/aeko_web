@@ -48,6 +48,7 @@ const PostFooter = ({
 
   const currentLikes = storePost?.likesCount ?? likes ?? 0;
   const currentShares = storePost?.engagement?.totalShares ?? 0;
+  const currentBookmarks = storePost?.bookmarksCount ?? 0;
   const currentComments = storePost?.commentsCount ?? 0;
   const currentReposts = storePost?.reposts?.length ?? 0;
 
@@ -131,16 +132,16 @@ const PostFooter = ({
           className="hover:scale-[1.05] cursor-pointer"
           onClick={() => incrementShare && incrementShare(postId!)}
         />
-        {/* <Metric
+        <Metric
           icon={
             <Bookmark
               className={`h-6 w-6 ${isBookmarked ? "fill-current" : ""}`}
             />
           }
-          value={""}
+          value={currentBookmarks}
           className="hover:scale-[1.05] cursor-pointer"
           onClick={() => toggleBookmark && toggleBookmark(postId!)}
-        /> */}
+        />
         <Metric
           icon={<MessageCircle className="h-6 w-6" />}
           value={currentComments}

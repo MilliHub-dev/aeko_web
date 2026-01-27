@@ -105,7 +105,15 @@ export const usePostsStore = create<PostState>()(
         }
       },
 
-      toggleBookmark: (postId) =>
+      toggleBookmark: async (postId) => {
+        const state = get();
+        const previousPosts = [...state.posts];
+        const previousSelectedPost = state.selectedPost
+          ? { ...state.selectedPost }
+          : null;
+        const previousBookmarkedPosts = new Set(state.bookmarkedPosts);
+
+        // Optimistic update
         set((state) => {
           const isBookmarked = state.bookmarkedPosts.has(postId);
           const newBookmarkedPosts = new Set(state.bookmarkedPosts);
@@ -116,10 +124,73 @@ export const usePostsStore = create<PostState>()(
             newBookmarkedPosts.add(postId);
           }
 
+          const updatePostBookmarks = (post: FeedPost) => {
+            if (post._id === postId) {
+              const currentBookmarks = post.bookmarks || [];
+              const newBookmarks = isBookmarked
+                ? currentBookmarks.filter(
+                    (id) => id !== state.bookmarkedPosts.values().next().value,
+                  )
+                : [...currentBookmarks, "current-user-id"]; // This will be updated by API response
+
+              return {
+                ...post,
+                bookmarks: newBookmarks,
+                bookmarksCount: newBookmarks.length,
+              };
+            }
+            return post;
+          };
+
           return {
             bookmarkedPosts: newBookmarkedPosts,
+            posts: state.posts.map(updatePostBookmarks),
+            selectedPost: state.selectedPost
+              ? updatePostBookmarks(state.selectedPost)
+              : null,
           };
-        }),
+        });
+
+        try {
+          const response = await fetch(`/api/posts/${postId}/bookmark`, {
+            method: "POST",
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to toggle bookmark");
+          }
+
+          const data = await response.json();
+
+          // Update with actual data from API
+          set((state) => {
+            const updatePostWithApiData = (post: FeedPost) => {
+              if (post._id === postId) {
+                return {
+                  ...post,
+                  bookmarksCount: data.totalBookmarks || post.bookmarksCount,
+                };
+              }
+              return post;
+            };
+
+            return {
+              posts: state.posts.map(updatePostWithApiData),
+              selectedPost: state.selectedPost
+                ? updatePostWithApiData(state.selectedPost)
+                : null,
+            };
+          });
+        } catch (error) {
+          console.error("Error toggling bookmark:", error);
+          // Revert changes on error
+          set({
+            posts: previousPosts,
+            selectedPost: previousSelectedPost,
+            bookmarkedPosts: previousBookmarkedPosts,
+          });
+        }
+      },
 
       incrementShare: (postId) =>
         set((state) => {

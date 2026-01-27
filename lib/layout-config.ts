@@ -9,8 +9,7 @@ export const LAYOUT_CONSTANTS = {
 
   // Grid column configurations
   GRID_COLS_SIMPLE: "md:grid-cols-[5.625rem_1fr] xl:grid-cols-[24rem_1fr]",
-  GRID_COLS_FULL:
-    "md:grid-cols-[5.625rem_1fr] xl:grid-cols-[24rem_minmax(0,1fr)_24rem]",
+  GRID_COLS_FULL: "md:grid-cols-[5.625rem_1fr] xl:grid-cols-[24rem_8rem_minmax(0,1fr)_24rem]",
 
   // Standard padding
   PADDING_X: "px-6 sm:px-8 lg:px-12",
@@ -27,12 +26,11 @@ export function getLayoutConfig(path: string): {
 } {
   // Matches /{handle}/posts/{id} OR /home/{handle}/posts/{id}
   const isUserPostsRoute =
-    /^\/[^/]+\/posts\/[^/]+$/.test(path) ||
-    /^\/home\/[^/]+\/posts\/[^/]+$/.test(path);
+    /^\/[^/]+\/posts\/[^/]+$/.test(path) || /^\/home\/[^/]+\/posts\/[^/]+$/.test(path);
 
   const isSimpleRoute =
     /^\/(explore|communities|wallet|nft-marketplace|messages|notifications|settings)(\/|$)/.test(
-      path
+      path,
     ) || /^\/live-streams(\/|$)/.test(path);
 
   const isLandingPage = /^\/$|^\/.+\/?$/.test(path);
