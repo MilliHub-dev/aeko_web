@@ -15,6 +15,8 @@ export async function GET() {
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Failed to fetch interests from backend:", response.status, errorText);
       return NextResponse.json(
         { success: false, error: "Failed to fetch interests" },
         { status: response.status }
@@ -38,8 +40,9 @@ export async function POST(request: Request) {
     const token = cookieStore.get("token")?.value;
 
     if (!token) {
+      console.log("DEBUG: No token found in cookies");
       return NextResponse.json(
-        { success: false, error: "Unauthorized" },
+        { success: false, error: "Unauthorized - No Token" },
         { status: 401 }
       );
     }
@@ -56,6 +59,8 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+
+    console.log("DEBUG: Sending request to backend with token:", token.substring(0, 10) + "...");
 
     const response = await fetch(`${BASE_URL}/user/interests`, {
       method: "POST",

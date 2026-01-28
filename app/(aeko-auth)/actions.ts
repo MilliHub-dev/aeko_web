@@ -27,7 +27,6 @@ type SignupResponse = {
     | "status"
     | "botEnabled"
     | "botPersonality"
-    | "solanaWalletAddress"
     | "createdAt"
     | "updatedAt"
   >;

@@ -7,7 +7,7 @@ export async function createSessionToken(token: string) {
 
   cookieStore.set("token", token, {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
     expires: expiresAt,
     sameSite: "lax",
     path: "/",
