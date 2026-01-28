@@ -12,6 +12,7 @@ interface PostState {
 
   bookmarkedPosts: Set<string>;
   lastFetchedAt: number | null;
+  lastAttemptedAt: number | null;
   isFetching: boolean;
 
   // Actions
@@ -35,6 +36,7 @@ export const usePostsStore = create<PostState>()(
 
       bookmarkedPosts: new Set(),
       lastFetchedAt: null,
+      lastAttemptedAt: null,
       isFetching: false,
 
       setPosts: (posts) =>
@@ -282,6 +284,7 @@ export const usePostsStore = create<PostState>()(
         bookmarkedPosts: Array.from(state.bookmarkedPosts),
         posts: state.posts,
         lastFetchedAt: state.lastFetchedAt,
+        lastAttemptedAt: state.lastAttemptedAt,
       }),
       storage: {
         getItem: (name) => {

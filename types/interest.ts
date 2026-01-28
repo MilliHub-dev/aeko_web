@@ -1,5 +1,6 @@
 export interface Interest {
-  _id: string;
+  id: string;
+  _id?: string; // Keeping for backward compatibility
   name: string;
   displayName: string;
   description: string;
@@ -7,7 +8,6 @@ export interface Interest {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  __v?: number;
 }
 
 export interface InterestsResponse {

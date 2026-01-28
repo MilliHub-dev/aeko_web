@@ -1,6 +1,9 @@
 import { User } from "@/types/user";
 import { redirect } from "next/navigation";
 
+// Client-side request deduplication
+let clientProfilePromise: Promise<User | null> | null = null;
+
 export async function getProfile(): Promise<User | null> {
   const isServer = typeof window === "undefined";
 
@@ -35,18 +38,32 @@ export async function getProfile(): Promise<User | null> {
   }
 
   // Client-side fallback
-  try {
-    const response = await fetch("/api/profile");
-    if (!response.ok) {
-      if (response.status === 401 || response.status === 403) {
-        redirect("/login");
-      }
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-    const data = await response.json();
-    return data.user ?? data;
-  } catch (error) {
-    console.error("Error fetching profile client-side:", error);
-    return null;
+  if (clientProfilePromise) {
+    return clientProfilePromise;
   }
+
+  clientProfilePromise = (async () => {
+    try {
+      const response = await fetch("/api/profile");
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          redirect("/login");
+        }
+        if (response.status === 429) {
+           console.error("Rate limited fetching profile");
+           return null;
+        }
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      return data.user ?? data;
+    } catch (error) {
+      console.error("Error fetching profile client-side:", error);
+      return null;
+    } finally {
+      clientProfilePromise = null;
+    }
+  })();
+
+  return clientProfilePromise;
 }

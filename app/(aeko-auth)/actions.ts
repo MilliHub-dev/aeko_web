@@ -144,6 +144,7 @@ export async function signupAction(
         username,
         email,
         password,
+        updatedAt: new Date().toISOString(),
       }),
     });
 
@@ -233,8 +234,17 @@ export async function verifyEmailAction(
       };
     }
 
-    // Update session or user state if needed?
-    // Usually verification updates the user status in DB.
+    // If the backend returns a new token (e.g. upgraded from partial to full access), save it
+    if (data.token) {
+      await createSessionToken(data.token);
+    } else {
+       // If we didn't get a new token, check if we already have one
+       const existingToken = (await cookies()).get("token")?.value;
+       if (!existingToken) {
+         // No token found, redirect to login
+         redirect("/login?verified=true");
+       }
+    }
   } catch (error) {
     console.error("Verification error:", error);
     return {

@@ -26,9 +26,18 @@ export default function InterestsPage() {
         const data = await response.json();
 
         if (data.success && data.data) {
-          setInterests(
-            data.data.filter((interest: Interest) => interest.isActive)
-          );
+          // Map data to ensure id exists
+          const validInterests = data.data
+            .filter((interest: any) => interest.isActive)
+            .map((interest: any, index: number) => {
+              const id = interest.id || interest._id || interest.name || `interest-${index}`;
+              return {
+                ...interest,
+                id: id,
+                _id: id, // Keep _id synced with id for components using it
+              };
+            });
+          setInterests(validInterests);
         } else {
           setError("Failed to load interests");
         }
@@ -77,6 +86,10 @@ export default function InterestsPage() {
       if (response.ok && data.success !== false) {
         router.push("/home");
       } else {
+        if (response.status === 401) {
+          router.push("/login?message=Session expired, please login again");
+          return;
+        }
         setError(data.error || "Failed to save interests");
         setSubmitting(false);
       }
@@ -129,7 +142,7 @@ export default function InterestsPage() {
           {/* Interests grid */}
           <div className="flex flex-wrap gap-3 mb-8 sm:mb-12 justify-center">
             {interests.map((interest, index) => {
-              const isSelected = selectedInterests.has(interest._id);
+              const isSelected = selectedInterests.has(interest.id);
 
               // Define a separate set of distinct filled colors for selected state
               const distinctFilledColors = [
@@ -148,8 +161,8 @@ export default function InterestsPage() {
 
               return (
                 <button
-                  key={interest._id}
-                  onClick={() => toggleInterest(interest._id)}
+                  key={interest.id}
+                  onClick={() => toggleInterest(interest.id)}
                   className={`px-6 py-3 rounded-full text-secondary font-medium transition-all transform hover:scale-105 active:scale-95 flex items-center gap-2 ${variantClass} ${
                     isSelected ? "shadow-lg" : ""
                   }`}>

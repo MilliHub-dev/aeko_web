@@ -5,8 +5,10 @@ import { usePostsStore } from "@/features/posts/stores";
 import { FeedPost } from "@/types/post";
 
 export function ClientPostsFetcher() {
-  const { shouldRefetch, setIsFetching, setPosts, isFetching } =
-    usePostsStore();
+  const shouldRefetch = usePostsStore((state) => state.shouldRefetch);
+  const setIsFetching = usePostsStore((state) => state.setIsFetching);
+  const setPosts = usePostsStore((state) => state.setPosts);
+  const isFetching = usePostsStore((state) => state.isFetching);
 
   useEffect(() => {
     // Check if we need to refetch

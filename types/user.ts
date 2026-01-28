@@ -25,7 +25,8 @@ export interface TwoFactorAuth {
 }
 
 export interface User {
-  _id: string;
+  id: string;
+  _id?: string; // Backward compatibility
   name: string;
   username: string;
   email: string;

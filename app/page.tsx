@@ -15,12 +15,12 @@ export default function LandingPage() {
 
 			<LandingHeader />
 
-			<section className="relative mx-auto max-w-[1920px] flex flex-col justify-center h-[calc(100vh-120px)] items-center gap-8 lg:gap-18 px-4 lg:px-12">
+			<section className="relative mx-auto max-w-[1920px] flex flex-col justify-center min-h-[calc(100vh-120px)] items-center gap-8 lg:gap-18 px-4 lg:px-12 py-10 lg:py-20">
 				<motion.h1
 					initial={{ opacity: 0, y: 16 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.5 }}
-					className="text-center font-extrabold leading-tight mt-10 text-4xl md:text-6xl lg:text-7xl  text-secondary"
+					className="text-center font-extrabold leading-tight mt-10 text-4xl md:text-5xl lg:text-6xl xl:text-7xl text-secondary"
 				>
 					Transform Your Connections into
 					<br />

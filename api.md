@@ -60,7 +60,7 @@ Authorization: Bearer <your_jwt_token>
 
 ## 🌐 Base URL
 - **Development**: `http://localhost:5000`
-- **Production**: `https://api.aeko.com`
+- **Production**: `https://dev.aeko.com`
 
 
 
