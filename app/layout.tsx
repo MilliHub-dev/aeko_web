@@ -1,7 +1,18 @@
 import { ThemeProvider } from "@/components/theme/theme-provider";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import { Toaster } from "sonner";
 import "./globals.css";
 import { equitanSans } from "@/lib/fonts";
+
+export const viewport: Viewport = {
+	themeColor: [
+		{ media: "(prefers-color-scheme: light)", color: "#ffffff" },
+		{ media: "(prefers-color-scheme: dark)", color: "#000000" }
+	],
+	width: "device-width",
+	initialScale: 1,
+	maximumScale: 1
+};
 
 export const metadata: Metadata = {
 	title: {
@@ -48,15 +59,6 @@ export const metadata: Metadata = {
 	alternates: {
 		canonical: "https://aeko.social"
 	},
-	themeColor: [
-		{ media: "(prefers-color-scheme: light)", color: "#ffffff" },
-		{ media: "(prefers-color-scheme: dark)", color: "#000000" }
-	],
-	viewport: {
-		width: "device-width",
-		initialScale: 1,
-		maximumScale: 1
-	},
 	icons: {
 		icon: "/icon.jpg",
 		shortcut: "/icon.jpg",
@@ -79,7 +81,10 @@ export default function RootLayout({
 			<body
 				className={`${equitanSans.className} antialiased`}
 			>
-				<ThemeProvider>{children}</ThemeProvider>
+				<ThemeProvider>
+					{children}
+					<Toaster richColors />
+				</ThemeProvider>
 			</body>
 		</html>
 	);

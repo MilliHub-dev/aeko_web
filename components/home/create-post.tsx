@@ -8,6 +8,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -23,7 +29,10 @@ import {
   List,
   Bold as BoldIcon,
   Italic as ItalicIcon,
-  Image as LucideImage
+  Image as LucideImage,
+  Users,
+  Lock,
+  User as UserIcon
 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -31,6 +40,8 @@ import { useMobile } from "@/hooks/use-mobile";
 import { PostType } from "@/types/post";
 import { createPostAction } from "@/app/(aeko-main)/actions";
 import { useUser } from "@/components/shared/user-context";
+import { UserSelector } from "./post/user-selector";
+import { toast } from "sonner";
 
 interface CreatePostProps {
   onPost?: (data: {
@@ -49,6 +60,9 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
   const [mediaPreview, setMediaPreview] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [postType, setPostType] = useState<PostType>("text");
+  const [privacy, setPrivacy] = useState<"public" | "followers" | "select_users" | "only_me">("public");
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [isUserSelectOpen, setIsUserSelectOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const isMobile = useMobile();
@@ -112,7 +126,11 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
       const formData = new FormData();
       formData.append("text", content);
       formData.append("type", postType);
-      formData.append("privacy", "public"); // Default to public for now
+      formData.append("privacy", privacy);
+      
+      if (privacy === "select_users" && selectedUsers.length > 0) {
+        formData.append("selectedUsers", JSON.stringify(selectedUsers));
+      }
 
       if (mediaFile) {
         formData.append("media", mediaFile);
@@ -122,6 +140,7 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
 
       if (result.success) {
         console.log("Post created successfully");
+        toast.success("Post created successfully");
         // Call the onPost callback if provided (e.g. for optimistic updates or parent notification)
         onPost?.({
           type: postType,
@@ -136,32 +155,35 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
         setIsOpen(false);
       } else {
         console.error("Failed to create post:", result.message);
+        toast.error(result.message || "Failed to create post");
         // You might want to show an error message to the user here
       }
     } catch (error) {
       console.error("Failed to create post:", error);
+      toast.error("An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        {trigger || (
-          <button
-            className="flex justify-center items-center md:size-15 lg:size-20 xl:size-16 p-3 xl:w-full xl:flex-1 xl:gap-x-3 xl:p-2 rounded-full 
-        text-black border-2 border-primary hover:bg-primary hover:text-secondary
-        xl:gap-x-3 
-        transition-all duration-200 ease-in-out">
-            <div className="flex justify-center items-center">
-              <Plus className="w-full" strokeWidth={1.5} size={35} />
-            </div>
-            <span className="hidden xl:block font-medium">Create Post</span>
-          </button>
-        )}
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] p-0 gap-0 overflow-hidden bg-background border-border rounded-2xl">
+    <>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>
+          {trigger || (
+            <button
+              className="flex justify-center items-center md:size-15 lg:size-20 xl:size-16 p-3 xl:w-full xl:flex-1 xl:gap-x-3 xl:p-2 rounded-full 
+          text-black border-2 border-primary hover:bg-primary hover:text-secondary
+          xl:gap-x-3 
+          transition-all duration-200 ease-in-out">
+              <div className="flex justify-center items-center">
+                <Plus className="w-full" strokeWidth={1.5} size={35} />
+              </div>
+              <span className="hidden xl:block font-medium">Create Post</span>
+            </button>
+          )}
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[600px] p-0 gap-0 overflow-hidden bg-background border-border rounded-2xl">
         <DialogHeader className="p-3 flex flex-row items-center justify-between border-none">
           <DialogTitle className="hidden">Create Post</DialogTitle>
           <Button
@@ -233,14 +255,37 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
               </div>
 
               <div className="pb-2 border-b border-border/40">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-6 px-2 text-primary hover:text-primary hover:bg-primary/10 rounded-full gap-2 font-semibold text-sm -ml-2"
-                >
-                  <Globe className="w-4 h-4" />
-                  Everyone can reply
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-6 px-2 text-primary hover:text-primary hover:bg-primary/10 rounded-full gap-2 font-semibold text-sm -ml-2"
+                    >
+                      {privacy === "public" && <><Globe className="w-4 h-4" /> Everyone can reply</>}
+                      {privacy === "followers" && <><Users className="w-4 h-4" /> Followers</>}
+                      {privacy === "select_users" && <><Users className="w-4 h-4" /> Specific People {selectedUsers.length > 0 && `(${selectedUsers.length})`}</>}
+                      {privacy === "only_me" && <><Lock className="w-4 h-4" /> Only Me</>}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start">
+                    <DropdownMenuItem onClick={() => setPrivacy("public")}>
+                      <Globe className="w-4 h-4 mr-2" /> Public
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setPrivacy("followers")}>
+                      <Users className="w-4 h-4 mr-2" /> Followers
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => {
+                      setPrivacy("select_users");
+                      setIsUserSelectOpen(true);
+                    }}>
+                      <UserIcon className="w-4 h-4 mr-2" /> Specific People
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setPrivacy("only_me")}>
+                      <Lock className="w-4 h-4 mr-2" /> Only Me
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
 
               {/* Tools & Post Button */}
@@ -379,5 +424,27 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
         </div>
       </DialogContent>
     </Dialog>
+
+    <Dialog open={isUserSelectOpen} onOpenChange={setIsUserSelectOpen}>
+      <DialogContent className="sm:max-w-[500px] h-[500px] flex flex-col z-[150]">
+        <DialogHeader>
+          <DialogTitle>Select People</DialogTitle>
+        </DialogHeader>
+        <UserSelector 
+          selectedUserIds={selectedUsers} 
+          onToggleUser={(userId) => {
+            setSelectedUsers(prev => 
+              prev.includes(userId) 
+                ? prev.filter(id => id !== userId)
+                : [...prev, userId]
+            );
+          }} 
+        />
+        <div className="flex justify-end pt-4">
+            <Button onClick={() => setIsUserSelectOpen(false)}>Done</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  </>
   );
 }

@@ -129,7 +129,7 @@ const StoryViewer = ({ userStories, storyId, prevUser, nextUser }: StoryViewerPr
   useEffect(() => {
     if (!currentStory || isPaused) return;
 
-    if (currentStory.mediaType === "image") {
+    if (currentStory.mediaType === "image" || currentStory.mediaType === "text") {
       const duration = currentStory.duration || STORY_DURATION;
       const interval = 50; // Update every 50ms
       const increment = (100 / duration) * interval;
@@ -270,6 +270,7 @@ const StoryViewer = ({ userStories, storyId, prevUser, nextUser }: StoryViewerPr
 
   const isImage = currentStory.mediaType === "image";
   const isVideo = currentStory.mediaType === "video";
+  const isText = currentStory.mediaType === "text";
 
   return (
     <Dialog.Root
@@ -359,7 +360,13 @@ const StoryViewer = ({ userStories, storyId, prevUser, nextUser }: StoryViewerPr
 
             {/* Media Content */}
             <div className="flex items-center justify-center w-full h-full relative">
-              {isImage ? (
+              {isText ? (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500 p-8 text-center">
+                  <p className="text-white text-2xl font-bold break-words whitespace-pre-wrap max-w-full overflow-hidden text-ellipsis">
+                    {currentStory.content}
+                  </p>
+                </div>
+              ) : isImage && currentStory.mediaUrl ? (
                 <Image
                   src={currentStory.mediaUrl}
                   alt={`Story by ${userStories.username}`}

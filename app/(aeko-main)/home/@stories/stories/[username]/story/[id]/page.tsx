@@ -50,8 +50,10 @@ export default async function StoriesPage({
 		
 		const group = storiesByUser.get(uName)!;
 		// Determine media type
-		let mediaType: "image" | "video" = "image";
-		if (status.mediaType) {
+		let mediaType: "image" | "video" | "text" = "image";
+		if (status.type === "text") {
+			mediaType = "text";
+		} else if (status.mediaType) {
 			mediaType = status.mediaType;
 		} else if (status.type === "video") {
 			mediaType = "video";
@@ -60,7 +62,8 @@ export default async function StoriesPage({
 		group.stories.push({
 			id: status._id,
 			userId: status.user._id,
-			mediaUrl: status.media || "", // Handle text stories? StoryViewer might expect a URL.
+			mediaUrl: status.media || "",
+			content: status.content,
 			mediaType: mediaType,
 			postedAt: new Date(status.createdAt).toISOString(),
 			expiresAt: new Date(status.expiresAt).toISOString(),

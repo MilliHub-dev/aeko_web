@@ -5,12 +5,29 @@ import Image from "next/image";
 import { useCallback, useMemo, useEffect, useState, useRef } from "react";
 import { useStoriesStore } from "@/features/stories/stores";
 import type { UserStoryGroup } from "@/types/story";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { ImagePlus, Type, Loader2 } from "lucide-react";
 
 /**
  * Stories sidebar
  *
  * - Fetches statuses from the proxied `/api/status` endpoint.
  * - Allows the user to create a new image/video status using a hidden file input.
+ * - Allows the user to create a new text status using a dialog.
  * - Accessibility:
  *   - Uses native `button` elements for interactive story items to avoid role hacks.
  *   - Avoids using `aria-hidden` on potentially focusable elements.
@@ -28,6 +45,11 @@ export function Stories() {
   const [stories, setStories] = useState<UserStoryGroup[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Text story state
+  const [isTextStoryOpen, setIsTextStoryOpen] = useState(false);
+  const [textContent, setTextContent] = useState("");
+  const [isPostingText, setIsPostingText] = useState(false);
 
   // Fetch active statuses (stories) from the backend API.
   const fetchStories = useCallback(async () => {
@@ -49,8 +71,13 @@ export function Stories() {
           stories: [
             {
               id: status._id,
+              userId: status.user?._id ?? "you",
               mediaUrl: Array.isArray(status.media) ? status.media[0] : (status.media ?? ""),
-              type: status.type,
+              content: status.content,
+              mediaType: status.type === "text" ? "text" : (status.mediaType ?? (status.type === "video" ? "video" : "image")),
+              postedAt: status.createdAt ?? new Date().toISOString(),
+              expiresAt: status.expiresAt ?? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+              seen: false,
             },
           ],
         }));
@@ -73,11 +100,6 @@ export function Stories() {
   const hasUnseenStories = useMemo(() => {
     return stories.some((group) => group.stories.some((s) => !isStorySeen(s.id)));
   }, [stories, isStorySeen]);
-
-  // Open the add story file picker
-  const handleAddClick = () => {
-    fileInputRef.current?.click();
-  };
 
   // Handle file selection and POST to /api/status
   const handleFileChange = useCallback(
@@ -145,46 +167,74 @@ export function Stories() {
     [fetchStories],
   );
 
+  const handleTextStorySubmit = async () => {
+    if (!textContent.trim()) return;
+
+    setIsPostingText(true);
+    try {
+      const res = await fetch("/api/status", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          type: "text",
+          content: textContent,
+        }),
+      });
+
+      const result = await res.json();
+
+      if (res.ok && result && result.success) {
+        setIsTextStoryOpen(false);
+        setTextContent("");
+        
+        if (result.data) {
+          const status = result.data;
+          const newGroup: UserStoryGroup = {
+            userId: status.user?._id ?? "you",
+            username: status.user?.username ?? "you",
+            avatarUrl: status.user?.profilePicture ?? "/placeholder-avatar.png",
+            stories: [
+              {
+                id: status._id,
+                userId: status.user?._id ?? "you",
+                mediaUrl: "",
+                content: status.content,
+                mediaType: "text",
+                postedAt: status.createdAt ?? new Date().toISOString(),
+                expiresAt: status.expiresAt ?? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+                seen: false,
+              },
+            ],
+          };
+          setStories((prev) => [newGroup, ...prev]);
+        } else {
+          await fetchStories();
+        }
+      } else {
+        console.error("Failed to create text status", result);
+        void window.alert(result?.message ?? "Failed to post text story");
+      }
+    } catch (err) {
+      console.error("Error posting text story:", err);
+      void window.alert("Failed to post text story");
+    } finally {
+      setIsPostingText(false);
+    }
+  };
+
   // Navigate to story viewer
   const openStory = (username: string, id: string) => {
     router.push(`/home/stories/${username}/story/${id}`);
   };
 
-  if (stories.length === 0) {
-    return (
-      <div className="flex w-full overflow-x-auto pb-4 pt-2 scrollbar-none md:pb-6">
-        <div className="flex gap-4 px-4">
-          <button
-            type="button"
-            onClick={handleAddClick}
-            className="group relative flex flex-col items-center gap-2"
-          >
-            <div className="relative h-16 w-16 overflow-hidden rounded-full border-2 border-dashed border-muted-foreground/30 p-[2px] transition-all group-hover:border-primary">
-              <div className="flex h-full w-full items-center justify-center rounded-full bg-muted/50">
-                <span className="text-2xl text-muted-foreground group-hover:text-primary">+</span>
-              </div>
-            </div>
-            <span className="text-xs font-medium text-muted-foreground">Add Story</span>
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*,video/*"
-            onChange={handleFileChange}
-            className="hidden"
-          />
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex w-full overflow-x-auto pb-4 pt-2 scrollbar-none md:pb-6">
-      <div className="flex gap-4 px-4">
-        {/* Add Story Button */}
+  const AddStoryButton = () => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
         <button
           type="button"
-          onClick={handleAddClick}
           className="group relative flex flex-col items-center gap-2"
         >
           <div className="relative h-16 w-16 overflow-hidden rounded-full border-2 border-dashed border-muted-foreground/30 p-[2px] transition-all group-hover:border-primary">
@@ -194,48 +244,95 @@ export function Stories() {
           </div>
           <span className="text-xs font-medium text-muted-foreground">Add Story</span>
         </button>
-        
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*,video/*"
-          onChange={handleFileChange}
-          className="hidden"
-        />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start">
+        <DropdownMenuItem onClick={() => fileInputRef.current?.click()} className="cursor-pointer">
+          <ImagePlus className="w-4 h-4 mr-2" />
+          Photo / Video
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setIsTextStoryOpen(true)} className="cursor-pointer">
+          <Type className="w-4 h-4 mr-2" />
+          Text Story
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 
-        {/* Story Items */}
-        {stories.map((group) => {
-          const hasUnseen = group.stories.some((s) => !isStorySeen(s.id));
-          return (
-            <button
-              key={group.username}
-              onClick={() => openStory(group.username, group.stories[0].id)}
-              className="group flex flex-col items-center gap-2"
-            >
-              <div
-                className={`relative h-16 w-16 rounded-full p-[2px] transition-all ${
-                  hasUnseen
-                    ? "bg-gradient-to-tr from-yellow-400 via-orange-500 to-purple-600"
-                    : "bg-border"
-                }`}
+  return (
+    <>
+      <div className="flex w-full overflow-x-auto pb-4 pt-2 scrollbar-none md:pb-6">
+        <div className="flex gap-4 px-4">
+          {/* Add Story Button */}
+          <AddStoryButton />
+          
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*,video/*"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+
+          {/* Story Items */}
+          {stories.map((group) => {
+            const hasUnseen = group.stories.some((s) => !isStorySeen(s.id));
+            return (
+              <button
+                key={group.username}
+                onClick={() => openStory(group.username, group.stories[0].id)}
+                className="group flex flex-col items-center gap-2"
               >
-                <div className="h-full w-full overflow-hidden rounded-full border-2 border-background">
-                  <Image
-                    src={group.avatarUrl}
-                    alt={group.username}
-                    width={64}
-                    height={64}
-                    className="h-full w-full object-cover transition-transform group-hover:scale-110"
-                  />
+                <div
+                  className={`relative h-16 w-16 rounded-full p-[2px] transition-all ${
+                    hasUnseen
+                      ? "bg-gradient-to-tr from-yellow-400 via-orange-500 to-purple-600"
+                      : "bg-border"
+                  }`}
+                >
+                  <div className="h-full w-full overflow-hidden rounded-full border-2 border-background">
+                    <Image
+                      src={group.avatarUrl}
+                      alt={group.username}
+                      width={64}
+                      height={64}
+                      className="h-full w-full object-cover transition-transform group-hover:scale-110"
+                    />
+                  </div>
                 </div>
-              </div>
-              <span className="w-16 truncate text-center text-xs font-medium">
-                {group.username}
-              </span>
-            </button>
-          );
-        })}
+                <span className="w-16 truncate text-center text-xs font-medium">
+                  {group.username}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
-    </div>
+
+      <Dialog open={isTextStoryOpen} onOpenChange={setIsTextStoryOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create Text Story</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <Textarea
+              placeholder="What's on your mind?"
+              className="min-h-[150px] text-lg resize-none"
+              value={textContent}
+              onChange={(e) => setTextContent(e.target.value)}
+              maxLength={500}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsTextStoryOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleTextStorySubmit} disabled={!textContent.trim() || isPostingText}>
+              {isPostingText ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              Post Story
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
