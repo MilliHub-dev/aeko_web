@@ -9,6 +9,7 @@ export function ClientPostsFetcher() {
   const setIsFetching = usePostsStore((state) => state.setIsFetching);
   const setPosts = usePostsStore((state) => state.setPosts);
   const isFetching = usePostsStore((state) => state.isFetching);
+  const markAttempt = usePostsStore((state) => state.markAttempt);
 
   useEffect(() => {
     // Check if we need to refetch
@@ -16,8 +17,9 @@ export function ClientPostsFetcher() {
       return;
     }
 
-    // Set fetching state
+    // Set fetching state and mark attempt
     setIsFetching(true);
+    markAttempt();
 
     // Fetch posts from API
     async function fetchPosts() {
@@ -27,6 +29,11 @@ export function ClientPostsFetcher() {
         if (!response.ok) {
           if (response.status === 401 || response.status === 403) {
             window.location.href = "/login";
+            return;
+          }
+          if (response.status === 429) {
+            console.warn("Rate limited fetching posts, backing off");
+            // Do nothing, shouldRefetch will prevent immediate retry due to markAttempt
             return;
           }
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -40,12 +47,13 @@ export function ClientPostsFetcher() {
         }
       } catch (error) {
         console.error("Failed to fetch posts:", error);
+      } finally {
         setIsFetching(false);
       }
     }
 
     fetchPosts();
-  }, [shouldRefetch, setIsFetching, setPosts, isFetching]);
+  }, [shouldRefetch, setIsFetching, setPosts, isFetching, markAttempt]);
 
   return null;
 }

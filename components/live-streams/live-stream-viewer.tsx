@@ -17,6 +17,7 @@ import {
   Share2,
   Send,
 } from "lucide-react";
+import { useLiveChat } from "@/features/livestream/hooks/use-live-chat";
 
 interface LiveStreamViewerProps {
   streamId: string;
@@ -34,51 +35,6 @@ interface LiveStreamViewerProps {
   isFollowing?: boolean;
 }
 
-interface ChatMessage {
-  id: number;
-  user: {
-    name: string;
-    username: string;
-    avatar: string;
-  };
-  message: string;
-  timestamp: string;
-}
-
-// Mock chat messages for demonstration
-const MOCK_MESSAGES: ChatMessage[] = [
-  {
-    id: 1,
-    user: { name: "Mercy", username: "@mercy", avatar: "🙏" },
-    message: "Yes sirr!!",
-    timestamp: "2m ago",
-  },
-  {
-    id: 2,
-    user: { name: "Mayy", username: "@mayy", avatar: "🎵" },
-    message: "I am blessed IJN",
-    timestamp: "1m ago",
-  },
-  {
-    id: 3,
-    user: { name: "Banks", username: "@banks", avatar: "🎸" },
-    message: "Ride on Sir",
-    timestamp: "30s ago",
-  },
-  {
-    id: 4,
-    user: { name: "Gwana", username: "@gwana", avatar: "😈" },
-    message: "The devil is a liar!!!",
-    timestamp: "15s ago",
-  },
-  {
-    id: 5,
-    user: { name: "Samuel", username: "@samuel", avatar: "❤️" },
-    message: "I love this message!",
-    timestamp: "5s ago",
-  },
-];
-
 export function LiveStreamViewer({
   streamId,
   title,
@@ -89,16 +45,16 @@ export function LiveStreamViewer({
   category,
   isFollowing = false,
 }: LiveStreamViewerProps) {
-  const [message, setMessage] = useState("");
+  const [inputText, setInputText] = useState("");
+  const { messages, sendMessage } = useLiveChat(streamId);
   const [currentLikes, setCurrentLikes] = useState(likes);
   const [hasLiked, setHasLiked] = useState(false);
   const [following, setFollowing] = useState(isFollowing);
 
-  const handleSendMessage = () => {
-    if (message.trim()) {
-      // In a real app, you would send the message to a backend
-      console.log("Sending message:", message);
-      setMessage("");
+  const handleSend = () => {
+    if (inputText.trim()) {
+      sendMessage(inputText);
+      setInputText("");
     }
   };
 
@@ -186,7 +142,7 @@ export function LiveStreamViewer({
       {/* Floating Chat Messages */}
       <div className="absolute bottom-32 left-0 right-0 z-10 px-4">
         <div className="flex flex-col gap-2">
-          {MOCK_MESSAGES.slice(-5).map((chat, index) => (
+          {messages.slice(-5).map((chat, index) => (
             <div
               key={chat.id}
               className="animate-slide-up w-fit max-w-[85%] rounded-2xl bg-black/30 px-4 py-2 backdrop-blur-md"
@@ -212,9 +168,9 @@ export function LiveStreamViewer({
           {/* Comment Input */}
           <div className="flex-1">
             <Input
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSend()}
               placeholder="Drop a comment....."
               className="h-12 rounded-full border-white/20 bg-black/30 px-5 text-sm text-white placeholder:text-white/60 backdrop-blur-md focus:border-white/40"
             />

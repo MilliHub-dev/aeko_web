@@ -2,8 +2,9 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
+import Image from "next/image";
 import type { SuggestedUser } from "@/types/explore";
+import { useFollowUser } from "@/features/profile/hooks/use-follow-user";
 
 interface SuggestedUsersProps {
   users: SuggestedUser[];
@@ -41,26 +42,46 @@ export function SuggestedUsers({ users }: SuggestedUsersProps) {
 }
 
 function SuggestedUserCard({ user }: { user: SuggestedUser }) {
+  const { isFollowing, isLoading, toggleFollow } = useFollowUser(
+    user._id,
+    user.isFollowing
+  );
+
   return (
     <article className="overflow-hidden rounded-[28px] border border-border/60 bg-background shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
       <div className="space-y-4 p-5">
         <div className="flex items-start gap-3">
           <Avatar className="h-14 w-14 border-2 border-border/60">
             <AvatarImage src={user.profilePicture} alt={user.name} />
-            <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+            <AvatarFallback>
+              <Image
+                src="/profile_icon.jpg"
+                alt="Profile"
+                fill
+                className="object-cover"
+              />
+            </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
               <p className="text-base font-semibold truncate">{user.name}</p>
               {user.blueTick && (
-                <div className="flex-shrink-0 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500">
-                  <Check className="h-3 w-3 text-white" />
-                </div>
+                <Image
+                  src="/blue_tick.png"
+                  alt="Verified"
+                  width={16}
+                  height={16}
+                  className="h-4 w-4 flex-shrink-0"
+                />
               )}
               {user.goldenTick && (
-                <div className="flex-shrink-0 flex h-4 w-4 items-center justify-center rounded-full bg-yellow-500">
-                  <Check className="h-3 w-3 text-white" />
-                </div>
+                <Image
+                  src="/gold_tick.png"
+                  alt="Gold Verified"
+                  width={16}
+                  height={16}
+                  className="h-4 w-4 flex-shrink-0"
+                />
               )}
             </div>
             <p className="text-sm text-muted-foreground">@{user.username}</p>
@@ -76,9 +97,11 @@ function SuggestedUserCard({ user }: { user: SuggestedUser }) {
         )}
         <Button
           className="w-full"
-          variant={user.isFollowing ? "outline" : "secondary"}
-          size="sm">
-          {user.isFollowing ? "Following" : "Follow"}
+          variant={isFollowing ? "outline" : "secondary"}
+          size="sm"
+          onClick={toggleFollow}
+          disabled={isLoading}>
+          {isFollowing ? "Following" : "Follow"}
         </Button>
       </div>
     </article>

@@ -4,14 +4,57 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { FeedPost } from "@/types/post";
+import { API_BASE_URL } from "@/lib/config";
+import { cn } from "@/lib/utils";
+
+// Helper to resolve media URLs
+const getMediaUrl = (url?: string) => {
+  if (!url) return "";
+  if (url.startsWith("http") || url.startsWith("data:")) return url;
+  
+  const localPrefixes = ["/avatars", "/posts", "/stories", "/users", "/fonts", "/icons", "/profile", "/placeholder", "/aeko", "/blue_tick", "/gold_tick", "/cover", "/demo"];
+  if (localPrefixes.some(prefix => url.startsWith(prefix))) {
+    return url;
+  }
+  
+  return `${API_BASE_URL}${url.startsWith("/") ? "" : "/"}${url}`;
+};
 
 interface PostDetailMediaProps {
   post: FeedPost;
+  className?: string;
 }
 
-export function PostDetailMedia({ post }: PostDetailMediaProps) {
+export function PostDetailMedia({ post, className }: PostDetailMediaProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  // Resolve media list
+  const mediaList = post.mediaUrls && post.mediaUrls.length > 0 
+    ? post.mediaUrls 
+    : (Array.isArray(post.media) ? post.media : (post.media ? [post.media] : []));
+    
+  const currentMedia = mediaList[currentIndex];
+  const resolvedMedia = getMediaUrl(currentMedia);
+  // Determine if video based on extension or post type (fallback)
+  const isVideo = currentMedia?.endsWith(".mp4") || currentMedia?.endsWith(".webm") || currentMedia?.endsWith(".mov") || (mediaList.length === 1 && post.type === "video");
+
+  const handleNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (currentIndex < mediaList.length - 1) {
+      setCurrentIndex(prev => prev + 1);
+    }
+  };
+
+  const handlePrev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (currentIndex > 0) {
+      setCurrentIndex(prev => prev - 1);
+    }
+  };
+
   const displayName = post.user?.name || "Unknown User";
   const displayHandle = post.user?.username || "";
   const displayProfileImage = post.user?.profilePicture || "";
@@ -27,30 +70,60 @@ export function PostDetailMedia({ post }: PostDetailMediaProps) {
   const hashtags: string[] = [];
 
   return (
-    <div className="relative w-full min-h-screen bg-black">
+    <div className={cn("relative w-full min-h-screen bg-black", className)}>
       {/* Media Content */}
-      {post.type === "image" && post.media && (
+      {resolvedMedia && (
         <div className="relative w-full h-screen">
-          <Image
-            src={post.media}
-            alt="Post media"
-            fill
-            className="object-cover"
-            priority
-          />
-        </div>
-      )}
+          {isVideo ? (
+            <video
+              src={resolvedMedia}
+              className="w-full h-full object-cover"
+              autoPlay
+              loop
+              muted
+              playsInline
+            />
+          ) : (
+            <Image
+              src={resolvedMedia}
+              alt="Post media"
+              fill
+              className="object-cover"
+              priority
+            />
+          )}
 
-      {post.type === "video" && post.media && (
-        <div className="relative w-full h-screen">
-          <video
-            src={post.media}
-            className="w-full h-full object-cover"
-            autoPlay
-            loop
-            muted
-            playsInline
-          />
+          {/* Navigation Controls */}
+          {mediaList.length > 1 && (
+             <>
+               {currentIndex > 0 && (
+                 <button 
+                   onClick={handlePrev}
+                   className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors z-20"
+                 >
+                   <ChevronLeft className="w-8 h-8" />
+                 </button>
+               )}
+               {currentIndex < mediaList.length - 1 && (
+                 <button 
+                   onClick={handleNext}
+                   className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors z-20"
+                 >
+                   <ChevronRight className="w-8 h-8" />
+                 </button>
+               )}
+               
+               {/* Pagination Dots */}
+               <div className="absolute bottom-32 left-0 right-0 flex justify-center gap-2 z-20">
+                 {mediaList.map((_, idx) => (
+                   <div 
+                     key={idx} 
+                     className={`w-1.5 h-1.5 rounded-full transition-colors ${idx === currentIndex ? "bg-white" : "bg-white/40"}`}
+                   />
+                 ))}
+               </div>
+             </>
+           )}
         </div>
       )}
 
@@ -63,7 +136,12 @@ export function PostDetailMedia({ post }: PostDetailMediaProps) {
               <Avatar className="w-12 h-12 ring-2 ring-white/20">
                 <AvatarImage src={displayProfileImage} alt={displayName} />
                 <AvatarFallback className="bg-primary text-primary-foreground">
-                  {displayName.slice(0, 2).toUpperCase()}
+                  <Image
+                    src="/profile_icon.jpg"
+                    alt="Profile"
+                    fill
+                    className="object-cover"
+                  />
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col">

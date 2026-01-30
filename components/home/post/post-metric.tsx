@@ -9,7 +9,7 @@ const Metric = ({
 	icon: React.ReactNode;
 	value?: string | number;
 	className?: string;
-	onClick?: () => void;
+	onClick?: React.MouseEventHandler<HTMLDivElement>;
 }) => {
 	return (
 		<div

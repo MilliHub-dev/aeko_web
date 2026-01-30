@@ -15,12 +15,13 @@ import {
   Coins,
   User,
   SearchIcon,
+  SettingsIcon,
 } from "lucide-react";
 import { useMobileMenu } from "./mobile-menu-context";
 import { logoutAction } from "@/app/(aeko-auth)/actions";
 
 import { useUser } from "./user-context";
-import { HomeIcon, RadioSolid } from "@/lib/icons";
+import { HomeIcon, RadioSolid, BellIcon, WalletOutline } from "@/lib/icons";
 
 export function MobileMenuDrawer() {
   const { open, closeMenu } = useMobileMenu();
@@ -51,24 +52,21 @@ export function MobileMenuDrawer() {
   const items = [
     { label: "Home", href: "/home", icon: HomeIcon },
     { label: "Explore", href: "/explore", icon: SearchIcon },
-    { label: "Profile", href: "/profile", icon: User },
+    { label: "Communities", href: "/communities", icon: Users },
     {
       label: "Live Streams",
       href: "/live-streams",
       icon: RadioSolid,
     },
-    // { label: "Wallet", href: "/wallet", icon: Wallet2 },
-    {
-      label: "Community",
-      href: "/communities",
-      icon: Users,
+    { label: "Notifications", href: "/notifications", icon: BellIcon },
+    { 
+      label: "Aeko Wallet", 
+      href: "/wallet", 
+      icon: WalletOutline,
+      badge: "Coming Soon" 
     },
-    // {
-    //   label: "NFT marketplace",
-    //   href: "/nft-marketplace",
-    //   icon: Coins,
-    // },
-    // { label: "Support", href: "/#", icon: LifeBuoy },
+    { label: "Profile", href: "/profile", icon: User },
+    { label: "Settings", href: "/settings", icon: SettingsIcon },
     { label: "Logout", href: "/#", icon: LogOut },
   ];
 
@@ -141,7 +139,7 @@ export function MobileMenuDrawer() {
                 </div>
               </div>
               <nav className="flex flex-col gap-4 py-6">
-                {items.map(({ label, href, icon: Icon }) => {
+                {items.map(({ label, href, icon: Icon, badge }) => {
                   if (label === "Logout") {
                     return (
                       <button
@@ -164,6 +162,11 @@ export function MobileMenuDrawer() {
                       onClick={closeMenu}>
                       <Icon className="shrink-0" size={22} />
                       <span>{label}</span>
+                      {badge && (
+                        <span className="ml-auto rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+                          {badge}
+                        </span>
+                      )}
                     </Link>
                   );
                 })}

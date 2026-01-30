@@ -4,6 +4,7 @@ import {
   SearchIcon,
   UsersIcon,
   CoinsIcon,
+  Bookmark,
 } from "lucide-react";
 import {
   BellIcon,
@@ -37,21 +38,27 @@ export const sidebarRoutes = [
     path: "/live-streams",
     icon: RadioSolid,
   },
-  // {
-  //   name: "Messages",
-  //   path: "/messages",
-  //   icon: ChatIcon,
-  // },
-  // {
-  //   name: "Notifications",
-  //   path: "/notifications",
-  //   icon: BellIcon,
-  // },
-  // {
-  //   name: "Aeko Wallet",
-  //   path: "/wallet",
-  //   icon: WalletOutline,
-  // },
+  {
+    name: "Messages",
+    path: "/messages",
+    icon: ChatIcon,
+  },
+  {
+    name: "Bookmarks",
+    path: "/bookmarks",
+    icon: Bookmark,
+  },
+  {
+    name: "Notifications",
+    path: "/notifications",
+    icon: BellIcon,
+  },
+  {
+    name: "Aeko Wallet",
+    path: "/wallet",
+    icon: WalletOutline,
+    badge: "Coming Soon",
+  },
   // {
   //   name: "NFT Marketplace",
   //   path: "/nft-marketplace",
@@ -62,11 +69,11 @@ export const sidebarRoutes = [
     path: "/profile",
     icon: UserOutline,
   },
-  // {
-  //   name: "Settings",
-  //   path: "/settings",
-  //   icon: SettingsIcon,
-  // },
+  {
+    name: "Settings",
+    path: "/settings",
+    icon: SettingsIcon,
+  },
 ];
 
 export const mobileRoutes = [

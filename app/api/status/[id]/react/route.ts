@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import type { StatusReactionResponse, ReactToStatusRequest } from "@/types/status";
+import { API_BASE_URL } from "@/lib/config";
 
 /**
  * POST /api/status/{id}/react
@@ -24,7 +25,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       );
     }
 
-    const externalRes = await fetch(`https://dev.aeko.social/api/status/${statusId}/react`, {
+    const externalRes = await fetch(`${API_BASE_URL}/api/status/${statusId}/react`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token?.value ?? ""}`,

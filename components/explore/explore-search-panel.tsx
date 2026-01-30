@@ -53,7 +53,14 @@ export function ExploreSearchResults({
 						>
 							<Avatar className="h-14 w-14">
 								<AvatarImage src={user.avatar} alt={user.name} />
-								<AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+								<AvatarFallback>
+									<Image
+										src="/profile_icon.jpg"
+										alt="Profile"
+										fill
+										className="object-cover"
+									/>
+								</AvatarFallback>
 							</Avatar>
 							<div className="space-y-0.5">
 								<p className="truncate text-sm font-medium text-foreground">

@@ -2,22 +2,12 @@
 
 import clsx from "clsx";
 import { motion } from "motion/react";
-import { Bookmark, Heart, MessageCircle, Share2 } from "lucide-react";
-
-import { usePostUIStore, usePostsStore } from "@/features/posts/stores";
-import { Metric } from "./post-metric";
-import { ReAeko } from "@/lib/icons";
-import { useUser } from "@/components/shared/user-context";
 
 interface PostFooterProps {
   type: "image" | "video" | "text";
   text?: string;
   hashtags: string[];
   taggedUsers: string[];
-  likes: number;
-  // shares: string;
-  // bookmarks: string;
-  comments: Comment[];
   className: string;
   isHovered: boolean;
   postId: string;
@@ -28,43 +18,18 @@ const PostFooter = ({
   text,
   hashtags = [],
   taggedUsers = [],
-  likes,
-  // shares,
-  // bookmarks,
-  comments,
   className,
   isHovered = false,
-  postId,
 }: Partial<PostFooterProps>) => {
-  const { openCommentsPanel } = usePostUIStore();
-  const { user } = useUser();
-  const { toggleLike, toggleBookmark, incrementShare, bookmarkedPosts, posts } =
-    usePostsStore();
-
-  // Get current post from store if available, otherwise use props
-  const storePost = posts.find((p) => p._id === postId);
-  const isLiked = storePost?.likes?.includes(user?._id!) ?? false;
-  const isBookmarked = bookmarkedPosts.has(postId!);
-
-  const currentLikes = storePost?.likesCount ?? likes ?? 0;
-  const currentShares = storePost?.engagement?.totalShares ?? 0;
-  const currentBookmarks = storePost?.bookmarksCount ?? 0;
-  const currentComments = storePost?.commentsCount ?? 0;
-  const currentReposts = storePost?.reposts?.length ?? 0;
-
   const isText = type === "text";
+
+  // If it's a text post, this component doesn't need to render anything
+  // as the text is handled by PostMedia (PostText) and actions are handled by PostCard
+  if (isText) return null;
 
   const detailPanel = clsx(
     "rounded-3xl px-6 py-6 shadow-[0_28px_85px_-48px_rgba(15,23,42,0.85)] transition-colors duration-300",
-    isText ? "" : "bg-white/12 border border-white/20 backdrop-blur-xl",
-    isText ? "text-slate-900" : "text-white/90",
-  );
-
-  const metricsRow = clsx(
-    "lg:hidden flex items-center justify-around gap-x-4 rounded-full px-5 py-2 transition-all duration-300",
-    isText
-      ? "text-slate-900"
-      : "bg-white/12 border border-white/20 backdrop-blur-xl text-white/90",
+    "bg-white/12 border border-white/20 backdrop-blur-xl text-white/90"
   );
 
   return (
@@ -72,17 +37,15 @@ const PostFooter = ({
       className={clsx(
         className,
         "relative z-20 flex flex-col justify-end",
-        isText
-          ? "px-0"
-          : "-mx-8 -mb-8 px-8 pb-10 pt-32 bg-linear-to-t from-slate-950/92 via-slate-950/28 to-transparent",
+        "-mx-8 -mb-8 px-8 pb-10 pt-32 bg-linear-to-t from-slate-950/92 via-slate-950/28 to-transparent"
       )}
       animate={{
         opacity: isHovered ? 1 : 0,
         y: isHovered ? 0 : 24,
       }}
       transition={{ duration: 0.35, ease: "easeOut" }}>
-      {!isText && (text || hashtags.length > 0 || taggedUsers.length > 0) && (
-        <div className="absolute inset-x-8 bottom-30 lg:bottom-10">
+      {(text || hashtags.length > 0 || taggedUsers.length > 0) && (
+        <div className="absolute inset-x-8 bottom-10">
           <div className={detailPanel}>
             {text && (
               <p className="text-base font-medium leading-relaxed md:text-lg">
@@ -108,54 +71,9 @@ const PostFooter = ({
           </div>
         </div>
       )}
-
-      <div className={metricsRow}>
-        <Metric
-          icon={
-            <Heart
-              className={`h-6 w-6 ${
-                isLiked ? "text-rose-400 fill-rose-500/80" : ""
-              }`}
-            />
-          }
-          value={currentLikes}
-          className="hover:scale-[1.05] cursor-pointer"
-          onClick={() => {
-            if (user?._id) {
-              toggleLike(postId!, user._id);
-            }
-          }}
-        />
-        <Metric
-          icon={<Share2 className="h-6 w-6" />}
-          value={currentShares}
-          className="hover:scale-[1.05] cursor-pointer"
-          onClick={() => incrementShare && incrementShare(postId!)}
-        />
-        <Metric
-          icon={
-            <Bookmark
-              className={`h-6 w-6 ${isBookmarked ? "fill-current" : ""}`}
-            />
-          }
-          value={currentBookmarks}
-          className="hover:scale-[1.05] cursor-pointer"
-          onClick={() => toggleBookmark && toggleBookmark(postId!)}
-        />
-        <Metric
-          icon={<MessageCircle className="h-6 w-6" />}
-          value={currentComments}
-          className="hover:scale-[1.05] cursor-pointer"
-          onClick={() => openCommentsPanel(postId!)}
-        />
-        <Metric
-          icon={<ReAeko strokeWidth={4} />}
-          value={currentReposts}
-          className="hover:scale-[1.05]"
-        />
-      </div>
     </motion.div>
   );
 };
 
 export { PostFooter };
+

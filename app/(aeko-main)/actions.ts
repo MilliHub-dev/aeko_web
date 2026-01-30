@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { API_BASE_URL } from "@/lib/config";
 
 export async function createPostAction(formData: FormData) {
   try {
@@ -14,7 +15,7 @@ export async function createPostAction(formData: FormData) {
       };
     }
 
-    const response = await fetch("https://dev.aeko.social/api/posts/create", {
+    const response = await fetch(`${API_BASE_URL}/api/posts/create`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,

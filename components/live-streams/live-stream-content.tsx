@@ -1,118 +1,38 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-
-import { LiveStream, LiveStreamCard, UpcomingStreamCard } from "./live-card";
-
-const STREAMS: LiveStream[] = [
-  {
-    id: 1,
-    title: "Ranked grind: Neon mains unlocked",
-    streamer: {
-      name: "KaylaRush",
-      username: "@kaylarush",
-      avatar: "/placeholder.svg",
-    },
-    category: "Gaming",
-    viewers: 4820,
-    thumbnail: "/placeholder.svg",
-    isLive: true,
-    description:
-      "High-intensity Valorant queues with live comms and chat-picked challenges.",
-    tags: ["valorant", "ranked", "fps"],
-  },
-  {
-    id: 2,
-    title: "Moonlight rooftop DJ session",
-    streamer: {
-      name: "Nova.fm",
-      username: "@nova",
-      avatar: "/placeholder.svg",
-    },
-    category: "Music",
-    viewers: 3270,
-    thumbnail: "/placeholder.svg",
-    isLive: true,
-    description:
-      "Future bass set blended with crowd requests and behind-the-track stories.",
-    tags: ["live", "futurebass", "nightmix"],
-  },
-  {
-    id: 3,
-    title: "Creator hotline: monetise your ideas",
-    streamer: {
-      name: "Studio 54",
-      username: "@studio54",
-      avatar: "/placeholder.svg",
-    },
-    category: "Talk Shows",
-    viewers: 1890,
-    thumbnail: "/placeholder.svg",
-    isLive: true,
-    description: "Live coaching on sponsorship pitches with rapid-fire audience Q&A.",
-    tags: ["creator", "business", "contracts"],
-  },
-  {
-    id: 4,
-    title: "Pick-up game under the lights",
-    streamer: {
-      name: "StreetBall TV",
-      username: "@streetball",
-      avatar: "/placeholder.svg",
-    },
-    category: "Sports",
-    viewers: 2540,
-    thumbnail: "/placeholder.svg",
-    isLive: true,
-    description:
-      "Mic'd-up commentary, slo-mo replays, and live scoreboard overlays.",
-    tags: ["hoops", "cityleague", "replays"],
-  },
-  {
-    id: 5,
-    title: "Build a Next.js design system live",
-    streamer: {
-      name: "DevMaster",
-      username: "@devmaster",
-      avatar: "/placeholder.svg",
-    },
-    category: "Education",
-    viewers: 0,
-    thumbnail: "/placeholder.svg",
-    isLive: false,
-    scheduledFor: "Today at 8:30 PM",
-    description:
-      "Refine typography scales, motion tokens, and theme switching with live code reviews.",
-    tags: ["nextjs", "design", "frontend"],
-  },
-  {
-    id: 6,
-    title: "Illustrate a cyberpunk cityscape",
-    streamer: {
-      name: "MiraSketch",
-      username: "@mira.sketch",
-      avatar: "/placeholder.svg",
-    },
-    category: "Creative",
-    viewers: 0,
-    thumbnail: "/placeholder.svg",
-    isLive: false,
-    scheduledFor: "Tomorrow at 2:00 PM",
-    description:
-      "Layer neon palettes with real-time Procreate tips and brush giveaways.",
-    tags: ["digitalart", "illustration", "tutorial"],
-  },
-];
+import { LiveStreamCard, UpcomingStreamCard } from "./live-card";
+import { useLiveStreams } from "@/features/livestream/hooks/use-live-streams";
+import { Loader2 } from "lucide-react";
 
 export function LiveStreamContent({
   activeCategory,
 }: {
   activeCategory: string;
 }) {
+  const { streams, loading, error } = useLiveStreams();
+
+  if (loading) {
+    return (
+      <div className="mt-12 flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mt-12 rounded-[28px] border border-red-200 bg-red-50 px-8 py-12 text-center text-red-600 shadow-sm dark:border-red-900/50 dark:bg-red-900/10">
+        <h3 className="text-lg font-semibold">Failed to load streams</h3>
+        <p className="mt-3 text-sm opacity-90">{error}</p>
+      </div>
+    );
+  }
+
   const filteredStreams =
     activeCategory === "All"
-      ? STREAMS
-      : STREAMS.filter((stream) => stream.category === activeCategory);
+      ? streams
+      : streams.filter((stream) => stream.category === activeCategory);
 
   const liveNow = filteredStreams.filter((stream) => stream.isLive);
   const upcoming = filteredStreams.filter((stream) => !stream.isLive);
@@ -169,9 +89,11 @@ export function LiveStreamContent({
 
       {filteredStreams.length === 0 && (
         <div className="rounded-[28px] border border-border/60 bg-card/70 px-8 py-12 text-center shadow-sm">
-          <h3 className="text-lg font-semibold">No streams yet</h3>
+          <h3 className="text-lg font-semibold">No streams found</h3>
           <p className="mt-3 text-sm text-muted-foreground">
-            Explore a different category or follow creators to see their live rooms appear here.
+            {activeCategory === "All"
+              ? "There are no live or upcoming streams right now."
+              : `There are no streams in the "${activeCategory}" category right now.`}
           </p>
         </div>
       )}

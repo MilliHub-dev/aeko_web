@@ -122,7 +122,9 @@ export interface CommunityPost {
     profilePicture: string;
   };
   text?: string;
-  media?: string;
+  media?: string | string[];
+  mediaUrl?: string;
+  mediaUrls?: string[];
   likesCount: number;
   commentsCount: number;
   sharesCount: number;

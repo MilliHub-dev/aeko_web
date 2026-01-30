@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { API_BASE_URL } from "@/lib/config";
 
 /**
  * POST /api/posts/{postId}/share-to-status
@@ -18,7 +19,7 @@ export async function POST(request: NextRequest, { params }: { params: { postId:
     const rawBody = await request.text();
     const hasBody = rawBody.length > 0;
 
-    const externalRes = await fetch(`https://dev.aeko.social/api/posts/${postId}/share-to-status`, {
+    const externalRes = await fetch(`${API_BASE_URL}/api/posts/${postId}/share-to-status`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token?.value ?? ""}`,

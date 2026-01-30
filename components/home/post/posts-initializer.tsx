@@ -10,7 +10,7 @@ interface PostsInitializerProps {
 }
 
 export function PostsInitializer({ posts, children }: PostsInitializerProps) {
-  const { setPosts, shouldRefetch, posts: cachedPosts } = usePostsStore();
+  const { setPosts } = usePostsStore();
 
   useEffect(() => {
     // Only set posts if we should refetch or if posts were actually fetched

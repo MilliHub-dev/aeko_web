@@ -38,6 +38,16 @@ export function CommunityPostCard({
     return count.toString();
   };
 
+  const getMediaSource = () => {
+    if (post.mediaUrls && post.mediaUrls.length > 0) return post.mediaUrls[0];
+    if (Array.isArray(post.media) && post.media.length > 0) return post.media[0];
+    if (typeof post.media === 'string') return post.media;
+    return post.mediaUrl;
+  };
+
+  const mediaUrl = getMediaSource();
+  const isVideo = mediaUrl?.endsWith(".mp4") || mediaUrl?.endsWith(".webm") || mediaUrl?.endsWith(".mov");
+
   return (
     <article
       className={cn(
@@ -45,15 +55,25 @@ export function CommunityPostCard({
         "hover:-translate-y-1 hover:shadow-xl hover:border-primary/30",
         className
       )}>
-      {post.media && (
+      {mediaUrl && (
         <div className="relative aspect-[4/5]">
-          <Image
-            src={post.media}
-            alt={post.text || "Post image"}
-            fill
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover"
-          />
+          {isVideo ? (
+            <video 
+              src={mediaUrl} 
+              className="w-full h-full object-cover" 
+              muted 
+              loop 
+              playsInline 
+            />
+          ) : (
+            <Image
+              src={mediaUrl}
+              alt={post.text || "Post image"}
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover"
+            />
+          )}
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
@@ -132,7 +152,7 @@ export function CommunityPostCard({
       </div>
 
       {/* Text content if no media */}
-      {!post.media && post.text && (
+      {!mediaUrl && post.text && (
         <div className="p-5">
           <p className="text-sm text-foreground line-clamp-3">{post.text}</p>
         </div>

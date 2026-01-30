@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { API_BASE_URL } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
@@ -8,18 +9,27 @@ export async function GET() {
   const token = cookieStore.get("token");
 
   try {
-    const res = await fetch("https://dev.aeko.social/api/profile", {
+    let res = await fetch(`${API_BASE_URL}/api/profile`, {
       headers: {
         Authorization: `Bearer ${token?.value}`,
       },
     });
 
-    const data = await res.json();
-
     if (!res.ok) {
-      return NextResponse.json(data, { status: res.status });
+      const errorText = await res.text();
+      console.error(`[Profile Proxy] Backend API error for URL ${res.url} (status: ${res.status}):`, errorText.substring(0, 500));
+      try {
+        const errorData = JSON.parse(errorText);
+        return NextResponse.json(errorData, { status: res.status });
+      } catch {
+        return NextResponse.json(
+          { error: `Backend API error: ${res.statusText}` },
+          { status: res.status }
+        );
+      }
     }
 
+    const data = await res.json();
     return NextResponse.json(data);
   } catch (error) {
     console.error("Proxy error:", error);

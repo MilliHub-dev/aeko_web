@@ -1,6 +1,7 @@
 import "server-only";
 import { cookies } from "next/headers";
 import { User } from "@/types/user";
+import { API_BASE_URL } from "./config";
 
 export async function getSession() {
   const cookieStore = await cookies();
@@ -16,7 +17,7 @@ export async function getCurrentUser(): Promise<User | null> {
   }
 
   try {
-    const response = await fetch("https://dev.aeko.social/api/profile", {
+    const response = await fetch(`${API_BASE_URL}/api/profile`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

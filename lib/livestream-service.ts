@@ -2,8 +2,9 @@ import type {
   LivestreamCreateData,
   LivestreamResponse,
 } from "@/types/livestream";
+import { API_BASE_URL } from "./config";
 
-const API_BASE = "https://dev.aeko.social/api";
+const API_BASE = `${API_BASE_URL}/api`;
 
 /**
  * Create a new livestream session

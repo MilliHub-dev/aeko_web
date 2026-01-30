@@ -1,10 +1,13 @@
 "use server";
 
+import "server-only";
+
 import { createSessionToken, deleteSessionToken } from "@/lib/token";
 import { User } from "@/types/user";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { z } from "zod";
+import { API_BASE_URL } from "@/lib/config";
 
 const loginSchema = z.object({
   email: z.email("Invalid email address"),
@@ -72,7 +75,7 @@ export async function loginAction(
   }
 
   try {
-    const response = await fetch("https://dev.aeko.social/api/auth/login", {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -134,7 +137,7 @@ export async function signupAction(
   let userId: string | undefined;
 
   try {
-    const response = await fetch("https://dev.aeko.social/api/auth/signup", {
+    const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -211,7 +214,7 @@ export async function verifyEmailAction(
     const token = (await cookies()).get("token")?.value;
 
     const response = await fetch(
-      "https://dev.aeko.social/api/auth/verify-email",
+      `${API_BASE_URL}/api/auth/verify-email`,
       {
         method: "POST",
         headers: {
@@ -261,7 +264,7 @@ export async function resendVerificationAction(userId: string) {
     const token = (await cookies()).get("token")?.value;
 
     const response = await fetch(
-      "https://dev.aeko.social/api/auth/resend-verification",
+      `${API_BASE_URL}/api/auth/resend-verification`,
       {
         method: "POST",
         headers: {

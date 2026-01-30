@@ -25,6 +25,7 @@ export function middleware(request: NextRequest) {
     pathname.startsWith(route)
   );
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
+  const isRootPage = pathname === "/";
 
   // If on a protected route and not authenticated, redirect to login
   if (isProtectedRoute && !token) {
@@ -34,14 +35,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // If on an auth route and authenticated, redirect to home
-  // Note: We might want to allow verify-email even if logged in, but usually not needed if verified.
-  // For now, redirecting to home is standard.
-  if (isAuthRoute && token) {
-    // Exception: If they are verifying email, maybe we let them? 
-    // But usually verify-email handles the verification token in URL, not the session token.
-    // If they are already logged in, verifying email might just update their status.
-    // Let's keep it simple: if logged in, go home. 
+  // If on an auth route OR root page, and authenticated, redirect to home
+  if ((isAuthRoute || isRootPage) && token) {
     return NextResponse.redirect(new URL("/home", request.url));
   }
 
@@ -56,8 +51,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public folder (if any specific public assets need exclusion)
+     * - public files with extensions
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|public).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:jpg|jpeg|gif|png|svg|ico|webp|js|css|woff|woff2|ttf|eot)).*)",
   ],
 };

@@ -44,7 +44,17 @@ export function ViralPosts({ posts }: ViralPostsProps) {
 }
 
 function ViralPostCard({ post }: { post: FeedPost }) {
-  const mediaUrl = post.media || "/placeholder.svg";
+  // Resolve media source handling polymorphic type
+  const getMediaSource = () => {
+    if (post.mediaUrls && post.mediaUrls.length > 0) return post.mediaUrls[0];
+    if (Array.isArray(post.media) && post.media.length > 0) return post.media[0];
+    if (typeof post.media === 'string') return post.media;
+    return post.mediaUrl;
+  };
+  
+  const rawMedia = getMediaSource();
+  const mediaUrl = rawMedia || "/placeholder.svg";
+  const isVideo = rawMedia?.endsWith(".mp4") || rawMedia?.endsWith(".webm") || rawMedia?.endsWith(".mov") || post.type === "video";
   const displayText = post.text || "";
 
   return (
@@ -53,13 +63,25 @@ function ViralPostCard({ post }: { post: FeedPost }) {
       className="group relative aspect-[9/16] overflow-hidden rounded-[24px] bg-black/5 shadow-lg transition hover:-translate-y-1 hover:shadow-2xl">
       {post.type !== "text" && (
         <>
-          <Image
-            fill
-            src={mediaUrl}
-            alt={displayText.substring(0, 50)}
-            sizes="(min-width: 1280px) 22vw, (min-width: 768px) 45vw, 100vw"
-            className="object-cover transition duration-500 group-hover:scale-[1.03]"
-          />
+          {isVideo ? (
+            <div className="absolute inset-0 w-full h-full bg-neutral-900">
+              <video 
+                src={mediaUrl} 
+                className="w-full h-full object-cover transition duration-500 group-hover:scale-[1.03]" 
+                muted 
+                loop 
+                playsInline 
+              />
+            </div>
+          ) : (
+            <Image
+              fill
+              src={mediaUrl}
+              alt={displayText.substring(0, 50)}
+              sizes="(min-width: 1280px) 22vw, (min-width: 768px) 45vw, 100vw"
+              className="object-cover transition duration-500 group-hover:scale-[1.03]"
+            />
+          )}
           <div className="absolute inset-0 bg-linear-to-b from-black/10 via-black/40 to-black/90" />
         </>
       )}
@@ -70,7 +92,12 @@ function ViralPostCard({ post }: { post: FeedPost }) {
           <Avatar className="h-9 w-9 border-2 border-white/70">
             <AvatarImage src={post.user.profilePicture} alt={post.user.name} />
             <AvatarFallback className="bg-primary text-white text-xs">
-              {post.user.name.charAt(0)}
+              <Image
+                src="/profile_icon.jpg"
+                alt="Profile"
+                fill
+                className="object-cover"
+              />
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">

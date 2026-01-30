@@ -16,16 +16,6 @@ export default async function ProfilePage() {
     );
   }
 
-  // Mock posts for grid
-  const posts = [
-    { id: 1, image: "/users/sarah-johnson.jpeg" },
-    { id: 2, image: "/users/mike-chen.jpg" },
-    { id: 3, image: "/users/alex-rivera.jpg" },
-    { id: 4, image: "/users/sarah-johnson.jpeg" },
-    { id: 5, image: "/users/mike-chen.jpg" },
-    { id: 6, image: "/users/alex-rivera.jpg" },
-  ];
-
   return (
     <div className="flex flex-col min-h-screen -mt-24 pb-20 md:pb-0 md:mt-0 bg-background">
       {/* Header / Cover */}
@@ -49,7 +39,12 @@ export default async function ProfilePage() {
               className="object-cover"
             />
             <AvatarFallback className="text-4xl">
-              {user.name.charAt(0)}
+              <Image
+                src="/profile_icon.jpg"
+                alt="Profile"
+                fill
+                className="object-cover"
+              />
             </AvatarFallback>
           </Avatar>
 
@@ -67,19 +62,19 @@ export default async function ProfilePage() {
         <div className="flex justify-center items-center gap-12 mb-8">
           <div className="flex flex-col items-center">
             <span className="text-lg font-bold text-foreground">
-              {user.posts.length}
+              {user.posts?.length || 0}
             </span>
             <span className="text-sm text-muted-foreground">Posts</span>
           </div>
           <div className="flex flex-col items-center">
             <span className="text-lg font-bold text-foreground">
-              {user.followers.length}
+              {user.followers?.length || 0}
             </span>
             <span className="text-sm text-muted-foreground">Followers</span>
           </div>
           <div className="flex flex-col items-center">
             <span className="text-lg font-bold text-foreground">
-              {user.following.length}
+              {user.following?.length || 0}
             </span>
             <span className="text-sm text-muted-foreground">Following</span>
           </div>
@@ -107,21 +102,53 @@ export default async function ProfilePage() {
         </TabsList>
 
         <TabsContent value="grid" className="mt-0">
-          {user.posts.length > 0 ? (
+          {user.posts?.length > 0 ? (
             <div className="grid grid-cols-3 gap-0.5 md:gap-4 md:p-4">
-              {user.posts.map((post) => (
-                <div
-                  key={post._id}
-                  className="relative aspect-4/5 bg-muted overflow-hidden">
-                  <Image
-                    src={post.media || ""}
-                    alt={`Post ${post._id}`}
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    className="object-cover hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-              ))}
+              {user.posts.map((post) => {
+                const getMediaSource = () => {
+                  if (post.mediaUrls && post.mediaUrls.length > 0) return post.mediaUrls[0];
+                  if (Array.isArray(post.media) && post.media.length > 0) return post.media[0];
+                  if (typeof post.media === 'string') return post.media;
+                  return post.mediaUrl;
+                };
+                const mediaUrl = getMediaSource();
+                const isVideo = mediaUrl?.endsWith(".mp4") || mediaUrl?.endsWith(".webm") || mediaUrl?.endsWith(".mov") || post.type === "video";
+
+                return (
+                  <div
+                    key={post._id}
+                    className="relative aspect-4/5 bg-muted overflow-hidden group">
+                    {mediaUrl && (
+                      isVideo ? (
+                        <div className="w-full h-full relative">
+                          <video 
+                            src={mediaUrl} 
+                            className="w-full h-full object-cover" 
+                            muted 
+                            loop
+                            playsInline
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                            <div className="p-2 bg-black/40 rounded-full backdrop-blur-sm">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-white">
+                                <path fillRule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <Image
+                          src={mediaUrl}
+                          alt={`Post ${post._id}`}
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          className="object-cover hover:scale-105 transition-transform duration-300"
+                        />
+                      )
+                    )}
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center text-center space-y-4 text-muted-foreground p-8">

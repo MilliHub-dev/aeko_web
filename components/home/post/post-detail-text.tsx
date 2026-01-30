@@ -2,6 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import { UserPlus } from "lucide-react";
 import { FeedPost } from "@/types/post";
 
@@ -26,7 +27,12 @@ export function PostDetailText({ post }: PostDetailTextProps) {
           <Avatar className="w-12 h-12">
             <AvatarImage src={displayProfileImage} alt={displayName} />
             <AvatarFallback>
-              {displayName.slice(0, 2).toUpperCase()}
+              <Image
+                src="/profile_icon.jpg"
+                alt="Profile"
+                fill
+                className="object-cover"
+              />
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col">

@@ -6,13 +6,15 @@ import { MobileNavbar } from "./mobile-navbar";
 import { MobileHeader } from "./mobile-header";
 import { MobileLeftSidebar } from "./mobile-left-sidebar";
 import { usePathname } from "next/navigation";
-import { Stories } from "../home/story/stories";
 import { getLayoutConfig, LAYOUT_CONSTANTS } from "@/lib/layout-config";
 import { CommentsPanel } from "@/components/home/post/comments-panel";
 import { CommentsMobileModal } from "@/components/home/post/comments-mobile-modal";
 import { MobileMenuProvider } from "./mobile-menu-context";
 import { MobileMenuDrawer } from "./mobile-menu-drawer";
 import { UserProvider } from "./user-context";
+
+import { CreatePost } from "@/components/home/create-post";
+import { Plus } from "lucide-react";
 
 interface BaseLayoutProps {
   children: React.ReactNode;
@@ -36,11 +38,6 @@ export function BaseLayout({ children }: BaseLayoutProps) {
           <div className={`xl:px-0 grid min-h-screen items-start ${gridColsClass}`}>
             <MobileLeftSidebar />
             <LeftSidebar />
-            {!isSimpleLayout && (
-              <div className="mx-auto hidden xl:block ">
-                <Stories />
-              </div>
-            )}
             <main className={`relative ${showMobileHeader ? "pt-24 md:pt-0" : ""}`}>
               {children}
             </main>
@@ -55,6 +52,19 @@ export function BaseLayout({ children }: BaseLayoutProps) {
             <MobileMenuDrawer />
           </div>
           <MobileNavbar />
+          
+          {/* Floating Create Post Button (Desktop only) */}
+          {!isSimpleLayout && (
+            <div className="hidden md:flex fixed bottom-8 right-8 z-50">
+              <CreatePost
+                trigger={
+                  <button className="bg-primary text-white hover:bg-primary/90 rounded-full w-14 h-14 flex items-center justify-center shadow-lg transition-transform hover:scale-105">
+                    <Plus size={28} />
+                  </button>
+                }
+              />
+            </div>
+          )}
         </div>
       </UserProvider>
     </MobileMenuProvider>

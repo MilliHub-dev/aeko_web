@@ -49,7 +49,7 @@ export function Stories() {
           stories: [
             {
               id: status._id,
-              mediaUrl: status.media ?? "",
+              mediaUrl: Array.isArray(status.media) ? status.media[0] : (status.media ?? ""),
               type: status.type,
             },
           ],
@@ -79,18 +79,6 @@ export function Stories() {
     fileInputRef.current?.click();
   };
 
-  // Helper to read a File as data URL
-  const readFileAsDataUrl = (file: File): Promise<string> =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onerror = () => reject(new Error("Failed to read file"));
-      reader.onload = () => {
-        if (typeof reader.result === "string") resolve(reader.result);
-        else reject(new Error("Unexpected file reader result"));
-      };
-      reader.readAsDataURL(file);
-    });
-
   // Handle file selection and POST to /api/status
   const handleFileChange = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,22 +88,17 @@ export function Stories() {
       setIsUploading(true);
 
       try {
-        const dataUrl = await readFileAsDataUrl(file);
         const mediaType = file.type.startsWith("video") ? "video" : "image";
 
-        const body = {
-          type: mediaType as "image" | "video",
-          media: dataUrl,
-          mediaType,
-        };
+        const formData = new FormData();
+        formData.append("type", mediaType);
+        formData.append("media", file);
+        formData.append("mediaType", mediaType);
 
         const res = await fetch("/api/status", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
           credentials: "include",
-          body: JSON.stringify(body),
+          body: formData,
         });
 
         const result = await res.json();
@@ -125,13 +108,18 @@ export function Stories() {
           if (result.data) {
             const status = result.data;
             const newGroup: UserStoryGroup = {
+              userId: status.user?._id ?? "you",
               username: status.user?.username ?? "you",
               avatarUrl: status.user?.profilePicture ?? "/placeholder-avatar.png",
               stories: [
                 {
                   id: status._id,
+                  userId: status.user?._id ?? "you",
                   mediaUrl: status.media ?? "",
-                  type: status.type,
+                  mediaType: status.type === "video" ? "video" : "image",
+                  postedAt: status.createdAt ?? new Date().toISOString(),
+                  expiresAt: status.expiresAt ?? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+                  seen: false,
                 },
               ],
             };
@@ -164,41 +152,20 @@ export function Stories() {
 
   if (stories.length === 0) {
     return (
-      <aside
-        className="sticky top-6 hidden h-[calc(100vh-3rem)] w-24 shrink-0 md:flex"
-        aria-label="Stories sidebar"
-      >
-        <div className="relative flex h-full w-full flex-col items-center overflow-hidden border-none">
-          <div className="flex flex-col items-center justify-center h-full text-center px-4">
-            <p className="text-xs text-muted-foreground">No stories available</p>
-            <button
-              type="button"
-              onClick={handleAddClick}
-              className="mt-3 inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground"
-              aria-label="Add a new story"
-            >
-              Add story
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*,video/*"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-          </div>
-        </div>
-      </aside>
-    );
-  }
-
-  return (
-    <aside
-      className="sticky top-6 hidden h-[calc(100vh-3rem)] w-24 shrink-0 md:flex"
-      aria-label="Stories sidebar"
-    >
-      <div className="relative flex h-full w-full flex-col items-center overflow-hidden">
-        <div className="mt-6 flex flex-col items-center gap-3 px-4">
+      <div className="flex w-full overflow-x-auto pb-4 pt-2 scrollbar-none md:pb-6">
+        <div className="flex gap-4 px-4">
+          <button
+            type="button"
+            onClick={handleAddClick}
+            className="group relative flex flex-col items-center gap-2"
+          >
+            <div className="relative h-16 w-16 overflow-hidden rounded-full border-2 border-dashed border-muted-foreground/30 p-[2px] transition-all group-hover:border-primary">
+              <div className="flex h-full w-full items-center justify-center rounded-full bg-muted/50">
+                <span className="text-2xl text-muted-foreground group-hover:text-primary">+</span>
+              </div>
+            </div>
+            <span className="text-xs font-medium text-muted-foreground">Add Story</span>
+          </button>
           <input
             ref={fileInputRef}
             type="file"
@@ -206,73 +173,69 @@ export function Stories() {
             onChange={handleFileChange}
             className="hidden"
           />
-
-          <button
-            type="button"
-            onClick={handleAddClick}
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md shadow-primary/30 transition hover:bg-primary/90 focus-visible:outline-2 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-            aria-label="Create new story"
-            disabled={isUploading}
-          >
-            {isUploading ? (
-              <span aria-hidden="true" className="animate-pulse">
-                ...
-              </span>
-            ) : (
-              "+"
-            )}
-          </button>
-
-          <p className="text-[10px] uppercase tracking-[0.35em] text-muted-foreground">
-            {isUploading ? "Uploading" : "New"}
-          </p>
-
-          {/* Simple visual indicator if there are unseen stories */}
-          <div className="mt-2" aria-hidden="true">
-            {hasUnseenStories ? <span className="text-[10px] text-green-400">•</span> : null}
-          </div>
-        </div>
-
-        <div className="mt-4 flex-1 w-full overflow-y-auto pb-6 pr-1">
-          <div className="flex flex-col items-center gap-5 pt-2">
-            {stories.map((group) => {
-              const firstStory = group.stories?.[0];
-              if (!firstStory) return null;
-              const unseen = group.stories.some((s) => !isStorySeen(s.id));
-
-              return (
-                <button
-                  key={group.username}
-                  type="button"
-                  onClick={() => openStory(group.username, firstStory.id)}
-                  className="flex flex-col items-center gap-2 text-center text-muted-foreground transition hover:text-foreground cursor-pointer group"
-                  aria-label={`View stories by ${group.username}`}
-                >
-                  <div
-                    className="relative h-12 w-12 overflow-hidden rounded-full border-2 border-border/60 shadow-inner outline-primary/30 outline-4 outline-offset-4 transition-all group-hover:border-primary/50"
-                    aria-hidden="false"
-                  >
-                    <Image
-                      src={group.avatarUrl}
-                      alt={`${group.username}'s avatar`}
-                      fill
-                      className="object-cover"
-                      sizes="48px"
-                    />
-                    {unseen && (
-                      <span
-                        className="absolute inset-0 rounded-full border-2 border-primary pointer-events-none"
-                        aria-label="Unseen stories"
-                      />
-                    )}
-                  </div>
-                  <p className="w-16 truncate text-[11px]">{group.username}</p>
-                </button>
-              );
-            })}
-          </div>
         </div>
       </div>
-    </aside>
+    );
+  }
+
+  return (
+    <div className="flex w-full overflow-x-auto pb-4 pt-2 scrollbar-none md:pb-6">
+      <div className="flex gap-4 px-4">
+        {/* Add Story Button */}
+        <button
+          type="button"
+          onClick={handleAddClick}
+          className="group relative flex flex-col items-center gap-2"
+        >
+          <div className="relative h-16 w-16 overflow-hidden rounded-full border-2 border-dashed border-muted-foreground/30 p-[2px] transition-all group-hover:border-primary">
+            <div className="flex h-full w-full items-center justify-center rounded-full bg-muted/50">
+              <span className="text-2xl text-muted-foreground group-hover:text-primary">+</span>
+            </div>
+          </div>
+          <span className="text-xs font-medium text-muted-foreground">Add Story</span>
+        </button>
+        
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*,video/*"
+          onChange={handleFileChange}
+          className="hidden"
+        />
+
+        {/* Story Items */}
+        {stories.map((group) => {
+          const hasUnseen = group.stories.some((s) => !isStorySeen(s.id));
+          return (
+            <button
+              key={group.username}
+              onClick={() => openStory(group.username, group.stories[0].id)}
+              className="group flex flex-col items-center gap-2"
+            >
+              <div
+                className={`relative h-16 w-16 rounded-full p-[2px] transition-all ${
+                  hasUnseen
+                    ? "bg-gradient-to-tr from-yellow-400 via-orange-500 to-purple-600"
+                    : "bg-border"
+                }`}
+              >
+                <div className="h-full w-full overflow-hidden rounded-full border-2 border-background">
+                  <Image
+                    src={group.avatarUrl}
+                    alt={group.username}
+                    width={64}
+                    height={64}
+                    className="h-full w-full object-cover transition-transform group-hover:scale-110"
+                  />
+                </div>
+              </div>
+              <span className="w-16 truncate text-center text-xs font-medium">
+                {group.username}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }

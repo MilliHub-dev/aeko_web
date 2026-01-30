@@ -1,17 +1,14 @@
 "use client";
 
 import { Dialog } from "@base-ui-components/react/dialog";
-
-import Image from "next/image";
-
 import { CommentSection } from "./post-modal-comment";
-
 import { X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useRouter } from "next/navigation";
-import { PostProps } from "@/types/post";
+import { FeedPost } from "@/types/post";
+import { PostDetailMedia } from "./post-detail-media";
 
-interface PostModalProps extends PostProps {
+interface PostModalProps extends Partial<FeedPost> {
 	isOpen: boolean;
 }
 
@@ -24,6 +21,8 @@ const PostModal = ({
 	const handleClose = () => {
 		router.back();
 	};
+
+	const post = props as FeedPost;
 
 	return (
 		<AnimatePresence>
@@ -66,40 +65,8 @@ const PostModal = ({
 								className="z-50 grid grid-cols-3 bg-background h-full"
 							>
 								{/* Media Section */}
-								<div className="col-span-2 bg-black relative">
-									{props.type ===
-										"image" &&
-										props.backgroundImage && (
-											<div className="relative w-full h-full">
-												<Image
-													src={
-														props.backgroundImage
-													}
-													alt="Post media"
-													fill
-													className="object-contain"
-													priority
-												/>
-											</div>
-										)}
-									{props.type ===
-										"video" &&
-										props.videoSrc && (
-											<div className="relative w-full h-full">
-												<video
-													src={
-														props.videoSrc
-													}
-													className="aspect-square object-contain"
-													controls
-													poster={
-														props.backgroundImage
-													}
-													loop
-													muted
-												/>
-											</div>
-										)}
+								<div className="col-span-2 bg-black relative flex items-center justify-center">
+									<PostDetailMedia post={post} className="min-h-0 h-full" />
 								</div>
 
 								{/* Content Panel */}
@@ -123,37 +90,13 @@ const PostModal = ({
 										{/* Caption */}
 										<div>
 											<p className="text-sm md:text-base leading-relaxed mb-2">
-												{
-													props.content
-												}
+												{post.text}
 											</p>
-											<div className="flex flex-wrap gap-2">
-												{props.hashtags?.map(
-													(
-														tag,
-														index
-													) => (
-														<span
-															key={
-																index
-															}
-															className="text-primary hover:underline cursor-pointer text-xs md:text-sm"
-														>
-															#
-															{
-																tag
-															}
-														</span>
-													)
-												)}
-											</div>
 										</div>
 
 										{/* Comments */}
 										<CommentSection
-											postId={
-												props.username!
-											}
+											postId={post._id}
 										/>
 									</div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 interface MemberAvatarStackProps {
@@ -44,7 +45,12 @@ export function MemberAvatarStack({
             )}>
             <AvatarImage src={avatar} alt="Community member" />
             <AvatarFallback className="bg-primary/20 text-[10px] text-white">
-              CM
+              <Image
+                src="/profile_icon.jpg"
+                alt="Profile"
+                fill
+                className="object-cover"
+              />
             </AvatarFallback>
           </Avatar>
         ))}

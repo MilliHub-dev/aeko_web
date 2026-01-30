@@ -36,7 +36,9 @@ export interface Post {
   user: Partial<User>;
   originalOwner: Partial<User> | null;
   text?: string;
-  media?: string;
+  media?: string | string[];
+  mediaUrl?: string;
+  mediaUrls?: string[];
   type: PostType;
   privacy: Privacy;
   views: number;
@@ -57,6 +59,8 @@ export interface FeedPost extends Pick<
   | "_id"
   | "text"
   | "media"
+  | "mediaUrl"
+  | "mediaUrls"
   | "type"
   | "engagement"
   | "views"

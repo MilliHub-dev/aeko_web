@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Logo } from "../logo";
+import Image from "next/image";
 import { useRouteName } from "@/hooks";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -69,8 +70,15 @@ const MobileHeader = () => {
     }
     if (isHome) {
       return (
-        <div className="w-16 h-16 flex items-center justify-center">
-          <Logo />
+        <div className="flex items-center justify-center">
+          <Image 
+            src="/aeko-logo.png" 
+            alt="Aeko" 
+            width={120} 
+            height={40} 
+            className="w-auto h-8 object-contain" 
+            priority
+          />
         </div>
       );
     }
@@ -91,7 +99,15 @@ const MobileHeader = () => {
     }
     if (isLiveStream) return;
     if (isExplore) return <div className="flex items-center gap-2 ml-12"></div>;
-    if (isHome) return <div className="flex items-center gap-2 ml-12"></div>;
+    if (isHome) {
+      return (
+        <Link
+          href="/messages"
+          className="rounded-full bg-secondary hover:bg-primary hover:text-secondary h-15 w-15 md:h-13 md:w-13 flex justify-center items-center">
+          <ChatIcon className="size-6" />
+        </Link>
+      );
+    }
     if (isCommunities) {
       return (
         <div className="flex justify-center items-center space-x-4">

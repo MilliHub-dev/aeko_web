@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { API_BASE_URL } from "@/lib/config";
 
 export async function POST(
   request: NextRequest,
@@ -11,7 +12,7 @@ export async function POST(
 
   try {
     const res = await fetch(
-      `https://dev.aeko.social/api/posts/${postId}/bookmark`,
+      `${API_BASE_URL}/api/posts/${postId}/bookmark`,
       {
         method: "POST",
         headers: {

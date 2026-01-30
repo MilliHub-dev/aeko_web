@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { API_BASE_URL } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
@@ -9,10 +10,10 @@ export async function GET(request: NextRequest) {
 
   // Get search query from URL
   const searchParams = request.nextUrl.searchParams;
-  const query = searchParams.get("q") || "";
+  const query = searchParams.get("q") || searchParams.get("search") || "";
 
   try {
-    const url = new URL("https://dev.aeko.social/api/users");
+    const url = new URL(`${API_BASE_URL}/api/users`);
     if (query) {
       url.searchParams.set("search", query);
     }

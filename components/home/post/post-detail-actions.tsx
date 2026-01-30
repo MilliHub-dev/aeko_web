@@ -3,9 +3,14 @@
 import { Heart, Share2, Bookmark, MessageCircle } from "lucide-react";
 import { ReAeko } from "@/lib/icons";
 import { usePostsStore } from "@/features/posts/stores";
+import { useUser } from "@/components/shared/user-context";
+import { useState } from "react";
+import { SharePostModal } from "./share-post-modal";
+import { FeedPost } from "@/types/post";
 
 interface PostDetailActionsProps {
   postId: string;
+  post?: FeedPost;
   likes: number;
   shares: number;
   bookmarks: number;
@@ -15,6 +20,7 @@ interface PostDetailActionsProps {
 
 export function PostDetailActions({
   postId,
+  post,
   likes,
   shares,
   bookmarks,
@@ -25,16 +31,20 @@ export function PostDetailActions({
     toggleLike,
     toggleBookmark,
     incrementShare,
-    likedPosts,
+    repost,
     bookmarkedPosts,
     posts,
   } = usePostsStore();
-
-  const isLiked = likedPosts.has(postId);
-  const isBookmarked = bookmarkedPosts.has(postId);
+  const { user } = useUser();
+  const userId = user?._id ?? user?.id;
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   // Get current post from store if available, otherwise use props
-  const storePost = posts.find((p) => p._id === postId);
+  const storePost = posts.find((p) => p._id === postId) || post;
+
+  const isLiked = userId ? (storePost?.likes?.includes(userId) ?? false) : false;
+  const isBookmarked = bookmarkedPosts.has(postId);
+
   const currentLikes = storePost?.likesCount ?? likes ?? 0;
   const currentShares = storePost?.engagement?.totalShares ?? shares ?? 0;
   const currentComments = storePost?.commentsCount ?? comments ?? 0;
@@ -55,7 +65,7 @@ export function PostDetailActions({
       <div className="flex items-center justify-around gap-4">
         {/* Like */}
         <button
-          onClick={() => toggleLike(postId)}
+          onClick={() => userId && toggleLike(postId, userId)}
           className="flex items-center gap-2 hover:opacity-70 transition-opacity group">
           <Heart
             className={`w-6 h-6 transition-colors ${
@@ -70,7 +80,7 @@ export function PostDetailActions({
 
         {/* Share */}
         <button
-          onClick={() => incrementShare && incrementShare(postId)}
+          onClick={() => setIsShareModalOpen(true)}
           className="flex items-center gap-2 hover:opacity-70 transition-opacity">
           <Share2 className="w-6 h-6" />
           <span className="text-sm font-medium">
@@ -99,13 +109,23 @@ export function PostDetailActions({
         </button>
 
         {/* Repost */}
-        <button className="flex items-center gap-2 hover:opacity-70 transition-opacity">
+        <button
+          onClick={() => repost && repost(postId)}
+          className="flex items-center gap-2 hover:opacity-70 transition-opacity">
           <ReAeko strokeWidth={4} className="w-6 h-6" />
           <span className="text-sm font-medium">
             {formatCount(currentReposts)}
           </span>
         </button>
       </div>
+
+      {storePost && (
+        <SharePostModal
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+          post={storePost}
+        />
+      )}
     </div>
   );
 }

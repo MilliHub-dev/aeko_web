@@ -1,9 +1,14 @@
 import { Heart, Share2, Bookmark, MessageCircle } from "lucide-react";
+import clsx from "clsx";
 import { Metric } from "./post-metric";
 import { ReAeko } from "@/lib/icons";
 import { usePostUIStore, usePostsStore } from "@/features/posts/stores";
 import { Comment } from "@/types/comment";
 import { useUser } from "@/components/shared/user-context";
+import { useState } from "react";
+import { SharePostModal } from "./share-post-modal";
+import { FeedPost } from "@/types/post";
+import { formatCount } from "@/lib/utils";
 
 interface PostActionsProps {
   likes: number;
@@ -12,6 +17,9 @@ interface PostActionsProps {
   comments: number;
   reposts: number;
   postId: string;
+  post?: FeedPost;
+  orientation?: "vertical" | "horizontal";
+  className?: string;
 }
 
 const PostActions = ({
@@ -21,15 +29,20 @@ const PostActions = ({
   comments,
   reposts,
   postId,
+  post,
+  orientation = "vertical",
+  className = "",
 }: Partial<PostActionsProps>) => {
   const { openCommentsPanel } = usePostUIStore();
   const { user } = useUser();
-  const { toggleLike, toggleBookmark, incrementShare, bookmarkedPosts, posts } =
+  const { toggleLike, toggleBookmark, incrementShare, repost, bookmarkedPosts, posts } =
     usePostsStore();
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   // Get current post from store if available, otherwise use props
-  const storePost = posts.find((p) => p._id === postId);
-  const isLiked = storePost?.likes?.includes(user?._id!) ?? false;
+  const storePost = posts.find((p) => p._id === postId) || post;
+  const userId = user?._id ?? user?.id;
+  const isLiked = userId ? (storePost?.likes?.includes(userId) ?? false) : false;
   const isBookmarked = bookmarkedPosts.has(postId!);
 
   const currentLikes = storePost?.likesCount ?? likes ?? 0;
@@ -38,49 +51,91 @@ const PostActions = ({
   const currentComments = storePost?.commentsCount ?? comments ?? 0;
   const currentReposts = storePost?.reposts?.length ?? reposts ?? 0;
 
+  const containerClasses =
+    orientation === "vertical"
+      ? "flex flex-col items-center gap-y-6"
+      : "flex flex-row items-center justify-between w-full px-4";
+
   return (
-    <div className="hidden lg:flex lg:items-center lg:justify-between">
-      <div className="flex flex-col items-center gap-y-8 px-2">
+    <div className={clsx(className)}>
+      <div className={containerClasses}>
         <Metric
           icon={
-            <Heart className={`w-8 h-8 ${isLiked ? "fill-red-500" : ""}`} />
+            <Heart 
+              className={clsx(
+                "w-7 h-7 transition-colors",
+                isLiked 
+                  ? "fill-[var(--color-green-cyan-darker)] text-[var(--color-green-cyan-darker)]" 
+                  : "text-[var(--color-green-cyan-normal)]"
+              )} 
+            />
           }
-          value={currentLikes}
-          onClick={() => {
-            if (user?._id) {
-              toggleLike(postId!, user._id);
+          value={formatCount(currentLikes)}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (userId) {
+              toggleLike(postId!, userId);
             }
           }}
-          className="cursor-pointer hover:opacity-80 transition-opacity"
+          className="cursor-pointer hover:scale-110 transition-transform"
         />
+        
         <Metric
-          icon={<Share2 className="w-8 h-8" />}
-          value={currentShares}
-          onClick={() => incrementShare && incrementShare(postId!)}
-          className="cursor-pointer hover:opacity-80 transition-opacity"
+          icon={<MessageCircle className="w-7 h-7 text-[var(--color-green-cyan-normal)]" />}
+          value={formatCount(currentComments)}
+          onClick={(e) => {
+            e.stopPropagation();
+            openCommentsPanel(postId!);
+          }}
+          className="cursor-pointer hover:scale-110 transition-transform"
         />
+
         <Metric
           icon={
             <Bookmark
-              className={`w-8 h-8 ${isBookmarked ? "fill-current" : ""}`}
+              className={clsx(
+                "w-7 h-7 transition-colors",
+                isBookmarked 
+                  ? "fill-[var(--color-green-cyan-darker)] text-[var(--color-green-cyan-darker)]" 
+                  : "text-[var(--color-green-cyan-normal)]"
+              )}
             />
           }
-          value={currentBookmarks}
-          onClick={() => toggleBookmark && toggleBookmark(postId!)}
-          className="cursor-pointer hover:opacity-80 transition-opacity"
+          value={formatCount(currentBookmarks)}
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleBookmark && toggleBookmark(postId!);
+          }}
+          className="cursor-pointer hover:scale-110 transition-transform"
         />
+
         <Metric
-          icon={<MessageCircle className="w-8 h-8" />}
-          value={currentComments}
-          onClick={() => openCommentsPanel(postId!)}
-          className="cursor-pointer hover:opacity-80 transition-opacity"
+          icon={<Share2 className="w-7 h-7 text-[var(--color-green-cyan-normal)]" />}
+          value={formatCount(currentShares)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsShareModalOpen(true);
+          }}
+          className="cursor-pointer hover:scale-110 transition-transform"
         />
+        
         <Metric
-          icon={<ReAeko strokeWidth={4} />}
-          value={currentReposts}
-          className="cursor-pointer hover:opacity-80 transition-opacity"
+          icon={<ReAeko strokeWidth={4} className="w-7 h-7 text-[var(--color-green-cyan-normal)]" />}
+          value={formatCount(currentReposts)}
+          onClick={(e) => {
+            e.stopPropagation();
+            repost && repost(postId!);
+          }}
+          className="cursor-pointer hover:scale-110 transition-transform"
         />
       </div>
+      {storePost && (
+        <SharePostModal
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+          post={storePost}
+        />
+      )}
     </div>
   );
 };

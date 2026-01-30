@@ -2,12 +2,20 @@
 
 import { Send, Image, Smile } from "lucide-react";
 import { useChat } from "@/contexts/ChatContext";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ChatHeader } from "./chat-header";
-import { getMockMessages, type Message } from "@/lib/mock-chats";
+import { useChatStore } from "@/features/chat/stores/chat-store";
+import { useUser } from "@/components/shared/user-context";
+
+interface DisplayMessage {
+  id: string;
+  text: string;
+  sent: boolean;
+  time: string;
+}
 
 interface MessageBubbleProps {
-  message: Message;
+  message: DisplayMessage;
 }
 
 const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => (
@@ -30,19 +38,58 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => (
 );
 
 interface MessageListProps {
-  messages: Message[];
+  messages: DisplayMessage[];
+  isLoading: boolean;
 }
 
-const MessageList: React.FC<MessageListProps> = ({ messages }) => (
-  <div className="flex-1 overflow-y-auto p-4 space-y-4">
-    {messages.map((msg) => (
-      <MessageBubble key={msg.id} message={msg} />
-    ))}
-  </div>
-);
+const MessageList: React.FC<MessageListProps> = ({ messages, isLoading }) => {
+  const bottomRef = useRef<HTMLDivElement>(null);
 
-const MessageInput: React.FC = () => {
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  return (
+    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      {isLoading ? (
+        <div className="flex justify-center p-4">
+           <span className="text-muted-foreground">Loading messages...</span>
+        </div>
+      ) : messages.length === 0 ? (
+        <div className="flex justify-center p-4">
+           <span className="text-muted-foreground">No messages yet. Say hi!</span>
+        </div>
+      ) : (
+        messages.map((msg) => (
+          <MessageBubble key={msg.id} message={msg} />
+        ))
+      )}
+      <div ref={bottomRef} />
+    </div>
+  );
+};
+
+interface MessageInputProps {
+  onSend: (text: string) => void;
+  isSending: boolean;
+}
+
+const MessageInput: React.FC<MessageInputProps> = ({ onSend, isSending }) => {
   const [message, setMessage] = useState("");
+
+  const handleSend = () => {
+    if (message.trim()) {
+      onSend(message);
+      setMessage("");
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
 
   return (
     <div className="border-t border-border p-4">
@@ -58,9 +105,14 @@ const MessageInput: React.FC = () => {
           placeholder="Start a new message"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          className="flex-1 bg-transparent focus:outline-none px-2 text-foreground placeholder:text-muted-foreground"
+          onKeyDown={handleKeyDown}
+          disabled={isSending}
+          className="flex-1 bg-transparent focus:outline-none px-2 text-foreground placeholder:text-muted-foreground disabled:opacity-50"
         />
-        <button className="p-1 hover:bg-secondary/80 rounded-full transition-colors">
+        <button 
+          onClick={handleSend}
+          disabled={!message.trim() || isSending}
+          className="p-1 hover:bg-secondary/80 rounded-full transition-colors disabled:opacity-50">
           <Send size={20} className="text-primary" />
         </button>
       </div>
@@ -82,12 +134,28 @@ const EmptyState: React.FC = () => (
 
 const ChatMessages = () => {
   const { selectedChat, showChatList } = useChat();
+  const { messages, fetchMessages, sendMessage, isSendingMessage, isLoadingMessages } = useChatStore();
+  const { user } = useUser();
+
+  useEffect(() => {
+    if (selectedChat?.id) {
+      fetchMessages(selectedChat.id);
+    }
+  }, [selectedChat?.id, fetchMessages]);
 
   if (!selectedChat) {
     return <EmptyState />;
   }
 
-  const messages = getMockMessages(selectedChat.id);
+  const chatMessages = messages[selectedChat.id] || [];
+  const isLoading = isLoadingMessages[selectedChat.id] || false;
+  
+  const displayMessages: DisplayMessage[] = chatMessages.map(m => ({
+    id: m.id,
+    text: m.content,
+    sent: m.senderId === (user?._id || user?.id),
+    time: new Date(m.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+  }));
 
   return (
     <div
@@ -95,8 +163,8 @@ const ChatMessages = () => {
         showChatList ? "hidden" : "flex"
       } lg:flex flex-col h-full bg-background`}>
       <ChatHeader />
-      <MessageList messages={messages} />
-      <MessageInput />
+      <MessageList messages={displayMessages} isLoading={isLoading} />
+      <MessageInput onSend={sendMessage} isSending={isSendingMessage} />
     </div>
   );
 };

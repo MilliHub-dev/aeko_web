@@ -1,10 +1,11 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import type { StatusResponse } from "@/types/status";
+import { API_BASE_URL } from "@/lib/config";
 
 /**
  * DELETE /api/status/{id}
- * Proxies the request to the external backend (`https://dev.aeko.social/api/status/{id}`)
+ * Proxies the request to the external backend (`${API_BASE_URL}/api/status/{id}`)
  * and forwards the response, preserving the external status code and payload.
  */
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
@@ -13,7 +14,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     const token = cookieStore.get("token");
     const { id } = params;
 
-    const externalRes = await fetch(`https://dev.aeko.social/api/status/${id}`, {
+    const externalRes = await fetch(`${API_BASE_URL}/api/status/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token?.value ?? ""}`,

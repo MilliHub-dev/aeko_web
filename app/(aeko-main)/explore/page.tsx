@@ -20,6 +20,7 @@ import type {
   SuggestedUser,
   ExploreCommunity,
 } from "@/types/explore";
+import type { FeedPost } from "@/types/post";
 import { ExploreTrendingPosts } from "@/components/explore/explore-trending-posts";
 
 const discoverFilters = [
@@ -43,6 +44,7 @@ export default function ExplorePage() {
   const [searchCommunities, setSearchCommunities] = useState<
     ExploreCommunity[]
   >([]);
+  const [searchPosts, setSearchPosts] = useState<FeedPost[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
   // API data state
@@ -63,14 +65,16 @@ export default function ExplorePage() {
 
     setIsSearching(true);
     try {
-      // Fetch both users and communities in parallel
-      const [usersRes, communitiesRes] = await Promise.all([
+      // Fetch users, communities, and posts in parallel
+      const [usersRes, communitiesRes, postsRes] = await Promise.all([
         fetch(`/api/users?q=${encodeURIComponent(query)}`),
         fetch(`/api/communities?q=${encodeURIComponent(query)}`),
+        fetch(`/api/posts/search?q=${encodeURIComponent(query)}`),
       ]);
 
       const usersData = await usersRes.json();
       const communitiesData = await communitiesRes.json();
+      const postsData = await postsRes.json();
 
       // Handle users - API returns { success: true, users: [...] }
       if (usersData.success && Array.isArray(usersData.users)) {
@@ -99,10 +103,20 @@ export default function ExplorePage() {
       } else {
         setSearchCommunities([]);
       }
+
+      // Handle posts
+      if (postsData.posts && Array.isArray(postsData.posts)) {
+        setSearchPosts(postsData.posts);
+      } else if (Array.isArray(postsData)) {
+        setSearchPosts(postsData);
+      } else {
+        setSearchPosts([]);
+      }
     } catch (error) {
       console.error("Search error:", error);
       setSearchUsers([]);
       setSearchCommunities([]);
+      setSearchPosts([]);
     } finally {
       setIsSearching(false);
     }
@@ -116,6 +130,7 @@ export default function ExplorePage() {
       } else {
         setSearchUsers([]);
         setSearchCommunities([]);
+        setSearchPosts([]);
       }
     }, 300);
 
@@ -203,6 +218,7 @@ export default function ExplorePage() {
     setIsSearchOpen(false);
     setSearchUsers([]);
     setSearchCommunities([]);
+    setSearchPosts([]);
   };
 
   const showSearchOverlay = isSearchOpen && searchQuery.trim().length > 0;
@@ -254,6 +270,7 @@ export default function ExplorePage() {
             <SearchResultsDropdown
               users={searchUsers}
               communities={searchCommunities}
+              posts={searchPosts}
               isLoading={isSearching}
               query={searchQuery}
               className="absolute left-0 right-0 top-full z-30 mt-4"
@@ -291,9 +308,14 @@ export default function ExplorePage() {
             {/* Trending Posts based on active filter */}
             {filteredPosts.length > 0 && (
               <ExploreTrendingPosts
-                posts={filteredPosts.map((post) => ({
+                posts={filteredPosts.map((post) => {
+                  const mediaSource = (post.mediaUrls && post.mediaUrls.length > 0) 
+                    ? post.mediaUrls[0] 
+                    : (Array.isArray(post.media) ? post.media[0] : post.media);
+                    
+                  return {
                   id: parseInt(post._id, 36) || 1,
-                  cover: post.media || "/placeholder.svg",
+                  cover: mediaSource || "/placeholder.svg",
                   title: post.text?.substring(0, 50) || "Post",
                   caption: post.text || "",
                   hashtags: [],
@@ -309,7 +331,7 @@ export default function ExplorePage() {
                     avatar: post.user.profilePicture || "/placeholder.svg",
                   },
                   badge: activeFilter !== "For You" ? activeFilter : undefined,
-                }))}
+                }})}
                 activeFilter={activeFilter}
               />
             )}

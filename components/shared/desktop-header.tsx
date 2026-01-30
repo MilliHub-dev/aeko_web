@@ -3,6 +3,7 @@
 import { Bell, MessageSquare, User } from "lucide-react";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import Image from "next/image";
 import { Logo } from "../logo";
 import { useState } from "react";
 import { ChatIcon } from "@/lib/icons";
@@ -68,8 +69,15 @@ const DesktopHeader = ({
 							/>
 						</Button>
 						<Avatar className="h-10 w-10 md:h-13 md:w-13 aspect-square outline-2 outline-offset-2 outline-normal-active">
-							<AvatarImage src="/profile.jpeg" />
-							<AvatarFallback>You</AvatarFallback>
+							<AvatarImage src={user?.avatar || undefined} />
+							<AvatarFallback>
+								<Image
+									src="/profile_icon.jpg"
+									alt="Profile"
+									fill
+									className="object-cover"
+								/>
+							</AvatarFallback>
 						</Avatar>
 					</div>
 

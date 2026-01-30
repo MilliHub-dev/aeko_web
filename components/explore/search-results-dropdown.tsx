@@ -1,14 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Check, Users } from "lucide-react";
+import { Users, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SuggestedUser, ExploreCommunity } from "@/types/explore";
+import type { FeedPost } from "@/types/post";
 
 interface SearchResultsDropdownProps {
   users: SuggestedUser[];
   communities: ExploreCommunity[];
+  posts?: FeedPost[];
   isLoading: boolean;
   query: string;
   className?: string;
@@ -17,11 +20,12 @@ interface SearchResultsDropdownProps {
 export function SearchResultsDropdown({
   users,
   communities,
+  posts = [],
   isLoading,
   query,
   className,
 }: SearchResultsDropdownProps) {
-  const hasResults = users.length > 0 || communities.length > 0;
+  const hasResults = users.length > 0 || communities.length > 0 || posts.length > 0;
 
   if (!query) return null;
 
@@ -41,6 +45,37 @@ export function SearchResultsDropdown({
         </div>
       ) : (
         <div className="max-h-[60vh] overflow-y-auto">
+          {/* Posts Section */}
+          {posts.length > 0 && (
+            <div className="border-b border-border/30 last:border-b-0">
+              <div className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Posts ({posts.length})
+              </div>
+              <div className="divide-y divide-border/30">
+                {posts.slice(0, 5).map((post, index) => (
+                  <Link
+                    key={`${post._id}-${index}`}
+                    href={`/home/${post.user.username}/posts/${post._id}`}
+                    className="flex items-start gap-3 px-4 py-3 transition hover:bg-muted/50">
+                    <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                      <FileText className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="line-clamp-2 text-sm font-medium">
+                        {post.text || "Media Post"}
+                      </p>
+                      <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                        <span>@{post.user.username}</span>
+                        <span>•</span>
+                        <span>{post.likesCount || 0} likes</span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Users Section */}
           {users.length > 0 && (
             <div className="border-b border-border/30 last:border-b-0">
@@ -48,17 +83,24 @@ export function SearchResultsDropdown({
                 People ({users.length})
               </div>
               <div className="divide-y divide-border/30">
-                {users.map((user) => (
+                {users.map((user, index) => (
                   <Link
-                    key={user._id}
+                    key={`${user._id}-${index}`}
                     href={`/home/@${user.username}`}
                     className="flex items-center gap-3 px-4 py-3 transition hover:bg-muted/50">
                     <Avatar className="h-12 w-12 border border-border/60">
                       <AvatarImage
-                        src={user.profilePicture || user.avatar || ""}
+                        src={user.profilePicture || user.avatar || undefined}
                         alt={user.name}
                       />
-                      <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                      <AvatarFallback>
+                        <Image
+                          src="/profile_icon.jpg"
+                          alt="Profile"
+                          fill
+                          className="object-cover"
+                        />
+                      </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
@@ -66,14 +108,22 @@ export function SearchResultsDropdown({
                           {user.name}
                         </p>
                         {user.blueTick && (
-                          <div className="shrink-0 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500">
-                            <Check className="h-2.5 w-2.5 text-white" />
-                          </div>
+                          <Image
+                            src="/blue_tick.png"
+                            alt="Verified"
+                            width={16}
+                            height={16}
+                            className="h-4 w-4 shrink-0"
+                          />
                         )}
                         {user.goldenTick && (
-                          <div className="shrink-0 flex h-4 w-4 items-center justify-center rounded-full bg-yellow-500">
-                            <Check className="h-2.5 w-2.5 text-white" />
-                          </div>
+                          <Image
+                            src="/gold_tick.png"
+                            alt="Gold Verified"
+                            width={16}
+                            height={16}
+                            className="h-4 w-4 shrink-0"
+                          />
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground">
@@ -101,10 +151,10 @@ export function SearchResultsDropdown({
                 Communities ({communities.length})
               </div>
               <div className="divide-y divide-border/30">
-                {communities.map((community) => (
+                {communities.map((community, index) => (
                   <Link
-                    key={community._id}
-                    href={`/communities/${community._id}`}
+                    key={`${community._id}-${index}`}
+                    href={`/communities/${community.slug || community._id}`}
                     className="flex items-center gap-3 px-4 py-3 transition hover:bg-muted/50">
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
                       <Users className="h-6 w-6 text-primary" />

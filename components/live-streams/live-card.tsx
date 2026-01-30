@@ -8,8 +8,8 @@ import { Button } from "../ui/button";
 import { Users, Bell, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface LiveStream {
-  id: number;
+export interface LiveStream {
+  id: string;
   title: string;
   streamer: {
     name: string;
@@ -203,4 +203,3 @@ const UpcomingStreamCard = ({ stream }: { stream: LiveStream }) => {
 };
 
 export { LiveStreamCard, UpcomingStreamCard };
-export type { LiveStream };

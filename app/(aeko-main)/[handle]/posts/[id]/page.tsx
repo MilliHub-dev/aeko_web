@@ -44,6 +44,7 @@ export default async function PostDetailPage({
         {/* Actions Row */}
         <PostDetailActions
           postId={post._id}
+          post={post}
           likes={post.likesCount}
           shares={post.engagement?.totalShares || 0}
           bookmarks={0}

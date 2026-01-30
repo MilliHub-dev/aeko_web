@@ -20,23 +20,25 @@ const MobileNavbar = () => {
     <nav
       className={
         shouldShow
-          ? "flex justify-center md:hidden fixed bottom-4 left-0 right-0 bg-transparent isolation-auto"
+          ? "fixed bottom-8 left-1/2 -translate-x-1/2 z-50 md:hidden isolation-auto"
           : "hidden"
       }>
-      <div className="flex items-center justify-around px-4 py-3 w-[350px] h-20 bg-black/30 backdrop-blur-md border border-white/20 shadow-[inset_0_1px_4px_rgba(255,255,255,0.25),0_4px_10px_rgba(0,0,0,0.35),0_0_12px_rgba(255,255,255,0.15)] rounded-full ">
+      <div className="flex items-center gap-1 px-2 py-2 bg-[#484848] backdrop-blur-md border border-white/10 shadow-2xl rounded-full">
         {mobileRoutes.map((item) => {
           const IconComponent = item.icon;
+          const isActive = item.label === routeName;
+          
+          const activeClass = "bg-white text-black rounded-full p-2.5 shadow-sm transform scale-105 transition-all duration-200";
+          const inactiveClass = "text-gray-400 p-2.5 hover:text-white transition-colors duration-200";
+
           return item.id === "aeko" ? (
             <CreatePost
               key={item.id}
               trigger={
                 <button
-                  className={`flex flex-col items-center justify-center p-3 rounded-full hover:bg-accent text-gray-100/60 hover:text-primary transition-colors ${
-                    item.label === routeName
-                      ? "bg-white text-primary!"
-                      : "bg-none"
-                  }`}>
-                  <IconComponent strokeWidth={1.5} size={24} />
+                  className="mx-1 bg-[var(--color-green-cyan-normal)] text-white rounded-full p-2.5 shadow-md hover:scale-105 hover:bg-[var(--color-green-cyan-dark)] transition-all"
+                >
+                  <IconComponent strokeWidth={3} size={24} />
                 </button>
               }
             />
@@ -44,10 +46,12 @@ const MobileNavbar = () => {
             <Link
               key={item.id}
               href={item.path}
-              className={`flex flex-col items-center justify-center p-3 rounded-full hover:bg-accent text-gray-100/60 hover:text-primary transition-colors ${
-                item.label === routeName ? "bg-white text-primary!" : "bg-none"
-              }`}>
-              <IconComponent strokeWidth={1.5} size={24} />
+              className={`flex items-center justify-center ${isActive ? activeClass : inactiveClass}`}>
+              <IconComponent 
+                strokeWidth={isActive ? 2.5 : 2} 
+                size={22} 
+                className={isActive ? "fill-current" : ""}
+              />
             </Link>
           );
         })}

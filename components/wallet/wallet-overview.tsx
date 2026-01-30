@@ -7,6 +7,7 @@ import {
 	SettingsIcon,
 	TrendingUp
 } from "lucide-react";
+import Image from "next/image";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import {
@@ -160,10 +161,12 @@ const WalletOverview = ({
 														}
 													/>
 													<AvatarFallback>
-														{
-															tx
-																.title[0]
-														}
+														<Image
+															src="/profile_icon.jpg"
+															alt="Profile"
+															fill
+															className="object-cover"
+														/>
 													</AvatarFallback>
 												</Avatar>
 											) : (

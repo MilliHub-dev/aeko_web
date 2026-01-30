@@ -24,6 +24,7 @@ import { startLivestream, endLivestream } from "@/lib/livestream-service";
 import type { LivestreamCreateData } from "@/types/livestream";
 import type { useCamera } from "@/hooks/use-camera";
 import { cn } from "@/lib/utils";
+import { useLiveChat } from "@/features/livestream/hooks/use-live-chat";
 
 interface LiveStreamBroadcastProps {
   streamId: string;
@@ -35,51 +36,6 @@ interface LiveStreamBroadcastProps {
   onBack?: () => void;
 }
 
-interface ChatMessage {
-  id: number;
-  user: {
-    name: string;
-    username: string;
-    avatar: string;
-  };
-  message: string;
-  timestamp: string;
-}
-
-// Mock chat messages for demonstration
-const MOCK_MESSAGES: ChatMessage[] = [
-  {
-    id: 1,
-    user: { name: "Mercy", username: "@mercy", avatar: "🙏" },
-    message: "Yes sirr!!",
-    timestamp: "2m ago",
-  },
-  {
-    id: 2,
-    user: { name: "Mayy", username: "@mayy", avatar: "🎵" },
-    message: "I am blessed IJN",
-    timestamp: "1m ago",
-  },
-  {
-    id: 3,
-    user: { name: "Banks", username: "@banks", avatar: "🎸" },
-    message: "Ride on Sir",
-    timestamp: "30s ago",
-  },
-  {
-    id: 4,
-    user: { name: "Gwana", username: "@gwana", avatar: "😈" },
-    message: "The devil is a liar!!!",
-    timestamp: "15s ago",
-  },
-  {
-    id: 5,
-    user: { name: "Samuel", username: "@samuel", avatar: "❤️" },
-    message: "I love this message!",
-    timestamp: "5s ago",
-  },
-];
-
 export function LiveStreamBroadcast({
   streamId,
   camera,
@@ -90,11 +46,9 @@ export function LiveStreamBroadcast({
   onBack,
 }: LiveStreamBroadcastProps) {
   const router = useRouter();
-  const [message, setMessage] = useState("");
+  const [inputText, setInputText] = useState("");
   const [viewerCount, setViewerCount] = useState(0);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(
-    isLive ? MOCK_MESSAGES : []
-  );
+  const { messages, sendMessage } = useLiveChat(streamId);
   const [isStarting, setIsStarting] = useState(false);
   const [isEnding, setIsEnding] = useState(false);
   const [showEndConfirm, setShowEndConfirm] = useState(false);
@@ -105,35 +59,6 @@ export function LiveStreamBroadcast({
       const interval = setInterval(() => {
         setViewerCount((prev) => prev + Math.floor(Math.random() * 5));
       }, 5000);
-
-      return () => clearInterval(interval);
-    }
-  }, [isLive]);
-
-  // Simulate new messages when live
-  useEffect(() => {
-    if (isLive) {
-      const interval = setInterval(() => {
-        const newMessage: ChatMessage = {
-          id: Date.now(),
-          user: {
-            name: ["Alex", "Jordan", "Sam", "Taylor"][
-              Math.floor(Math.random() * 4)
-            ],
-            username: "@user" + Math.floor(Math.random() * 1000),
-            avatar: ["🎨", "🎮", "🎵", "💻"][Math.floor(Math.random() * 4)],
-          },
-          message: [
-            "Great stream!",
-            "Love this!",
-            "Keep it up!",
-            "Amazing content!",
-          ][Math.floor(Math.random() * 4)],
-          timestamp: "Just now",
-        };
-
-        setChatMessages((prev) => [...prev.slice(-10), newMessage]);
-      }, 8000);
 
       return () => clearInterval(interval);
     }
@@ -166,11 +91,10 @@ export function LiveStreamBroadcast({
     }
   };
 
-  const handleSendMessage = () => {
-    if (message.trim()) {
-      // In a real app, send to backend
-      console.log("Sending message:", message);
-      setMessage("");
+  const handleSend = () => {
+    if (inputText.trim()) {
+      sendMessage(inputText);
+      setInputText("");
     }
   };
 
@@ -258,10 +182,10 @@ export function LiveStreamBroadcast({
       </div>
 
       {/* Floating Chat Messages (only when live) */}
-      {isLive && chatMessages.length > 0 && (
+      {isLive && messages.length > 0 && (
         <div className="absolute bottom-32 left-0 right-0 z-10 px-4">
           <div className="flex flex-col gap-2">
-            {chatMessages.slice(-5).map((chat, index) => (
+            {messages.slice(-5).map((chat, index) => (
               <div
                 key={chat.id}
                 className="animate-slide-up w-fit max-w-[85%] rounded-2xl bg-black/30 px-4 py-2 backdrop-blur-md"
@@ -320,9 +244,9 @@ export function LiveStreamBroadcast({
             {/* Comment Input */}
             <div className="flex-1">
               <Input
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSend()}
                 placeholder="Drop a comment....."
                 className="h-12 rounded-full border-white/20 bg-black/30 px-5 text-sm text-white placeholder:text-white/60 backdrop-blur-md focus:border-white/40"
               />

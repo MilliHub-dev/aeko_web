@@ -1,8 +1,9 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { InterestsResponse } from "@/types/interest";
+import { API_BASE_URL } from "@/lib/config";
 
-const BASE_URL = "https://dev.aeko.social/api";
+const BASE_URL = `${API_BASE_URL}/api`;
 
 export async function GET() {
   try {

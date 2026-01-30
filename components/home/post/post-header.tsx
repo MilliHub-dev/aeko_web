@@ -5,6 +5,7 @@ import {
 	AvatarFallback,
 	AvatarImage
 } from "@/components/ui/avatar";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -17,10 +18,14 @@ import {
 	MoreVertical,
 	UserPlusIcon,
 	Volume2,
-	VolumeX
+	VolumeX,
+	Eye
 } from "lucide-react";
 import { motion } from "motion/react";
 import clsx from "clsx";
+import { useUser } from "@/components/shared/user-context";
+import { useFollowUser } from "@/features/profile/hooks/use-follow-user";
+import { formatCount } from "@/lib/utils";
 
 interface PostHeaderProps {
 	type?: "image" | "video" | "text";
@@ -38,6 +43,7 @@ interface PostHeaderProps {
 	isHovered?: boolean;
 	isMuted?: boolean;
 	toggleMute?: () => void;
+	views?: number;
 }
 
 const PostHeader = ({
@@ -49,12 +55,24 @@ const PostHeader = ({
 	className,
 	isHovered = false,
 	isMuted = false,
-	toggleMute
+	toggleMute,
+	views = 0
 }: PostHeaderProps) => {
 	// Extract user info from either flat props or nested user object
 	const displayName = user?.name || username || "Unknown User";
 	const displayHandle = user?.username || handle || "";
 	const displayProfileImage = user?.profilePicture || profileImage || "";
+
+	const { user: currentUser } = useUser();
+	const targetUserId = user?._id || "";
+	const isOwnPost = currentUser?._id === targetUserId;
+	const { isFollowing, toggleFollow } = useFollowUser(targetUserId);
+	
+	// Show follow button only if:
+	// 1. We have a valid target user ID
+	// 2. It's not the current user's own post
+	// 3. The current user is not already following them
+	const showFollowButton = targetUserId && !isOwnPost && !isFollowing;
 
 	// shared style sets
 	const isText = type === "text";
@@ -91,7 +109,14 @@ const PostHeader = ({
 			>
 				<Avatar className="h-10 w-10 aspect-square outline-2 outline-offset-2 outline-normal-active">
 					<AvatarImage src={displayProfileImage} />
-					<AvatarFallback>You</AvatarFallback>
+					<AvatarFallback>
+						<Image
+							src="/profile_icon.jpg"
+							alt="Profile"
+							fill
+							className="object-cover"
+						/>
+					</AvatarFallback>
 				</Avatar>
 				<div
 					className={clsx(
@@ -110,19 +135,35 @@ const PostHeader = ({
 
 			{/* Right side actions */}
 			<div className="flex gap-2 md:gap-4">
-				<Button
+				{/* Views Counter */}
+				<div
 					className={clsx(
 						buttonBg,
-						"w-16 h-16 rounded-full flex items-center justify-center cursor-pointer"
+						"h-16 px-5 rounded-full flex items-center justify-center gap-2"
 					)}
 				>
-					<UserPlusIcon
+					<Eye className={clsx("w-5 h-5", iconColor)} />
+					<span className={clsx("font-semibold text-sm", iconColor)}>
+						{formatCount(views)}
+					</span>
+				</div>
+
+				{showFollowButton && (
+					<Button
 						className={clsx(
-							"w-6 h-6",
-							iconColor
+							buttonBg,
+							"w-16 h-16 rounded-full flex items-center justify-center cursor-pointer"
 						)}
-					/>
-				</Button>
+						onClick={(e) => toggleFollow(e)}
+					>
+						<UserPlusIcon
+							className={clsx(
+								"w-6 h-6",
+								iconColor
+							)}
+						/>
+					</Button>
+				)}
 
 				{/* Volume Control */}
 				{type === "video" && (

@@ -8,4 +8,8 @@ export interface Comment {
 	text: string;
 	timeAgo: string;
 	liked?: boolean;
+	likesCount?: number;
+	parentId?: string;
+	replies?: Comment[];
+	repliesCount?: number;
 }

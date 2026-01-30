@@ -59,15 +59,15 @@ Authorization: Bearer <your_jwt_token>
 ```
 
 ## 🌐 Base URL
-- **Development**: `http://localhost:5000`
-- **Production**: `https://dev.aeko.com`
+- **Development**: `https://dev.aeko.social`
+- **Production**: `https://api.aeko.com`
 
 
 
 ## 📡 Real-Time Communication
 
 The enhanced chat system uses **Socket.IO** for real-time features:
-- **Endpoint**: `ws://localhost:5000`
+- **Endpoint**: `https://dev.aeko.social`
 - **Authentication**: JWT token required
 - **Features**: Instant messaging, voice recording, emoji reactions, AI bot responses
 

@@ -1,10 +1,11 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import type { StatusListResponse, StatusResponse, CreateStatusRequest } from "@/types/status";
+import { API_BASE_URL } from "@/lib/config";
 
 /**
  * GET /api/status
- * Proxies the request to the external backend (`https://dev.aeko.social/api/status`).
+ * Proxies the request to the external backend (`${API_BASE_URL}/api/status`).
  * The external service returns data in the shape of `StatusListResponse`.
  */
 export async function GET(request: NextRequest) {
@@ -12,7 +13,7 @@ export async function GET(request: NextRequest) {
     const cookieStore = await cookies();
     const token = cookieStore.get("token");
 
-    const externalRes = await fetch("https://dev.aeko.social/api/status", {
+    const externalRes = await fetch(`${API_BASE_URL}/api/status`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token?.value ?? ""}`,
@@ -53,15 +54,26 @@ export async function POST(request: NextRequest) {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get("token");
-    const body: CreateStatusRequest = await request.json();
+    
+    const contentType = request.headers.get("content-type") || "";
+    let body: any;
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${token?.value ?? ""}`,
+    };
 
-    const externalRes = await fetch("https://dev.aeko.social/api/status", {
+    if (contentType.includes("multipart/form-data")) {
+      body = await request.formData();
+      // Do NOT set Content-Type for FormData, fetch will do it automatically with boundary
+    } else {
+      body = await request.json();
+      headers["Content-Type"] = "application/json";
+      body = JSON.stringify(body);
+    }
+
+    const externalRes = await fetch(`${API_BASE_URL}/api/status`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token?.value ?? ""}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
+      headers,
+      body,
     });
 
     const data = await externalRes.json();

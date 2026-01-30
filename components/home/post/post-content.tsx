@@ -4,7 +4,24 @@ import React from "react";
 import Image from "next/image";
 import clsx from "clsx";
 import { motion } from "motion/react";
+import { Play } from "lucide-react";
 import { FeedPost } from "@/types/post";
+import { API_BASE_URL } from "@/lib/config";
+
+// Helper to resolve media URLs
+const getMediaUrl = (url?: string) => {
+  if (!url) return "";
+  if (url.startsWith("http") || url.startsWith("data:")) return url;
+  
+  // List of known local folders in public/
+  const localPrefixes = ["/avatars", "/posts", "/stories", "/users", "/fonts", "/icons", "/profile", "/placeholder", "/aeko", "/blue_tick", "/gold_tick", "/cover", "/demo"];
+  if (localPrefixes.some(prefix => url.startsWith(prefix))) {
+    return url;
+  }
+  
+  // Otherwise assume backend
+  return `${API_BASE_URL}${url.startsWith("/") ? "" : "/"}${url}`;
+};
 
 // ---------------------------------------------------------
 // Main Wrapper
@@ -15,22 +32,79 @@ interface PostMediaProps extends Partial<FeedPost> {
   muted?: boolean;
 }
 
+// ---------------------------------------------------------
+// Grid Component for Multiple Media
+// ---------------------------------------------------------
+const PostMediaGrid = ({ items }: { items: string[] }) => {
+  const gridClass = items.length === 1 
+    ? "grid-cols-1" 
+    : items.length === 2 
+    ? "grid-cols-2" 
+    : "grid-cols-2";
+
+  return (
+    <div className={clsx("grid gap-0.5 w-full aspect-square bg-black overflow-hidden", gridClass)}>
+      {items.map((item, index) => {
+        const resolved = getMediaUrl(item);
+        const isVideo = item.endsWith(".mp4") || item.endsWith(".webm") || item.endsWith(".mov");
+        
+        // Layout logic for 3 items: first item spans full width
+        const isThreeItems = items.length === 3;
+        const itemClass = isThreeItems && index === 0 ? "col-span-2 aspect-[2/1]" : "aspect-square";
+
+        return (
+          <div key={index} className={clsx("relative bg-neutral-900 overflow-hidden", itemClass)}>
+             {isVideo ? (
+               <>
+                 <video src={resolved} className="w-full h-full object-cover" />
+                 <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                   <div className="p-3 bg-black/40 rounded-full backdrop-blur-sm">
+                     <Play className="w-6 h-6 text-white fill-white" />
+                   </div>
+                 </div>
+               </>
+             ) : (
+               <Image src={resolved} alt={`Media ${index}`} fill className="object-cover" />
+             )}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 const PostMedia = ({
   type,
   videoRef,
   progress,
   muted,
   media,
+  mediaUrl,
+  mediaUrls,
   text,
 }: Partial<PostMediaProps>) => {
+  // Check for multiple files
+  const hasMultiple = (mediaUrls && mediaUrls.length > 1) || (Array.isArray(media) && media.length > 1);
+  
+  if (hasMultiple) {
+    const items = mediaUrls && mediaUrls.length > 0 ? mediaUrls : (media as string[]);
+    return <PostMediaGrid items={items} />;
+  }
+
+  // Fallback to single view
+  const targetMedia = mediaUrl || (mediaUrls && mediaUrls.length > 0 ? mediaUrls[0] : (Array.isArray(media) ? media[0] : media));
+  const resolvedMedia = getMediaUrl(targetMedia);
+
   switch (type) {
     case "image":
-      return <PostImage backgroundImage={media!} />;
+      if (!targetMedia) return null;
+      return <PostImage backgroundImage={resolvedMedia} />;
     case "video":
+      if (!targetMedia) return null;
       return (
         <PostVideo
-          videoSrc={media!}
-          poster={media}
+          videoSrc={resolvedMedia}
+          poster={resolvedMedia}
           muted={muted}
           videoRef={videoRef}
           progress={progress}
@@ -39,6 +113,21 @@ const PostMedia = ({
     case "text":
       return <PostText content={text!} hashtags={[]} taggedUsers={[]} />;
     default:
+      // Fallback for when type is unknown but we have media (e.g. from array logic fallback)
+      if (targetMedia) {
+        if (targetMedia.endsWith('.mp4') || targetMedia.endsWith('.webm')) {
+           return (
+            <PostVideo
+              videoSrc={resolvedMedia}
+              poster={resolvedMedia}
+              muted={muted}
+              videoRef={videoRef}
+              progress={progress}
+            />
+          );
+        }
+        return <PostImage backgroundImage={resolvedMedia} />;
+      }
       return null;
   }
 };
@@ -107,6 +196,8 @@ interface PostImageProps {
 }
 
 const PostImage = ({ backgroundImage, className }: PostImageProps) => {
+  if (!backgroundImage) return null;
+  
   return (
     <Image
       src={backgroundImage}
@@ -146,11 +237,29 @@ const PostText = ({
       ? content.slice(0, MAX_LENGTH) + "..."
       : content;
 
+  const renderFormattedText = (text: string) => {
+    // Split by bold (**...**)
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith('**') && part.endsWith('**') && part.length >= 4) {
+        return <strong key={i}>{part.slice(2, -2)}</strong>;
+      }
+      // Split by italic (*...*)
+      const subParts = part.split(/(\*.*?\*)/g);
+      return subParts.map((subPart, j) => {
+        if (subPart.startsWith('*') && subPart.endsWith('*') && subPart.length >= 2) {
+          return <em key={`${i}-${j}`}>{subPart.slice(1, -1)}</em>;
+        }
+        return subPart;
+      });
+    });
+  };
+
   return (
     <div className={clsx("flex flex-col gap-4 py-6", className)}>
       <div className="relative">
         <p className="text-xl md:text-3xl leading-relaxed whitespace-pre-wrap">
-          {displayContent}
+          {renderFormattedText(displayContent)}
         </p>
 
         {shouldTruncate && (

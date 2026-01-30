@@ -38,7 +38,7 @@ export function MobileLeftSidebar() {
         <nav className="mt-6 flex flex-1 flex-col items-center gap-4">
           {sidebarRoutes.map((route) => {
             const Icon = route.icon;
-            const active = pathname.startsWith(route.path);
+            const active = pathname.startsWith(route.path) && route.path !== "/wallet";
             return (
               <Link
                 key={route.path}

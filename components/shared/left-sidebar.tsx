@@ -26,7 +26,7 @@ const navItem = cva(
   }
 );
 
-const MAIN_LINK_COUNT = 5;
+const MAIN_LINK_COUNT = 6;
 
 import { useUser } from "./user-context";
 
@@ -72,7 +72,7 @@ export function LeftSidebar() {
                 <div className="space-y-2">
                   {mainLinks.map((route) => {
                     const Icon = route.icon;
-                    const active = pathname.startsWith(route.path);
+                    const active = pathname.startsWith(route.path) && route.path !== "/wallet";
                     return (
                       <Link
                         key={route.path}
@@ -86,6 +86,11 @@ export function LeftSidebar() {
                         <div className="flex min-w-0 flex-col">
                           <span className="truncate text-lg">{route.name}</span>
                         </div>
+                        {(route as any).badge && (
+                          <span className="ml-auto rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+                            {(route as any).badge}
+                          </span>
+                        )}
                       </Link>
                     );
                   })}
@@ -99,7 +104,7 @@ export function LeftSidebar() {
                 <div className="space-y-2">
                   {secondaryLinks.map((route) => {
                     const Icon = route.icon;
-                    const active = pathname.startsWith(route.path);
+                    const active = pathname.startsWith(route.path) && route.path !== "/wallet";
                     return (
                       <Link
                         key={route.path}
@@ -111,6 +116,11 @@ export function LeftSidebar() {
                           <Icon className="h-4 w-4" />
                         </span>
                         <span className="truncate text-lg">{route.name}</span>
+                        {(route as any).badge && (
+                          <span className="ml-auto rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+                            {(route as any).badge}
+                          </span>
+                        )}
                       </Link>
                     );
                   })}

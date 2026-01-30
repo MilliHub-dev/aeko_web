@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { API_BASE_URL } from "@/lib/config";
 
 export async function POST(
   request: NextRequest,
@@ -9,15 +10,19 @@ export async function POST(
   const token = cookieStore.get("token");
   const { postId } = await params;
 
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (token?.value) {
+    headers["Authorization"] = `Bearer ${token.value}`;
+  }
+
   try {
     const res = await fetch(
-      `https://dev.aeko.social/api/posts/like/${postId}`,
+      `${API_BASE_URL}/api/posts/${postId}/like`,
       {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token?.value}`,
-          "Content-Type": "application/json",
-        },
+        headers,
       },
     );
 

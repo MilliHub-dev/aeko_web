@@ -1,8 +1,11 @@
 import { User } from "@/types/user";
 import { redirect } from "next/navigation";
+import { API_BASE_URL } from "./config";
 
 // Client-side request deduplication
 let clientProfilePromise: Promise<User | null> | null = null;
+let lastProfileFetchTime = 0;
+const PROFILE_FETCH_COOLDOWN = 2000; // 2 seconds
 
 export async function getProfile(): Promise<User | null> {
   const isServer = typeof window === "undefined";
@@ -13,7 +16,7 @@ export async function getProfile(): Promise<User | null> {
     const token = cookieStore.get("token");
 
     try {
-      const response = await fetch("https://dev.aeko.social/api/profile", {
+      const response = await fetch(`${API_BASE_URL}/api/profile`, {
         headers: {
           Authorization: `Bearer ${token?.value}`,
         },
@@ -38,9 +41,18 @@ export async function getProfile(): Promise<User | null> {
   }
 
   // Client-side fallback
+  // Return existing promise if active
   if (clientProfilePromise) {
     return clientProfilePromise;
   }
+
+  // Rate limiting check
+  const now = Date.now();
+  if (now - lastProfileFetchTime < PROFILE_FETCH_COOLDOWN) {
+    return null; // Return null if within cooldown to prevent spamming
+  }
+
+  lastProfileFetchTime = now;
 
   clientProfilePromise = (async () => {
     try {
@@ -50,10 +62,11 @@ export async function getProfile(): Promise<User | null> {
           redirect("/login");
         }
         if (response.status === 429) {
-           console.error("Rate limited fetching profile");
-           return null;
+          console.warn("Rate limited fetching profile");
+          return null;
         }
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        console.warn(`[getProfile] Failed to fetch profile. Status: ${response.status}`);
+        return null;
       }
       const data = await response.json();
       return data.user ?? data;

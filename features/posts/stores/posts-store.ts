@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 import { FeedPost } from "@/types/post";
 import { Comment } from "@/types/comment";
 
@@ -19,17 +18,23 @@ interface PostState {
   setPosts: (posts: FeedPost[]) => void;
   setSelectedPost: (post: FeedPost | null) => void;
   updatePost: (id: string, updates: Partial<FeedPost>) => void;
+  syncPost: (post: FeedPost) => void;
   toggleLike: (postId: string, userId: string) => void;
   toggleBookmark?: (postId: string) => void;
   incrementComment: (postId: string) => void;
   incrementShare?: (postId: string) => void;
+  incrementRepost?: (postId: string) => void;
   addComment: (postId: string, comment: Comment) => void;
   setIsFetching: (isFetching: boolean) => void;
+  markAttempt: () => void;
   shouldRefetch: () => boolean;
+  repost: (postId: string) => Promise<void>;
+  shareToStatus: (postId: string, content: string) => Promise<void>;
+  fetchBookmarks: () => Promise<void>;
+  recordView: (postId: string) => Promise<void>;
 }
 
 export const usePostsStore = create<PostState>()(
-  persist(
     (set, get) => ({
       posts: [],
       selectedPost: null,
@@ -54,6 +59,21 @@ export const usePostsStore = create<PostState>()(
               ? { ...state.selectedPost, ...updates }
               : state.selectedPost,
         })),
+
+      syncPost: (post) =>
+        set((state) => {
+          const exists = state.posts.some((p) => p._id === post._id);
+          if (exists) {
+            return {
+              posts: state.posts.map((p) =>
+                p._id === post._id ? { ...p, ...post } : p,
+              ),
+            };
+          }
+          return {
+            posts: [...state.posts, post],
+          };
+        }),
 
       toggleLike: async (postId, userId) => {
         const state = get();
@@ -96,6 +116,20 @@ export const usePostsStore = create<PostState>()(
 
           if (!response.ok) {
             throw new Error("Failed to toggle like");
+          }
+
+          const data = await response.json();
+          
+          // Update with server data if available
+          if (data.post) {
+             set((state) => ({
+                posts: state.posts.map((p) => 
+                  p._id === postId ? { ...p, ...data.post } : p
+                ),
+                selectedPost: state.selectedPost?._id === postId 
+                  ? { ...state.selectedPost, ...data.post }
+                  : state.selectedPost
+             }));
           }
         } catch (error) {
           console.error("Error toggling like:", error);
@@ -218,6 +252,34 @@ export const usePostsStore = create<PostState>()(
           };
         }),
 
+      incrementRepost: (postId) =>
+        set((state) => {
+          const updatePostReposts = (post: FeedPost) => {
+            if (post._id === postId) {
+              const currentReposts = post.reposts || [];
+              // Since we don't have the full repost object, we just push a placeholder
+              // or rely on the length check if reposts is an array of objects
+              // The type says reposts: [], so we assume it's an array.
+              // We'll just push "optimistic" string if it's string[], or just rely on length update if possible
+              // But FeedPost type says reposts: [], which usually implies any[].
+              // Let's check type again. FeedPost has reposts: [].
+              
+              return {
+                ...post,
+                reposts: [...currentReposts, "optimistic-repost"] as any,
+              };
+            }
+            return post;
+          };
+
+          return {
+            posts: state.posts.map(updatePostReposts),
+            selectedPost: state.selectedPost
+              ? updatePostReposts(state.selectedPost)
+              : null,
+          };
+        }),
+
       incrementComment: (postId) =>
         set((state) => {
           const updatePostComments = (post: FeedPost) => {
@@ -264,47 +326,83 @@ export const usePostsStore = create<PostState>()(
 
       setIsFetching: (isFetching) => set({ isFetching }),
 
+      markAttempt: () => set({ lastAttemptedAt: Date.now() }),
+
       shouldRefetch: () => {
         const state = get();
-        // Should refetch if:
-        // 1. Never fetched before (lastFetchedAt is null)
-        // 2. Cache is stale (older than CACHE_DURATION)
-        // 3. No posts in store
-        if (!state.lastFetchedAt || state.posts.length === 0) {
-          return true;
-        }
         const now = Date.now();
+        
+        // If last attempt was very recent (e.g. < 5s), don't fetch again to avoid loops
+        // Check this FIRST before checking lastFetchedAt to prevent infinite initial retry loops
+        if (state.lastAttemptedAt && now - state.lastAttemptedAt < 5000) {
+          return false;
+        }
+
+        if (!state.lastFetchedAt) return true;
+        
         const timeSinceLastFetch = now - state.lastFetchedAt;
         return timeSinceLastFetch > CACHE_DURATION;
       },
-    }),
-    {
-      name: "posts-storage",
-      partialize: (state) => ({
-        bookmarkedPosts: Array.from(state.bookmarkedPosts),
-        posts: state.posts,
-        lastFetchedAt: state.lastFetchedAt,
-        lastAttemptedAt: state.lastAttemptedAt,
-      }),
-      storage: {
-        getItem: (name) => {
-          const str = localStorage.getItem(name);
-          if (!str) return null;
-          const parsed = JSON.parse(str);
-          return {
-            ...parsed,
-            state: {
-              ...parsed.state,
+      
+      repost: async (postId) => {
+        const state = get();
+        // Optimistic update (increment share count and repost count)
+        state.incrementShare?.(postId);
+        state.incrementRepost?.(postId);
 
-              bookmarkedPosts: new Set(parsed.state?.bookmarkedPosts || []),
-            },
-          };
-        },
-        setItem: (name, value) => {
-          localStorage.setItem(name, JSON.stringify(value));
-        },
-        removeItem: (name) => localStorage.removeItem(name),
+        try {
+          const res = await fetch(`/api/posts/repost/${postId}`, {
+            method: "POST",
+          });
+          if (!res.ok) throw new Error("Failed to repost");
+        } catch (error) {
+          console.error(error);
+          // Revert if needed, though simple share count increment is low risk
+        }
       },
-    },
-  ),
+
+      shareToStatus: async (postId: string, content: string) => {
+         try {
+          const res = await fetch(`/api/posts/${postId}/share-to-status`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ additionalContent: content }),
+          });
+          if (!res.ok) throw new Error("Failed to share to status");
+        } catch (error) {
+          console.error(error);
+          throw error;
+        }
+      },
+
+      fetchBookmarks: async () => {
+        try {
+          const res = await fetch("/api/posts/user/bookmarks");
+          if (!res.ok) throw new Error("Failed to fetch bookmarks");
+          const data = await res.json();
+          // Assuming data.posts is the array of bookmarked posts
+          const bookmarkedIds = new Set<string>(data.posts.map((p: any) => p._id));
+          set({ bookmarkedPosts: bookmarkedIds });
+        } catch (error) {
+          console.error("Error fetching bookmarks:", error);
+        }
+      },
+
+      recordView: async (postId: string) => {
+        try {
+          // Optimistically update view count?
+          // For views, we might not want to optimistically update since it's passive
+          // and relies on server-side logic (unique viewers, etc.)
+          
+          await fetch(`/api/posts/${postId}/view`, {
+            method: "POST",
+          });
+          
+          // Optionally, refetch post or update views if response returns new count
+          // But usually views are just fire-and-forget for analytics
+        } catch (error) {
+          console.error("Error recording view:", error);
+        }
+      },
+    })
 );

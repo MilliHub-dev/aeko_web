@@ -1,0 +1,36 @@
+import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
+import { API_BASE_URL } from "@/lib/config";
+
+export async function POST(request: NextRequest) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token");
+  
+  try {
+    const body = await request.json();
+    
+    // Using the endpoint found in api.md
+    const res = await fetch(`${API_BASE_URL}/api/chat/send-message`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token?.value}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return NextResponse.json(data, { status: res.status });
+    }
+
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error("Chat Send Message API error:", error);
+    return NextResponse.json(
+      { success: false, message: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
