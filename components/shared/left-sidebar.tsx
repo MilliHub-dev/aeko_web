@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 import { cva } from "class-variance-authority";
@@ -64,7 +65,27 @@ export function LeftSidebar() {
               <p className="text-xs tracking-[0.35em] text-muted-foreground">
                 {user?.username ? `@${user.username}` : "Welcome"}
               </p>
-              <p className="text-lg font-semibold">{user?.name}</p>
+              <div className="flex items-center gap-1.5">
+                <p className="text-lg font-semibold">{user?.name}</p>
+                {user?.blueTick && (
+                  <Image
+                    src="/blue_tick.png"
+                    alt="Verified"
+                    width={16}
+                    height={16}
+                    className="h-4 w-4 shrink-0"
+                  />
+                )}
+                {user?.goldenTick && (
+                  <Image
+                    src="/gold_tick.png"
+                    alt="Gold Verified"
+                    width={16}
+                    height={16}
+                    className="h-4 w-4 shrink-0"
+                  />
+                )}
+              </div>
             </div>
           </div>
         </div>
