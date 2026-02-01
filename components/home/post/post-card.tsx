@@ -126,6 +126,7 @@ const PostCard = ({ isActive, ...post }: FeedPost & { isActive?: boolean }) => {
       {isMedia && <PostOverlay show={showOverlay} />}
       <PostHeader
         {...currentPost}
+        postId={currentPost._id}
         isHovered={showOverlay}
         isMuted={isMuted}
         toggleMute={toggleMute}

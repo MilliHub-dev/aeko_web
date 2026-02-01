@@ -33,8 +33,8 @@ export function SuggestedUsers({ users }: SuggestedUsersProps) {
         </button>
       </header>
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-        {users.map((user) => (
-          <SuggestedUserCard key={user._id} user={user} />
+        {users.map((user, index) => (
+          <SuggestedUserCard key={`${user._id}-${index}`} user={user} />
         ))}
       </div>
     </section>

@@ -12,6 +12,7 @@ interface User {
 	name: string;
 	email: string;
 	avatar?: string;
+	profilePicture?: string;
 	initials: string;
 }
 
@@ -68,17 +69,19 @@ const DesktopHeader = ({
 								className="h-5 w-5"
 							/>
 						</Button>
-						<Avatar className="h-10 w-10 md:h-13 md:w-13 aspect-square outline-2 outline-offset-2 outline-normal-active">
-							<AvatarImage src={user?.avatar || undefined} />
-							<AvatarFallback>
-								<Image
-									src="/profile_icon.jpg"
-									alt="Profile"
-									fill
-									className="object-cover"
-								/>
-							</AvatarFallback>
-						</Avatar>
+						<div className="flex h-10 w-10 md:h-13 md:w-13 items-center justify-center rounded-full bg-muted/50 backdrop-blur-md shadow-inner ring-1 ring-white/20">
+							<Avatar className="h-10 w-10 md:h-13 md:w-13 aspect-square outline-2 outline-offset-2 outline-normal-active">
+								<AvatarImage src={user?.profilePicture || user?.avatar || undefined} />
+								<AvatarFallback>
+									<Image
+										src="/profile_icon.jpg"
+										alt="Profile"
+										fill
+										className="object-cover"
+									/>
+								</AvatarFallback>
+							</Avatar>
+						</div>
 					</div>
 
 					{/* Blurred bottom border illusion */}

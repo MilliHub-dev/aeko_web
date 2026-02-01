@@ -24,16 +24,48 @@ export default function CommunityProfilePage({
   );
   const [activeTab, setActiveTab] = useState<"posts" | "about">("posts");
   const [isFollowing, setIsFollowing] = useState(false);
+  const [isMember, setIsMember] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
-  // Load community data
+  // Load community data and user
   useEffect(() => {
+    checkCurrentUser();
     params.then((p) => {
       setSlug(p.slug);
       fetchCommunity(p.slug);
     });
   }, [params]);
+
+  // Update isFollowing and isMember when community or user data changes
+  useEffect(() => {
+    if (community && currentUserId) {
+      const memberStatus = community.members?.some((m: any) => 
+        (typeof m.user === 'string' ? m.user : m.user?._id) === currentUserId
+      );
+      setIsMember(!!memberStatus);
+
+      const followers = (community as any).followers || [];
+      const isFollower = followers.some((f: any) => 
+        (typeof f === 'string' ? f : f?._id) === currentUserId
+      );
+      setIsFollowing(!!(memberStatus || isFollower));
+    }
+  }, [community, currentUserId]);
+
+  const checkCurrentUser = async () => {
+    try {
+      const res = await fetch("/api/profile");
+      if (res.ok) {
+        const data = await res.json();
+        const user = data.user || data.data || data;
+        setCurrentUserId(user._id);
+      }
+    } catch (err) {
+      console.error("Failed to fetch user:", err);
+    }
+  };
 
   const fetchCommunity = async (communityId: string) => {
     setIsLoading(true);
@@ -48,9 +80,6 @@ export default function CommunityProfilePage({
 
       const data: SingleCommunityApiResponse = await response.json();
       setCommunity(data);
-
-      // Check if user is following (would need current user ID in real implementation)
-      // setIsFollowing(data.members?.some(m => m.user === currentUserId) || false);
     } catch (err) {
       console.error("Error fetching community:", err);
       setError(err instanceof Error ? err.message : "Failed to load community");
@@ -66,13 +95,16 @@ export default function CommunityProfilePage({
     setIsFollowing(!isFollowing);
 
     try {
-      // TODO: API call to follow/unfollow
       const action = isFollowing ? "unfollow" : "follow";
       console.log(`${action} community:`, community._id);
 
-      // await fetch(`/api/communities/${community._id}/${action}`, {
-      //   method: "POST",
-      // });
+      const res = await fetch(`/api/community-profiles/${community._id}/${action}`, {
+        method: "POST",
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to ${action}`);
+      }
     } catch (err) {
       // Revert on error
       setIsFollowing(!isFollowing);
@@ -83,9 +115,23 @@ export default function CommunityProfilePage({
   const handleAbout = () => setActiveTab("about");
   const handleReport = () => console.log("Report community");
   const handleLeave = async () => {
+    if (!community) return;
+    
     if (confirm("Are you sure you want to leave this community?")) {
-      console.log("Leave community");
-      // TODO: API call
+      try {
+        const res = await fetch(`/api/communities/${community._id}/leave`, {
+          method: "POST",
+        });
+        
+        if (res.ok) {
+          // Refresh community data to reflect changes
+          fetchCommunity(slug);
+        } else {
+          console.error("Failed to leave community");
+        }
+      } catch (err) {
+        console.error("Error leaving community:", err);
+      }
     }
   };
 
@@ -157,7 +203,7 @@ export default function CommunityProfilePage({
               <CommunityMenu
                 onAbout={handleAbout}
                 onReport={handleReport}
-                onLeave={handleLeave}
+                onLeave={isMember ? handleLeave : undefined}
               />
             </div>
           </div>

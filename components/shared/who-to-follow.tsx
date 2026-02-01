@@ -45,8 +45,8 @@ const WhoToFollow = () => {
 
       {/* User Suggestions */}
       <div className="space-y-3">
-        {suggestedUsers.slice(0, 5).map((user) => (
-          <UserItem key={user._id} user={user} />
+        {suggestedUsers.slice(0, 5).map((user, index) => (
+          <UserItem key={`${user._id}-${index}`} user={user} />
         ))}
       </div>
 

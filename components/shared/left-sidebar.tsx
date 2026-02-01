@@ -48,10 +48,17 @@ export function LeftSidebar() {
           <div className="flex items-center gap-3">
             <Avatar className="h-14 w-14 border border-border/60">
               <AvatarImage
-                src={user?.profilePicture}
+                src={user?.profilePicture || user?.avatar}
                 alt={user?.name || "User"}
               />
-              <AvatarFallback>{user?.name?.charAt(0) || "U"}</AvatarFallback>
+              <AvatarFallback>
+                {/* Consistent fallback with Profile Page */}
+                {user?.profilePicture || user?.avatar ? (
+                   user?.name?.charAt(0) || "U"
+                ) : (
+                   <img src="/profile_icon.jpg" alt="Profile" className="w-full h-full object-cover" />
+                )}
+              </AvatarFallback>
             </Avatar>
             <div className="space-y-1">
               <p className="text-xs tracking-[0.35em] text-muted-foreground">
@@ -73,6 +80,30 @@ export function LeftSidebar() {
                   {mainLinks.map((route) => {
                     const Icon = route.icon;
                     const active = pathname.startsWith(route.path) && route.path !== "/wallet";
+                    
+                    if (route.path === "/wallet") {
+                      return (
+                        <div
+                          key={route.path}
+                          className={navItem({
+                            active: false,
+                            className: "opacity-60 cursor-not-allowed"
+                          })}>
+                          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-muted text-primary transition">
+                            <Icon className="h-4 w-4" />
+                          </span>
+                          <div className="flex min-w-0 flex-col">
+                            <span className="truncate text-lg">{route.name}</span>
+                          </div>
+                          {(route as any).badge && (
+                            <span className="ml-auto rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+                              {(route as any).badge}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    }
+
                     return (
                       <Link
                         key={route.path}
@@ -105,6 +136,28 @@ export function LeftSidebar() {
                   {secondaryLinks.map((route) => {
                     const Icon = route.icon;
                     const active = pathname.startsWith(route.path) && route.path !== "/wallet";
+                    
+                    if (route.path === "/wallet") {
+                      return (
+                        <div
+                          key={route.path}
+                          className={navItem({
+                            active: false,
+                            className: "opacity-60 cursor-not-allowed"
+                          })}>
+                          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-muted text-primary transition">
+                            <Icon className="h-4 w-4" />
+                          </span>
+                          <span className="truncate text-lg">{route.name}</span>
+                          {(route as any).badge && (
+                            <span className="ml-auto rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+                              {(route as any).badge}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    }
+
                     return (
                       <Link
                         key={route.path}

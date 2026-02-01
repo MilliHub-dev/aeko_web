@@ -11,6 +11,12 @@ import { API_BASE_URL } from "@/lib/config";
 // Helper to resolve media URLs
 const getMediaUrl = (url?: string) => {
   if (!url) return "";
+
+  // Handle dummy/example URLs from backend
+  if (url.includes("example.com") || url.includes("arrObj")) {
+    return "/placeholder.svg";
+  }
+
   if (url.startsWith("http") || url.startsWith("data:")) return url;
   
   // List of known local folders in public/

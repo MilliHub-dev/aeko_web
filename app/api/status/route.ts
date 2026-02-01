@@ -62,8 +62,10 @@ export async function POST(request: NextRequest) {
     };
 
     if (contentType.includes("multipart/form-data")) {
-      body = await request.formData();
-      // Do NOT set Content-Type for FormData, fetch will do it automatically with boundary
+      // Forward raw blob to preserve boundary and content structure exactly as received.
+      // This avoids parsing issues and ensures the backend receives the exact same payload.
+      body = await request.blob();
+      headers["Content-Type"] = contentType;
     } else {
       body = await request.json();
       headers["Content-Type"] = "application/json";
@@ -76,7 +78,21 @@ export async function POST(request: NextRequest) {
       body,
     });
 
-    const data = await externalRes.json();
+    const responseText = await externalRes.text();
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      console.error("Backend returned non-JSON response:", responseText);
+      // If parsing fails, return the text as the error message
+      return NextResponse.json(
+        { 
+          success: false, 
+          message: responseText || `Backend error: ${externalRes.status}` 
+        }, 
+        { status: externalRes.status || 500 }
+      );
+    }
 
     if (!externalRes.ok) {
       return NextResponse.json(data, {
@@ -85,8 +101,6 @@ export async function POST(request: NextRequest) {
     }
 
     const response: StatusResponse = data as StatusResponse;
-    // The external API already decides the appropriate status code,
-    // but we follow the convention of returning 201 on success.
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
     console.error("Error proxying POST /api/status:", error);

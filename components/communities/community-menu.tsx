@@ -59,12 +59,14 @@ export function CommunityMenu({
           <Flag className="h-4 w-4" />
           <span>Report Community</span>
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={onLeave}
-          className="cursor-pointer gap-3 rounded-xl py-3 text-destructive focus:text-destructive">
-          <LogOut className="h-4 w-4" />
-          <span>Leave Community</span>
-        </DropdownMenuItem>
+        {onLeave && (
+          <DropdownMenuItem
+            onClick={onLeave}
+            className="cursor-pointer gap-3 rounded-xl py-3 text-destructive focus:text-destructive">
+            <LogOut className="h-4 w-4" />
+            <span>Leave Community</span>
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

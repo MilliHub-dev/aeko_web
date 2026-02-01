@@ -131,11 +131,11 @@ export function UserSelector({ selectedUserIds, onToggleUser }: UserSelectorProp
         )}
 
         <div className="space-y-1">
-          {users.map(user => {
+          {users.map((user, index) => {
             const isSelected = selectedUserIds.includes(user._id);
             return (
               <div 
-                key={user._id}
+                key={`${user._id}-${index}`}
                 className={cn(
                   "flex items-center justify-between p-2 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors",
                   isSelected && "bg-primary/5 hover:bg-primary/10"

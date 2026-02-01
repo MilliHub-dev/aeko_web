@@ -23,12 +23,12 @@ interface PostState {
   toggleBookmark?: (postId: string) => void;
   incrementComment: (postId: string) => void;
   incrementShare?: (postId: string) => void;
-  incrementRepost?: (postId: string) => void;
+  incrementRepost?: (postId: string, userId?: string) => void;
   addComment: (postId: string, comment: Comment) => void;
   setIsFetching: (isFetching: boolean) => void;
   markAttempt: () => void;
   shouldRefetch: () => boolean;
-  repost: (postId: string) => Promise<void>;
+  repost: (postId: string, userId?: string) => Promise<void>;
   shareToStatus: (postId: string, content: string) => Promise<void>;
   fetchBookmarks: () => Promise<void>;
   recordView: (postId: string) => Promise<void>;
@@ -252,21 +252,19 @@ export const usePostsStore = create<PostState>()(
           };
         }),
 
-      incrementRepost: (postId) =>
+      incrementRepost: (postId, userId) =>
         set((state) => {
           const updatePostReposts = (post: FeedPost) => {
             if (post._id === postId) {
               const currentReposts = post.reposts || [];
-              // Since we don't have the full repost object, we just push a placeholder
-              // or rely on the length check if reposts is an array of objects
-              // The type says reposts: [], so we assume it's an array.
-              // We'll just push "optimistic" string if it's string[], or just rely on length update if possible
-              // But FeedPost type says reposts: [], which usually implies any[].
-              // Let's check type again. FeedPost has reposts: [].
               
+              if (userId && currentReposts.includes(userId)) {
+                 return post;
+              }
+
               return {
                 ...post,
-                reposts: [...currentReposts, "optimistic-repost"] as any,
+                reposts: [...currentReposts, userId || "optimistic-repost"],
               };
             }
             return post;
@@ -344,11 +342,11 @@ export const usePostsStore = create<PostState>()(
         return timeSinceLastFetch > CACHE_DURATION;
       },
       
-      repost: async (postId) => {
+      repost: async (postId, userId) => {
         const state = get();
         // Optimistic update (increment share count and repost count)
         state.incrementShare?.(postId);
-        state.incrementRepost?.(postId);
+        state.incrementRepost?.(postId, userId);
 
         try {
           const res = await fetch(`/api/posts/repost/${postId}`, {

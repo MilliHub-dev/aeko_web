@@ -76,17 +76,29 @@ export interface FeedPost extends Pick<
   | "updatedAt"
 > {
   ad: Ad;
-  user: Pick<User, "_id" | "name" | "username" | "email" | "profilePicture">;
+  user: Pick<User, "_id" | "name" | "username" | "email" | "profilePicture" | "blueTick" | "goldenTick">;
   comments: Comment[];
   likes: string[];
   bookmarks: string[];
-  reposts: [];
+  reposts: string[];
   originalPost: null | FeedPost;
   likesCount: number;
   commentsCount: number;
   bookmarksCount: number;
   nftMetadataUri?: string | null;
   __v: number;
+}
+
+export interface Pagination {
+  total: number;
+  page: number;
+  pages: number;
+  limit: number;
+}
+
+export interface PaginatedPostsResponse {
+  posts: FeedPost[];
+  pagination: Pagination;
 }
 
 // Legacy type for mock data - will be replaced with FeedPost
@@ -142,6 +154,8 @@ const userPost: FeedPost = {
     username: "Abuaslam",
     email: "abdullahabuaslam@gmail.com",
     profilePicture: "",
+    blueTick: false,
+    goldenTick: false,
   },
   text: "{@}[Bob Johnson](3)  weldone ",
   media: "",

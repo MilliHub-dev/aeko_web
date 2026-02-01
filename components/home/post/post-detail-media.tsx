@@ -2,16 +2,25 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { FeedPost } from "@/types/post";
 import { API_BASE_URL } from "@/lib/config";
 import { cn } from "@/lib/utils";
+import { useUser } from "@/components/shared/user-context";
+import { useFollowUser } from "@/features/profile/hooks/use-follow-user";
 
 // Helper to resolve media URLs
 const getMediaUrl = (url?: string) => {
   if (!url) return "";
+  
+  // Handle dummy/example URLs from backend
+  if (url.includes("example.com") || url.includes("arrObj")) {
+    return "/placeholder.svg";
+  }
+
   if (url.startsWith("http") || url.startsWith("data:")) return url;
   
   const localPrefixes = ["/avatars", "/posts", "/stories", "/users", "/fonts", "/icons", "/profile", "/placeholder", "/aeko", "/blue_tick", "/gold_tick", "/cover", "/demo"];
@@ -30,6 +39,7 @@ interface PostDetailMediaProps {
 export function PostDetailMedia({ post, className }: PostDetailMediaProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const { user: currentUser } = useUser();
   
   // Resolve media list
   const mediaList = post.mediaUrls && post.mediaUrls.length > 0 
@@ -59,6 +69,12 @@ export function PostDetailMedia({ post, className }: PostDetailMediaProps) {
   const displayHandle = post.user?.username || "";
   const displayProfileImage = post.user?.profilePicture || "";
 
+  const targetUserId = post.user?._id || "";
+  const currentUserId = currentUser?._id || currentUser?.id;
+  const isOwnPost = currentUserId && targetUserId && currentUserId === targetUserId;
+  const { isFollowing, toggleFollow } = useFollowUser(targetUserId);
+  const showFollowButton = targetUserId && !isOwnPost && !isFollowing;
+
   const MAX_LENGTH = 150;
   const shouldTruncate = post.text ? post.text.length > MAX_LENGTH : false;
   const displayText =
@@ -73,7 +89,7 @@ export function PostDetailMedia({ post, className }: PostDetailMediaProps) {
     <div className={cn("relative w-full min-h-screen bg-black", className)}>
       {/* Media Content */}
       {resolvedMedia && (
-        <div className="relative w-full h-screen">
+        <div className="relative w-full h-full">
           {isVideo ? (
             <video
               src={resolvedMedia}
@@ -132,7 +148,10 @@ export function PostDetailMedia({ post, className }: PostDetailMediaProps) {
         <div className="space-y-4">
           {/* User Info with Follow Button */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <Link 
+              href={`/${displayHandle}`}
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+            >
               <Avatar className="w-12 h-12 ring-2 ring-white/20">
                 <AvatarImage src={displayProfileImage} alt={displayName} />
                 <AvatarFallback className="bg-primary text-primary-foreground">
@@ -145,19 +164,40 @@ export function PostDetailMedia({ post, className }: PostDetailMediaProps) {
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
-                <span className="font-semibold text-white text-base">
+                <span className="font-semibold text-white text-base flex items-center gap-1">
                   {displayName}
+                  {post.user?.blueTick && (
+                    <Image
+                      src="/blue_tick.png"
+                      alt="Verified"
+                      width={14}
+                      height={14}
+                      className="h-3.5 w-3.5"
+                    />
+                  )}
+                  {post.user?.goldenTick && (
+                    <Image
+                      src="/gold_tick.png"
+                      alt="Gold Verified"
+                      width={14}
+                      height={14}
+                      className="h-3.5 w-3.5"
+                    />
+                  )}
                 </span>
                 <span className="text-sm text-white/70">@{displayHandle}</span>
               </div>
-            </div>
+            </Link>
 
             {/* Follow Button */}
-            <Button
-              size="sm"
-              className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground px-5 font-semibold">
-              Follow
-            </Button>
+            {showFollowButton && (
+              <Button
+                size="sm"
+                onClick={(e) => toggleFollow(e)}
+                className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground px-5 font-semibold">
+                Follow
+              </Button>
+            )}
           </div>
 
           {/* Post Text */}

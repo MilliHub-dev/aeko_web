@@ -4,7 +4,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import { Heart, X } from "lucide-react";
+import { Heart, X, MoreHorizontal, Flag } from "lucide-react";
+import { ReportDialog } from "@/components/report/report-dialog";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useCommentsStore, usePostsStore } from "@/features/posts/stores";
 import { useUser } from "@/components/shared/user-context";
 import { Comment } from "@/types/comment";
@@ -20,6 +27,8 @@ interface CommentItemProps {
 }
 
 const CommentItem = ({ comment, postId, onReply, onLike, depth = 0 }: CommentItemProps) => {
+    const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+    
 	return (
 		<div className={cn("flex flex-col", depth > 0 && "ml-8 mt-4")}>
 			<motion.div
@@ -31,7 +40,7 @@ const CommentItem = ({ comment, postId, onReply, onLike, depth = 0 }: CommentIte
 			>
 				<Avatar className="w-8 h-8 shrink-0">
 					<AvatarImage
-						src={comment.user.avatar || undefined}
+						src={comment.user.profilePicture || comment.user.avatar || undefined}
 						alt={`${comment.user.name}'s avatar`}
 					/>
 					<AvatarFallback>
@@ -46,6 +55,22 @@ const CommentItem = ({ comment, postId, onReply, onLike, depth = 0 }: CommentIte
 						<span className="text-muted-foreground text-xs">
 							{comment.timeAgo}
 						</span>
+                        <div className="ml-auto">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full hover:bg-muted p-0">
+                                        <MoreHorizontal className="h-3 w-3 text-muted-foreground" />
+                                        <span className="sr-only">More options</span>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => setIsReportDialogOpen(true)}>
+                                        <Flag className="w-4 h-4 mr-2" />
+                                        Report Comment
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
 					</div>
 					<p className="text-sm wrap-break-word">
 						{comment.text}
@@ -77,6 +102,13 @@ const CommentItem = ({ comment, postId, onReply, onLike, depth = 0 }: CommentIte
 					</div>
 				</div>
 			</motion.div>
+            <ReportDialog
+                isOpen={isReportDialogOpen}
+                onOpenChange={setIsReportDialogOpen}
+                entityId={comment.id}
+                entityType="COMMENT"
+                reportedId={comment.user.id || comment.user._id || (comment.user as any).id || (comment.user as any)._id || ""}
+            />
 			
 			{/* Recursive rendering of replies */}
 			{comment.replies && comment.replies.length > 0 && (
@@ -242,7 +274,7 @@ export function CommentSection({
 			{/* Comment Input */}
 			<div className="flex items-start gap-2">
 				<Avatar className="w-8 h-8">
-					<AvatarImage src={user?.profilePicture || undefined} />
+					<AvatarImage src={user?.profilePicture || user?.avatar || undefined} />
 					<AvatarFallback>{user?.name?.slice(0, 2).toUpperCase() || "UN"}</AvatarFallback>
 				</Avatar>
 				<div className="flex-1">

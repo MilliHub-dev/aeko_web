@@ -96,3 +96,53 @@ export async function GET(
     );
   }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ postId: string }> },
+) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token");
+  const { postId } = await params;
+
+  if (!token) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/api/posts/${postId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    const responseText = await res.text();
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      console.error("Delete Post API error: Backend returned non-JSON response", responseText);
+      return NextResponse.json(
+        { success: false, message: `Backend error: ${res.status} ${res.statusText}` },
+        { status: res.status || 500 }
+      );
+    }
+
+    if (!res.ok) {
+      return NextResponse.json(data, { status: res.status });
+    }
+
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error("Delete Post API error:", error);
+    return NextResponse.json(
+      { success: false, message: "Internal Server Error" },
+      { status: 500 },
+    );
+  }
+}

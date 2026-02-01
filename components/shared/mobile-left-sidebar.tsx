@@ -30,8 +30,14 @@ export function MobileLeftSidebar() {
       <div className="relative flex h-full w-full flex-col items-center overflow-hidden rounded-[32px] bg-card pb-4 text-muted-foreground">
         <div className="flex h-20 w-full items-center justify-center border-b px-4">
           <Avatar className="h-16 w-16 ">
-            <AvatarImage src={user?.profilePicture} alt="User Avatar" />
-            <AvatarFallback>{user?.name.charAt(0)}</AvatarFallback>
+            <AvatarImage src={user?.profilePicture || user?.avatar} alt="User Avatar" />
+            <AvatarFallback>
+               {user?.profilePicture || user?.avatar ? (
+                 user?.name?.charAt(0) || "U"
+               ) : (
+                 <img src="/profile_icon.jpg" alt="Profile" className="w-full h-full object-cover" />
+               )}
+            </AvatarFallback>
           </Avatar>
         </div>
 
@@ -39,6 +45,18 @@ export function MobileLeftSidebar() {
           {sidebarRoutes.map((route) => {
             const Icon = route.icon;
             const active = pathname.startsWith(route.path) && route.path !== "/wallet";
+            
+            if (route.path === "/wallet") {
+              return (
+                <div
+                  key={route.path}
+                  aria-label={route.name}
+                  className="group relative flex h-14 w-14 items-center justify-center rounded-2xl transition opacity-60 cursor-not-allowed">
+                  <Icon className="h-6 w-6" />
+                </div>
+              );
+            }
+
             return (
               <Link
                 key={route.path}

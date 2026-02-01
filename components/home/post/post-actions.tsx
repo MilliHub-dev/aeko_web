@@ -44,6 +44,7 @@ const PostActions = ({
   const userId = user?._id ?? user?.id;
   const isLiked = userId ? (storePost?.likes?.includes(userId) ?? false) : false;
   const isBookmarked = bookmarkedPosts.has(postId!);
+  const isReposted = userId ? (storePost?.reposts?.includes(userId) ?? false) : false;
 
   const currentLikes = storePost?.likesCount ?? likes ?? 0;
   const currentShares = storePost?.engagement?.totalShares ?? shares ?? 0;
@@ -120,11 +121,21 @@ const PostActions = ({
         />
         
         <Metric
-          icon={<ReAeko strokeWidth={4} className="w-7 h-7 text-[var(--color-green-cyan-normal)]" />}
+          icon={
+            <ReAeko 
+              strokeWidth={4} 
+              className={clsx(
+                "w-7 h-7 transition-colors",
+                isReposted 
+                  ? "text-[var(--color-green-cyan-normal)]" 
+                  : "text-gray-400"
+              )} 
+            />
+          }
           value={formatCount(currentReposts)}
           onClick={(e) => {
             e.stopPropagation();
-            repost && repost(postId!);
+            repost && repost(postId!, userId);
           }}
           className="cursor-pointer hover:scale-110 transition-transform"
         />

@@ -37,7 +37,7 @@ const PostFooter = ({
       className={clsx(
         className,
         "relative z-20 flex flex-col justify-end",
-        "-mx-8 -mb-8 px-8 pb-10 pt-32 bg-linear-to-t from-slate-950/92 via-slate-950/28 to-transparent"
+        "mx-0 mb-0 px-4 pb-4 pt-20 md:-mx-8 md:-mb-8 md:px-8 md:pb-10 md:pt-32 bg-linear-to-t from-slate-950/92 via-slate-950/28 to-transparent"
       )}
       animate={{
         opacity: isHovered ? 1 : 0,
@@ -45,7 +45,7 @@ const PostFooter = ({
       }}
       transition={{ duration: 0.35, ease: "easeOut" }}>
       {(text || hashtags.length > 0 || taggedUsers.length > 0) && (
-        <div className="absolute inset-x-8 bottom-10">
+        <div className="absolute inset-x-4 bottom-4 md:inset-x-8 md:bottom-10">
           <div className={detailPanel}>
             {text && (
               <p className="text-base font-medium leading-relaxed md:text-lg">

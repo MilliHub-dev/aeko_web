@@ -21,7 +21,11 @@ export async function GET(
       headers["Authorization"] = `Bearer ${token}`;
     }
 
-    const res = await fetch(`${API_BASE_URL}/api/posts/user/${userId}`, {
+    const { searchParams } = new URL(request.url);
+    const queryString = searchParams.toString();
+    const url = `${API_BASE_URL}/api/posts/user/${userId}${queryString ? `?${queryString}` : ""}`;
+
+    const res = await fetch(url, {
       headers,
     });
 
@@ -38,6 +42,7 @@ export async function GET(
     
     // Normalize data structure
     const rawPosts = Array.isArray(data) ? data : (data.posts || data.data || []);
+    const pagination = data.pagination || null;
     
     // Map backend ID fields to client expected format (_id)
     const posts = rawPosts.map((post: any) => {
@@ -86,7 +91,7 @@ export async function GET(
       };
     });
 
-    return NextResponse.json({ posts });
+    return NextResponse.json({ posts, pagination });
   } catch (error) {
     console.error("Error fetching user posts:", error);
     return NextResponse.json(

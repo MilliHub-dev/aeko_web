@@ -154,6 +154,23 @@ export function MobileMenuDrawer() {
                       </button>
                     );
                   }
+
+                  if (href === "/wallet") {
+                    return (
+                      <div
+                        key={label}
+                        className="flex items-center gap-3 rounded-lg px-2 py-3 text-lg opacity-60 cursor-not-allowed">
+                        <Icon className="shrink-0" size={22} />
+                        <span>{label}</span>
+                        {badge && (
+                          <span className="ml-auto rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+                            {badge}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  }
+
                   return (
                     <Link
                       key={label}

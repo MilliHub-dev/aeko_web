@@ -6,6 +6,7 @@ import {
 	AvatarImage
 } from "@/components/ui/avatar";
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -27,7 +28,12 @@ import { useUser } from "@/components/shared/user-context";
 import { useFollowUser } from "@/features/profile/hooks/use-follow-user";
 import { formatCount } from "@/lib/utils";
 
+import { ReportDialog } from "@/components/report/report-dialog";
+import { toast } from "sonner";
+import { useState } from "react";
+
 interface PostHeaderProps {
+	postId?: string;
 	type?: "image" | "video" | "text";
 	username?: string;
 	handle?: string;
@@ -38,6 +44,8 @@ interface PostHeaderProps {
 		username?: string;
 		email?: string;
 		profilePicture?: string;
+        blueTick?: boolean;
+        goldenTick?: boolean;
 	};
 	className?: string;
 	isHovered?: boolean;
@@ -47,6 +55,7 @@ interface PostHeaderProps {
 }
 
 const PostHeader = ({
+	postId,
 	type,
 	username,
 	handle,
@@ -65,14 +74,44 @@ const PostHeader = ({
 
 	const { user: currentUser } = useUser();
 	const targetUserId = user?._id || "";
-	const isOwnPost = currentUser?._id === targetUserId;
+	// Check against both _id and id to handle potential inconsistencies
+	const currentUserId = currentUser?._id || currentUser?.id;
+	const isOwnPost = currentUserId && targetUserId && currentUserId === targetUserId;
 	const { isFollowing, toggleFollow } = useFollowUser(targetUserId);
-	
-	// Show follow button only if:
+
+    // State for Report Dialog
+    const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+    
+    // State for hiding post (Not Interested)
+    const [isHidden, setIsHidden] = useState(false);
+
+    const handleNotInterested = async () => {
+        if (!postId) return;
+        
+        try {
+            const res = await fetch(`/api/posts/${postId}/not-interested`, {
+                method: "POST"
+            });
+            
+            if (res.ok) {
+                toast.success("Post marked as not interested");
+                setIsHidden(true);
+            } else {
+                toast.error("Failed to mark as not interested");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("An error occurred");
+        }
+    };
+
+    // Show follow button only if:
 	// 1. We have a valid target user ID
 	// 2. It's not the current user's own post
 	// 3. The current user is not already following them
 	const showFollowButton = targetUserId && !isOwnPost && !isFollowing;
+
+    if (isHidden) return null;
 
 	// shared style sets
 	const isText = type === "text";
@@ -80,8 +119,8 @@ const PostHeader = ({
 		"bg-black/30 backdrop-blur-md border border-white/20 shadow-[inset_0_1px_4px_rgba(255,255,255,0.25),0_4px_10px_rgba(0,0,0,0.35),0_0_12px_rgba(255,255,255,0.15)]";
 
 	const containerPosition = isText
-		? "top-4"
-		: "top-8 right-4 left-4";
+		? "top-4 relative"
+		: "absolute top-4 left-0 right-0 px-4 md:top-8 md:px-0 md:left-4 md:right-4";
 	const headerBg = isText ? "bg-white" : glassStyles;
 	const textColor = isText ? "text-black" : "text-white";
 	const buttonBg = isText ? "bg-secondary" : glassStyles;
@@ -101,10 +140,11 @@ const PostHeader = ({
 			transition={{ duration: 0.3 }}
 		>
 			{/* Left side user info */}
-			<div
+			<Link
+				href={`/${displayHandle}`}
 				className={clsx(
 					headerBg,
-					"flex items-center space-x-3 rounded-full px-3 h-16 w-[206px]"
+					"flex items-center space-x-3 rounded-full px-3 h-16 w-[206px] hover:opacity-90 transition-opacity cursor-pointer"
 				)}
 			>
 				<Avatar className="h-10 w-10 aspect-square outline-2 outline-offset-2 outline-normal-active">
@@ -121,17 +161,35 @@ const PostHeader = ({
 				<div
 					className={clsx(
 						textColor,
-						"flex flex-col"
+						"flex flex-col truncate"
 					)}
 				>
-					<span className="font-semibold text-lg">
+					<span className="font-semibold text-lg truncate flex items-center gap-1">
 						{displayName}
+                        {user?.blueTick && (
+                            <Image
+                                src="/blue_tick.png"
+                                alt="Verified"
+                                width={14}
+                                height={14}
+                                className="h-3.5 w-3.5"
+                            />
+                        )}
+                        {user?.goldenTick && (
+                            <Image
+                                src="/gold_tick.png"
+                                alt="Gold Verified"
+                                width={14}
+                                height={14}
+                                className="h-3.5 w-3.5"
+                            />
+                        )}
 					</span>
-					<span className="text-sm">
+					<span className="text-sm truncate">
 						{displayHandle}
 					</span>
 				</div>
-			</div>
+			</Link>
 
 			{/* Right side actions */}
 			<div className="flex gap-2 md:gap-4">
@@ -202,25 +260,44 @@ const PostHeader = ({
 						align="end"
 						className="w-48 bg-gray-50 px-4"
 					>
-						{[
-							"Not Interested",
-							"Report",
-							"Save",
-							"View Profile",
-							`Block ${username}`
-						].map((item, idx, arr) => (
-							<div key={item}>
-								<DropdownMenuItem>
-									{item}
+						{!isOwnPost && (
+							<>
+								<DropdownMenuItem onClick={handleNotInterested}>
+									Not Interested
 								</DropdownMenuItem>
-								{idx < arr.length - 1 && (
-									<DropdownMenuSeparator />
-								)}
-							</div>
-						))}
+								<DropdownMenuSeparator />
+								<DropdownMenuItem onClick={() => setIsReportDialogOpen(true)}>
+									Report
+								</DropdownMenuItem>
+								<DropdownMenuSeparator />
+							</>
+						)}
+						<DropdownMenuItem>Save</DropdownMenuItem>
+						<DropdownMenuSeparator />
+						<DropdownMenuItem asChild>
+							<Link 
+								href={isOwnPost ? "/profile" : `/${displayHandle.replace(/^@/, '')}`}
+								className="w-full cursor-pointer"
+							>
+								View Profile
+							</Link>
+						</DropdownMenuItem>
+						<DropdownMenuSeparator />
+						<DropdownMenuItem className="text-red-500 focus:text-red-500">
+							Block @{displayHandle.replace(/^@/, '') || "user"}
+						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</div>
+
+            {/* Report Dialog */}
+            <ReportDialog 
+                isOpen={isReportDialogOpen}
+                onOpenChange={setIsReportDialogOpen}
+                entityId={postId || ""}
+                entityType="POST"
+                reportedId={targetUserId}
+            />
 		</motion.div>
 	);
 };

@@ -3,27 +3,40 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import Link from "next/link";
 import { UserPlus } from "lucide-react";
 import { FeedPost } from "@/types/post";
+import { useUser } from "@/components/shared/user-context";
+import { useFollowUser } from "@/features/profile/hooks/use-follow-user";
 
 interface PostDetailTextProps {
   post: FeedPost;
 }
 
 export function PostDetailText({ post }: PostDetailTextProps) {
+  const { user: currentUser } = useUser();
   const displayName = post.user?.name || "Unknown User";
   const displayHandle = post.user?.username || "";
   const displayProfileImage = post.user?.profilePicture || "";
+
+  const targetUserId = post.user?._id || "";
+  const currentUserId = currentUser?._id || currentUser?.id;
+  const isOwnPost = currentUserId && targetUserId && currentUserId === targetUserId;
+  const { isFollowing, toggleFollow } = useFollowUser(targetUserId);
+  const showFollowButton = targetUserId && !isOwnPost && !isFollowing;
 
   // Extract hashtags from text (simple implementation)
   const hashtags: string[] = [];
   const taggedUsers: string[] = [];
 
   return (
-    <div className="px-6 py-4 space-y-4">
+    <div className="px-4 py-4 md:px-6 space-y-4">
       {/* User Info */}
       <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
+        <Link 
+          href={`/${displayHandle}`}
+          className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+        >
           <Avatar className="w-12 h-12">
             <AvatarImage src={displayProfileImage} alt={displayName} />
             <AvatarFallback>
@@ -36,20 +49,43 @@ export function PostDetailText({ post }: PostDetailTextProps) {
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
-            <span className="font-semibold text-base">{displayName}</span>
+            <span className="font-semibold text-base flex items-center gap-1">
+                {displayName}
+                {post.user?.blueTick && (
+                    <Image
+                        src="/blue_tick.png"
+                        alt="Verified"
+                        width={14}
+                        height={14}
+                        className="h-3.5 w-3.5"
+                    />
+                )}
+                {post.user?.goldenTick && (
+                    <Image
+                        src="/gold_tick.png"
+                        alt="Gold Verified"
+                        width={14}
+                        height={14}
+                        className="h-3.5 w-3.5"
+                    />
+                )}
+            </span>
             <span className="text-sm text-muted-foreground">
               @{displayHandle}
             </span>
           </div>
-        </div>
+        </Link>
 
         {/* Follow Button */}
-        <Button
-          size="sm"
-          className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground px-4">
-          <UserPlus className="w-4 h-4 mr-1" />
-          Follow
-        </Button>
+        {showFollowButton && (
+          <Button
+            size="sm"
+            onClick={(e) => toggleFollow(e)}
+            className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground px-4">
+            <UserPlus className="w-4 h-4 mr-1" />
+            Follow
+          </Button>
+        )}
       </div>
 
       {/* Post Content */}

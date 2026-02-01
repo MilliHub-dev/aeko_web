@@ -32,7 +32,9 @@ import {
   Image as LucideImage,
   Users,
   Lock,
-  User as UserIcon
+  User as UserIcon,
+  Circle,
+  CheckCircle2
 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -61,6 +63,7 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [postType, setPostType] = useState<PostType>("text");
   const [privacy, setPrivacy] = useState<"public" | "followers" | "select_users" | "only_me">("public");
+  const [hasLocation, setHasLocation] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [isUserSelectOpen, setIsUserSelectOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -268,21 +271,36 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
                       {privacy === "only_me" && <><Lock className="w-4 h-4" /> Only Me</>}
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
-                    <DropdownMenuItem onClick={() => setPrivacy("public")}>
-                      <Globe className="w-4 h-4 mr-2" /> Public
+                  <DropdownMenuContent align="start" className="w-56">
+                    <DropdownMenuItem onClick={() => setPrivacy("public")} className="flex items-center justify-between cursor-pointer">
+                      <div className="flex items-center">
+                        <Globe className="w-4 h-4 mr-2" /> Public
+                      </div>
+                      {privacy === "public" ? <CheckCircle2 className="w-4 h-4 text-primary fill-primary/10" /> : <Circle className="w-4 h-4 text-muted-foreground" />}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setPrivacy("followers")}>
-                      <Users className="w-4 h-4 mr-2" /> Followers
+                    <DropdownMenuItem onClick={() => setPrivacy("followers")} className="flex items-center justify-between cursor-pointer">
+                      <div className="flex items-center">
+                        <Users className="w-4 h-4 mr-2" /> Followers
+                      </div>
+                      {privacy === "followers" ? <CheckCircle2 className="w-4 h-4 text-primary fill-primary/10" /> : <Circle className="w-4 h-4 text-muted-foreground" />}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => {
-                      setPrivacy("select_users");
-                      setIsUserSelectOpen(true);
-                    }}>
-                      <UserIcon className="w-4 h-4 mr-2" /> Specific People
+                    <DropdownMenuItem 
+                      onClick={() => {
+                        setPrivacy("select_users");
+                        setIsUserSelectOpen(true);
+                      }}
+                      className="flex items-center justify-between cursor-pointer"
+                    >
+                      <div className="flex items-center">
+                        <UserIcon className="w-4 h-4 mr-2" /> Specific People
+                      </div>
+                      {privacy === "select_users" ? <CheckCircle2 className="w-4 h-4 text-primary fill-primary/10" /> : <Circle className="w-4 h-4 text-muted-foreground" />}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setPrivacy("only_me")}>
-                      <Lock className="w-4 h-4 mr-2" /> Only Me
+                    <DropdownMenuItem onClick={() => setPrivacy("only_me")} className="flex items-center justify-between cursor-pointer">
+                      <div className="flex items-center">
+                        <Lock className="w-4 h-4 mr-2" /> Only Me
+                      </div>
+                      {privacy === "only_me" ? <CheckCircle2 className="w-4 h-4 text-primary fill-primary/10" /> : <Circle className="w-4 h-4 text-muted-foreground" />}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -370,11 +388,15 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="text-primary hover:text-primary hover:bg-primary/10 rounded-full h-9 w-9"
+                    className={cn(
+                      "text-primary hover:text-primary hover:bg-primary/10 rounded-full h-9 w-9",
+                      hasLocation && "bg-primary/10 text-primary"
+                    )}
                     disabled={isLoading}
                     title="Location"
+                    onClick={() => setHasLocation(!hasLocation)}
                   >
-                    <MapPin className="w-5 h-5" />
+                    <MapPin className={cn("w-5 h-5", hasLocation && "fill-current")} />
                   </Button>
 
                   {/* Formatting Group */}

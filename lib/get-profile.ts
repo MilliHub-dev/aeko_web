@@ -20,7 +20,7 @@ export async function getProfile(): Promise<User | null> {
         headers: {
           Authorization: `Bearer ${token?.value}`,
         },
-        cache: "force-cache",
+        cache: "no-store",
       });
 
       if (!response.ok) {

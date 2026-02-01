@@ -31,26 +31,31 @@ export default async function PostDetailPage({
   return (
     <div className="relative bg-background min-h-screen">
       {/* Header */}
-      <PostDetailHeader />
+      <PostDetailHeader 
+        postId={post._id}
+        authorId={post.user?._id}
+      />
 
       {/* Content (conditional based on type) */}
       <div className="pt-0">
         {isMedia ? (
-          <PostDetailMedia post={post} />
+          <PostDetailMedia post={post} className="h-[calc(100vh-4rem)] min-h-0" />
         ) : (
           <PostDetailText post={post} />
         )}
 
         {/* Actions Row */}
-        <PostDetailActions
-          postId={post._id}
-          post={post}
-          likes={post.likesCount}
-          shares={post.engagement?.totalShares || 0}
-          bookmarks={0}
-          comments={post.commentsCount}
-          reposts={post.reposts?.length || 0}
-        />
+        <div className="sticky bottom-0 z-50 bg-background border-t border-border">
+          <PostDetailActions
+            postId={post._id}
+            post={post}
+            likes={post.likesCount}
+            shares={post.engagement?.totalShares || 0}
+            bookmarks={0}
+            comments={post.commentsCount}
+            reposts={post.reposts?.length || 0}
+          />
+        </div>
 
         {/* Comments Section */}
         <div className="w-full max-w-screen-sm mx-auto px-6 py-6">

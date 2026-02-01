@@ -8,11 +8,11 @@ import { API_BASE_URL } from "@/lib/config";
  * Proxies the request to the external backend (`${API_BASE_URL}/api/status/{id}`)
  * and forwards the response, preserving the external status code and payload.
  */
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get("token");
-    const { id } = params;
+    const { id } = await params;
 
     const externalRes = await fetch(`${API_BASE_URL}/api/status/${id}`, {
       method: "DELETE",
@@ -22,7 +22,17 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       },
     });
 
-    const data = await externalRes.json();
+    const responseText = await externalRes.text();
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      console.error("Delete Status API error: Backend returned non-JSON response", responseText);
+      return NextResponse.json(
+        { success: false, message: `Backend error: ${externalRes.status} ${externalRes.statusText}` },
+        { status: externalRes.status || 500 }
+      );
+    }
 
     // Forward external status code and payload directly.
     return NextResponse.json(data as StatusResponse, { status: externalRes.status as number });

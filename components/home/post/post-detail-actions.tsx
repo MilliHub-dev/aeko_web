@@ -44,6 +44,7 @@ export function PostDetailActions({
 
   const isLiked = userId ? (storePost?.likes?.includes(userId) ?? false) : false;
   const isBookmarked = bookmarkedPosts.has(postId);
+  const isReposted = userId ? (storePost?.reposts?.includes(userId) ?? false) : false;
 
   const currentLikes = storePost?.likesCount ?? likes ?? 0;
   const currentShares = storePost?.engagement?.totalShares ?? shares ?? 0;
@@ -110,10 +111,15 @@ export function PostDetailActions({
 
         {/* Repost */}
         <button
-          onClick={() => repost && repost(postId)}
+          onClick={() => repost && repost(postId, userId)}
           className="flex items-center gap-2 hover:opacity-70 transition-opacity">
-          <ReAeko strokeWidth={4} className="w-6 h-6" />
-          <span className="text-sm font-medium">
+          <ReAeko 
+            strokeWidth={4} 
+            className={`w-6 h-6 transition-colors ${
+              isReposted ? "text-[var(--color-green-cyan-normal)]" : "text-gray-400"
+            }`} 
+          />
+          <span className={`text-sm font-medium ${isReposted ? "text-[var(--color-green-cyan-normal)]" : ""}`}>
             {formatCount(currentReposts)}
           </span>
         </button>

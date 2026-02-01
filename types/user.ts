@@ -35,7 +35,9 @@ export interface User {
   avatar: string;
   lastLoginAt: string | null;
   profilePicture: string;
+  coverPicture?: string;
   bio: string;
+  location?: string;
   followers: string[]; // Assuming IDs
   following: string[]; // Assuming IDs
   posts: Post[]; // Assuming IDs
@@ -73,4 +75,11 @@ export interface User {
   status?: UserStatus; // Not in JSON but was in file
   solanaWalletAddress?: string; // Not in JSON but was in file
   twoFactorEnabled?: boolean; // Replaced by twoFactorAuth object
+  
+  // Stats
+  postsCount?: number;
+  followersCount?: number;
+  followingCount?: number;
+  likesCount?: number;
+  bookmarksCount?: number;
 }

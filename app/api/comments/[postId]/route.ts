@@ -73,7 +73,27 @@ export async function POST(
       },
     );
 
-    const data = await res.json();
+    let data;
+    const responseText = await res.text();
+
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      // If response is not JSON (e.g. empty or html error)
+      if (!res.ok) {
+        return NextResponse.json(
+          { message: responseText || `Request failed with status ${res.status}` },
+          { status: res.status }
+        );
+      }
+      // If success but not JSON, this is unexpected for this API, but return text
+      // or try to handle it. Assuming success response MUST be JSON for now.
+      console.error("Non-JSON success response:", responseText);
+      return NextResponse.json(
+        { message: "Invalid response from server" },
+        { status: 500 }
+      );
+    }
 
     if (!res.ok) {
       return NextResponse.json(data, { status: res.status });

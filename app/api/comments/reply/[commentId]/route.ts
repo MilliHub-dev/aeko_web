@@ -29,7 +29,24 @@ export async function POST(
       },
     );
 
-    const data = await res.json();
+    let data;
+    const responseText = await res.text();
+
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      if (!res.ok) {
+        return NextResponse.json(
+          { message: responseText || `Request failed with status ${res.status}` },
+          { status: res.status }
+        );
+      }
+      console.error("Non-JSON success response:", responseText);
+      return NextResponse.json(
+        { message: "Invalid response from server" },
+        { status: 500 }
+      );
+    }
 
     if (!res.ok) {
       return NextResponse.json(data, { status: res.status });

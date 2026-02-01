@@ -1,8 +1,11 @@
 export interface Comment {
 	id: string;
 	user: {
+		_id?: string;
+		id?: string;
 		name: string;
 		avatar: string;
+		profilePicture?: string;
 		isOnline?: boolean;
 	};
 	text: string;

@@ -9,7 +9,7 @@ export default function HomeLayout({
 	return (
 		<>
 			{children}
-			<div className="hidden lg:block">{stories}</div>
+			<div className="block">{stories}</div>
 		</>
 	);
 }

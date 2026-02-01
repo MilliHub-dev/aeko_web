@@ -7,8 +7,12 @@ export async function GET(request: NextRequest) {
   const token = cookieStore.get("token");
 
   try {
+    const { searchParams } = new URL(request.url);
+    const queryString = searchParams.toString();
+    const url = `${API_BASE_URL}/api/posts/user/bookmarks${queryString ? `?${queryString}` : ""}`;
+
     const res = await fetch(
-      `${API_BASE_URL}/api/posts/user/bookmarks`,
+      url,
       {
         headers: {
           Authorization: `Bearer ${token?.value}`,

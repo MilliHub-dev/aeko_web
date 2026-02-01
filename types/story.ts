@@ -8,6 +8,8 @@ export type Story = {
 	expiresAt: string; // ISO date string
 	duration?: number; // Duration in seconds (videos)
 	seen: boolean; // Has the current user seen it?
+	backgroundColor?: string;
+	font?: string;
 };
 
 export type UserStoryGroup = {
