@@ -202,7 +202,15 @@ interface PostImageProps {
 }
 
 const PostImage = ({ backgroundImage, className }: PostImageProps) => {
-  if (!backgroundImage) return null;
+  const [error, setError] = React.useState(false);
+
+  if (!backgroundImage || error) {
+    return (
+      <div className={clsx("w-full h-full bg-neutral-900 flex items-center justify-center", className)}>
+         <span className="text-neutral-700 text-sm">Media unavailable</span>
+      </div>
+    );
+  }
   
   return (
     <Image
@@ -211,6 +219,7 @@ const PostImage = ({ backgroundImage, className }: PostImageProps) => {
       fill
       priority
       className={clsx("object-cover", className)}
+      onError={() => setError(true)}
     />
   );
 };

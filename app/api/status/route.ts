@@ -62,10 +62,8 @@ export async function POST(request: NextRequest) {
     };
 
     if (contentType.includes("multipart/form-data")) {
-      // Forward raw blob to preserve boundary and content structure exactly as received.
-      // This avoids parsing issues and ensures the backend receives the exact same payload.
-      body = await request.blob();
-      headers["Content-Type"] = contentType;
+      // Parse formData and send it as body. fetch will set the correct Content-Type with boundary.
+      body = await request.formData();
     } else {
       body = await request.json();
       headers["Content-Type"] = "application/json";
