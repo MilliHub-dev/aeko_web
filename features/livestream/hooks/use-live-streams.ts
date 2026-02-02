@@ -32,10 +32,14 @@ export function useLiveStreams() {
   useEffect(() => {
     const fetchStreams = async () => {
       try {
-        const res = await fetch("/api/livestream/feed");
+        // Use trending endpoint for public discovery
+        const res = await fetch("/api/livestream/trending");
+        
         if (!res.ok) {
-          throw new Error("Failed to fetch live streams");
+          const errorText = await res.text().catch(() => "No error details");
+          throw new Error(`Failed to fetch live streams: ${res.status} ${res.statusText}`);
         }
+        
         const data: LiveStreamFeedResponse = await res.json();
         
         if (data.success && Array.isArray(data.livestreams)) {

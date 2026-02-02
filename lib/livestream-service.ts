@@ -4,7 +4,8 @@ import type {
 } from "@/types/livestream";
 import { API_BASE_URL } from "./config";
 
-const API_BASE = `${API_BASE_URL}/api`;
+// Use local API proxy instead of direct backend URL to avoid CORS
+const API_BASE = "/api";
 
 /**
  * Create a new livestream session

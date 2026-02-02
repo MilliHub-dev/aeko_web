@@ -39,9 +39,10 @@ export function getLayoutConfig(path: string): {
 
   // Keep behavior consistent with existing components:
   // - MobileHeader is not shown on /messages (component further hides on user-posts)
-  // - MobileNavbar hides on user-posts route
-  const showMobileHeader = path !== "/messages" && !isUserPostsRoute;
-  const showMobileNavbar = !isUserPostsRoute;
+  // - MobileNavbar hides on user-posts route and live stream viewer
+  const isLiveStreamViewer = /^\/live-streams\/[^/]+$/.test(path);
+  const showMobileHeader = path !== "/messages" && !isUserPostsRoute && !isLiveStreamViewer;
+  const showMobileNavbar = !isUserPostsRoute && !isLiveStreamViewer;
 
   return {
     variant,

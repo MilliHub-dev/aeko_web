@@ -73,7 +73,7 @@ export function LiveStreamViewer({
   };
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-black">
+    <div className="relative h-dvh w-full overflow-hidden bg-black">
       {/* Background Video/Image */}
       <div className="absolute inset-0">
         <Image

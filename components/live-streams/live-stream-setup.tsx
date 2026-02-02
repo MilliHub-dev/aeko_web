@@ -108,7 +108,7 @@ export function LiveStreamSetup({
       const data: LivestreamCreateData = {
         title: title.trim(),
         description: description.trim(),
-        category,
+        category: category.toLowerCase(),
         streamType: streamType.toLowerCase(),
         features: {},
         quality: {
@@ -121,13 +121,21 @@ export function LiveStreamSetup({
       };
 
       const response = await createLivestream(data);
+      console.log("Create livestream response:", response);
 
-      // Upload thumbnail if provided
-      if (thumbnail && response.livestream._id) {
-        await uploadThumbnail(response.livestream._id, thumbnail);
+      const streamId = response.livestream?._id;
+
+      if (!streamId) {
+        console.error("Missing stream ID in response:", response);
+        throw new Error("Failed to get stream ID from server");
       }
 
-      onStreamCreated(response.livestream._id, data);
+      // Upload thumbnail if provided
+      if (thumbnail) {
+        await uploadThumbnail(streamId, thumbnail);
+      }
+
+      onStreamCreated(streamId, data);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to create livestream"
@@ -141,7 +149,7 @@ export function LiveStreamSetup({
   const microphones = camera.devices.filter((d) => d.kind === "audioinput");
 
   return (
-    <div className="relative h-screen -mt-24 w-full overflow-hidden bg-black">
+    <div className="relative h-[85vh] w-full overflow-hidden bg-black rounded-xl border border-white/10">
       {/* Camera Feed Background */}
       <div className="absolute inset-0">
         {camera.hasPermission ? (
@@ -209,9 +217,9 @@ export function LiveStreamSetup({
                 <SelectTrigger className="mt-1 border-white/20 bg-black/40 text-white backdrop-blur-sm">
                   <SelectValue placeholder="Select camera" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-black/90 border-white/20 text-white backdrop-blur-xl">
                   {cameras.map((device) => (
-                    <SelectItem key={device.deviceId} value={device.deviceId}>
+                    <SelectItem key={device.deviceId} value={device.deviceId} className="focus:bg-white/20 focus:text-white">
                       {device.label}
                     </SelectItem>
                   ))}
@@ -228,9 +236,9 @@ export function LiveStreamSetup({
                 <SelectTrigger className="mt-1 border-white/20 bg-black/40 text-white backdrop-blur-sm">
                   <SelectValue placeholder="Select microphone" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-black/90 border-white/20 text-white backdrop-blur-xl">
                   {microphones.map((device) => (
-                    <SelectItem key={device.deviceId} value={device.deviceId}>
+                    <SelectItem key={device.deviceId} value={device.deviceId} className="focus:bg-white/20 focus:text-white">
                       {device.label}
                     </SelectItem>
                   ))}
@@ -242,10 +250,10 @@ export function LiveStreamSetup({
       )}
 
       {/* Main Form - Centered Overlay */}
-      <div className="absolute inset-x-0 translate-y-10 md:bottom-0 z-20 px-4 md:pb-safe-bottom md:safe-bottom">
+      <div className="absolute inset-x-0 bottom-0 z-20 px-4 pb-10 md:pb-safe-bottom md:safe-bottom">
         <form
           onSubmit={handleSubmit}
-          className="mx-auto max-w-lg space-y-3 pb-6">
+          className="mx-auto max-w-lg space-y-3 pb-8">
           {error && (
             <div className="rounded-2xl border border-red-500/50 bg-red-500/20 px-4 py-3 text-sm text-white backdrop-blur-md">
               {error}
@@ -292,9 +300,9 @@ export function LiveStreamSetup({
                 <SelectTrigger className="border-0 bg-transparent p-0 text-white focus:ring-0">
                   <SelectValue placeholder="Select..." />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-black/90 border-white/20 text-white backdrop-blur-xl">
                   {CATEGORIES.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
+                    <SelectItem key={cat} value={cat} className="focus:bg-white/20 focus:text-white">
                       {cat}
                     </SelectItem>
                   ))}
@@ -310,9 +318,9 @@ export function LiveStreamSetup({
                 <SelectTrigger className="border-0 bg-transparent p-0 text-white focus:ring-0">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-black/90 border-white/20 text-white backdrop-blur-xl">
                   {STREAM_TYPES.map((type) => (
-                    <SelectItem key={type} value={type}>
+                    <SelectItem key={type} value={type} className="focus:bg-white/20 focus:text-white">
                       {type}
                     </SelectItem>
                   ))}

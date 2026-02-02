@@ -1,99 +1,53 @@
 "use client";
 
 import { useState } from "react";
-import { LiveStreamSetup } from "@/components/live-streams/live-stream-setup";
-import { LiveStreamBroadcast } from "@/components/live-streams/live-stream-broadcast";
-import { useCamera } from "@/hooks/use-camera";
-import type { LivestreamCreateData } from "@/types/livestream";
+import Link from "next/link";
+import { CategoryTabs } from "@/components/category-tabs";
+import { LiveStreamContent } from "@/components/live-streams/live-stream-content";
+import { Button } from "@/components/ui/button";
+import { Radio } from "lucide-react";
 
-type BroadcastState = "setup" | "ready" | "live" | "ended";
+const CATEGORIES = [
+  "All",
+  "Gaming",
+  "Music",
+  "Talk Shows",
+  "Sports",
+  "Education",
+  "Creative",
+  "Technology",
+  "Entertainment",
+];
 
-export default function BroadcastPage() {
-  const [state, setState] = useState<BroadcastState>("setup");
-  const [streamId, setStreamId] = useState<string | null>(null);
-  const [streamData, setStreamData] = useState<LivestreamCreateData | null>(
-    null
-  );
+export default function LiveStreamsPage() {
+  const [activeCategory, setActiveCategory] = useState("All");
 
-  const camera = useCamera({
-    onError: (error) => {
-      console.error("Camera error:", error);
-    },
-  });
+  return (
+    <div className="container mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <div className="flex flex-col gap-6">
+        <header className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">
+              Live Streams
+            </h1>
+            <Link href="/live-streams/create">
+              <Button className="gap-2">
+                <Radio className="h-4 w-4" />
+                Go Live
+              </Button>
+            </Link>
+          </div>
+          <CategoryTabs
+            categories={CATEGORIES}
+            activeCategory={activeCategory}
+            setActiveCategory={setActiveCategory}
+          />
+        </header>
 
-  const handleStreamCreated = (id: string, data: LivestreamCreateData) => {
-    setStreamId(id);
-    setStreamData(data);
-    setState("ready");
-  };
-
-  const handleGoLive = () => {
-    setState("live");
-  };
-
-  const handleEndStream = () => {
-    setState("ended");
-    // Redirect after a short delay
-    setTimeout(() => {
-      window.location.href = "/home";
-    }, 2000);
-  };
-
-  const handleBack = () => {
-    setState("setup");
-    setStreamId(null);
-    setStreamData(null);
-  };
-
-  // Setup state - create and configure livestream
-  if (state === "setup") {
-    return (
-      <LiveStreamSetup camera={camera} onStreamCreated={handleStreamCreated} />
-    );
-  }
-
-  // Ready state - preview before going live
-  if (state === "ready" && streamId) {
-    return (
-      <LiveStreamBroadcast
-        streamId={streamId}
-        camera={camera}
-        streamData={streamData}
-        onGoLive={handleGoLive}
-        onBack={handleBack}
-        isLive={false}
-      />
-    );
-  }
-
-  // Live state - broadcasting
-  if (state === "live" && streamId) {
-    return (
-      <LiveStreamBroadcast
-        streamId={streamId}
-        camera={camera}
-        streamData={streamData}
-        onEndStream={handleEndStream}
-        isLive={true}
-      />
-    );
-  }
-
-  // Ended state
-  if (state === "ended") {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold text-foreground">
-            Stream Ended
-          </h2>
-          <p className="mt-2 text-muted-foreground">
-            Redirecting to live streams...
-          </p>
-        </div>
+        <main>
+          <LiveStreamContent activeCategory={activeCategory} />
+        </main>
       </div>
-    );
-  }
-
-  return null;
+    </div>
+  );
 }
