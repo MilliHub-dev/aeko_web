@@ -44,6 +44,11 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "100mb",
     },
+    // Increase proxy body size limit to avoid "Unexpected end of form"
+    proxyTimeout: 60000,
+    // Fix "Request body exceeded 10MB" error
+    // @ts-ignore
+    proxyClientMaxBodySize: "100mb",
   },
 };
 

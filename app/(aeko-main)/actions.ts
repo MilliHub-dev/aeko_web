@@ -9,11 +9,14 @@ export async function createPostAction(formData: FormData) {
     const token = (await cookies()).get("token")?.value;
 
     if (!token) {
+      console.log("Create Post Action: No token found");
       return {
         success: false,
         message: "Unauthorized",
       };
     }
+
+    console.log(`Create Post Action: Sending request to ${API_BASE_URL}/api/posts/create`);
 
     const response = await fetch(`${API_BASE_URL}/api/posts/create`, {
       method: "POST",
@@ -24,10 +27,21 @@ export async function createPostAction(formData: FormData) {
     });
 
     if (!response.ok) {
-      const data = await response.json();
+      const responseText = await response.text();
+      console.error(`Create Post Action Failed: ${response.status} ${response.statusText}`, responseText);
+      
+      let message = "Failed to create post";
+      try {
+        const data = JSON.parse(responseText);
+        message = data.message || message;
+      } catch (e) {
+        // use default message or responseText if short
+        if (responseText.length < 100) message = responseText;
+      }
+      
       return {
         success: false,
-        message: data.message || "Failed to create post",
+        message: message,
       };
     }
 
@@ -37,11 +51,11 @@ export async function createPostAction(formData: FormData) {
       success: true,
       message: "Post created successfully",
     };
-  } catch (error) {
-    console.error("Create post error:", error);
+  } catch (error: any) {
+    console.error("Create post error (catch block):", error);
     return {
       success: false,
-      message: "An unexpected error occurred",
+      message: error.message || "An unexpected error occurred",
     };
   }
 }
