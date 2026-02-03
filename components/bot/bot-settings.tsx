@@ -7,17 +7,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Loader2 } from "lucide-react";
 
+import { Textarea } from "@/components/ui/textarea";
+
 interface BotSettings {
-  personality: string;
-  responseLength: string;
-  isActive: boolean;
+  botEnabled: boolean;
+  botPersonality: string;
+  customInstructions: string;
 }
 
 export function BotSettings({ onBack }: { onBack: () => void }) {
   const [settings, setSettings] = useState<BotSettings>({
-    personality: "friendly",
-    responseLength: "medium",
-    isActive: true,
+    botEnabled: true,
+    botPersonality: "friendly",
+    customInstructions: "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -31,8 +33,12 @@ export function BotSettings({ onBack }: { onBack: () => void }) {
       const res = await fetch("/api/enhanced-bot/settings");
       if (res.ok) {
         const data = await res.json();
-        // Merge with defaults if fields are missing
-        setSettings({ ...settings, ...data });
+        // Merge with defaults if fields are missing and map legacy fields if necessary
+        setSettings({
+            botEnabled: data.botEnabled ?? data.isActive ?? true,
+            botPersonality: data.botPersonality ?? data.personality ?? "friendly",
+            customInstructions: data.customInstructions ?? "",
+        });
       }
     } catch (error) {
       console.error("Failed to fetch bot settings", error);
@@ -69,19 +75,19 @@ export function BotSettings({ onBack }: { onBack: () => void }) {
 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <Label htmlFor="bot-active">Enable Bot</Label>
+          <Label htmlFor="bot-active">Enable Auto-Reply Bot</Label>
           <Switch
             id="bot-active"
-            checked={settings.isActive}
-            onCheckedChange={(checked) => saveSettings({ ...settings, isActive: checked })}
+            checked={settings.botEnabled}
+            onCheckedChange={(checked) => saveSettings({ ...settings, botEnabled: checked })}
           />
         </div>
 
         <div className="space-y-2">
           <Label>Personality</Label>
           <Select
-            value={settings.personality}
-            onValueChange={(value) => saveSettings({ ...settings, personality: value })}
+            value={settings.botPersonality}
+            onValueChange={(value) => saveSettings({ ...settings, botPersonality: value })}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select personality" />
@@ -90,26 +96,19 @@ export function BotSettings({ onBack }: { onBack: () => void }) {
               <SelectItem value="friendly">Friendly</SelectItem>
               <SelectItem value="professional">Professional</SelectItem>
               <SelectItem value="sarcastic">Sarcastic</SelectItem>
-              <SelectItem value="concise">Concise</SelectItem>
+              <SelectItem value="mentor">Mentor</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-2">
-          <Label>Response Length</Label>
-          <Select
-            value={settings.responseLength}
-            onValueChange={(value) => saveSettings({ ...settings, responseLength: value })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select length" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="short">Short</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="long">Detailed</SelectItem>
-            </SelectContent>
-          </Select>
+          <Label>Custom Instructions</Label>
+          <Textarea
+            placeholder="E.g., Tell people I am currently on vacation."
+            value={settings.customInstructions}
+            onChange={(e) => saveSettings({ ...settings, customInstructions: e.target.value })}
+            className="min-h-[100px]"
+          />
         </div>
       </div>
     </div>

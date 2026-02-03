@@ -6,6 +6,8 @@ import { useChat } from "@/contexts/ChatContext";
 import { ChatListHeader } from "./chat-list-header";
 import { useChatStore } from "@/features/chat/stores/chat-store";
 import { type Chat } from "@/features/chat/types";
+import { useUser } from "@/components/shared/user-context";
+import { getChatDisplayName, getChatDisplayImage, getChatDisplayUsername } from "@/lib/chat-utils";
 
 interface ChatListItemProps {
   chat: Chat;
@@ -13,6 +15,7 @@ interface ChatListItemProps {
 
 const ChatListItem: React.FC<ChatListItemProps> = ({ chat }) => {
   const { setSelectedChat } = useChat();
+  const { user } = useUser();
 
   // Helper to format date
   const formatTime = (dateString: string) => {
@@ -22,9 +25,12 @@ const ChatListItem: React.FC<ChatListItemProps> = ({ chat }) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  const displayName = chat.name || "Unknown User";
-  const displayUsername = chat.username || "unknown";
-  const displayAvatar = chat.avatar || "/placeholder.svg?height=40&width=40";
+  const myId = user?.id || user?._id;
+  
+  const displayName = getChatDisplayName(chat, myId);
+  const displayUsername = getChatDisplayUsername(chat, myId);
+  const displayAvatar = getChatDisplayImage(chat, myId);
+  
   const lastMessageText = chat.lastMessage?.content || "No messages yet";
   const displayTime = chat.lastMessage?.createdAt 
     ? formatTime(chat.lastMessage.createdAt) 
@@ -51,9 +57,11 @@ const ChatListItem: React.FC<ChatListItemProps> = ({ chat }) => {
             <span className="font-semibold text-foreground truncate">
               {displayName}
             </span>
-            <span className="text-muted-foreground text-sm truncate">
-              @{displayUsername}
-            </span>
+            {displayUsername && (
+              <span className="text-muted-foreground text-sm truncate">
+                @{displayUsername}
+              </span>
+            )}
           </div>
           <span className="text-muted-foreground text-sm shrink-0 ml-2">
             {displayTime}
@@ -87,9 +95,11 @@ const ChatList = () => {
       <div className="flex-1 overflow-y-auto">
         {isLoadingChats ? (
            <div className="p-4 text-center text-muted-foreground">Loading chats...</div>
+        ) : chats.length === 0 ? (
+           <div className="p-4 text-center text-muted-foreground">No conversations yet</div>
         ) : (
-          chats.map((chat) => (
-            <ChatListItem key={chat.id} chat={chat} />
+          chats.map((chat, index) => (
+            <ChatListItem key={`${chat.id}-${index}`} chat={chat} />
           ))
         )}
       </div>

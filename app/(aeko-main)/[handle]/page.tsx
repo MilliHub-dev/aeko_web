@@ -73,7 +73,7 @@ export default async function UserProfilePage({ params }: PageProps) {
           ) : (
             <>
               <Button variant="secondary" size="icon" className="rounded-full bg-background/80 backdrop-blur-sm hover:bg-background/90" asChild>
-                <Link href={`/messages/${targetUser._id || targetUser.id}`}>
+                <Link href={`/messages/${targetUser.username || targetUser._id || targetUser.id}`}>
                   <MessageCircle className="w-5 h-5" />
                 </Link>
               </Button>

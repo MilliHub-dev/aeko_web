@@ -1,11 +1,14 @@
 "use client";
 
-import { Send, Image, Smile } from "lucide-react";
+import { Send, Image, Smile, Mic } from "lucide-react";
 import { useChat } from "@/contexts/ChatContext";
 import { useState, useEffect, useRef } from "react";
 import { ChatHeader } from "./chat-header";
 import { useChatStore } from "@/features/chat/stores/chat-store";
 import { useUser } from "@/components/shared/user-context";
+import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { getOtherParticipant } from "@/lib/chat-utils";
 
 interface DisplayMessage {
   id: string;
@@ -71,16 +74,35 @@ const MessageList: React.FC<MessageListProps> = ({ messages, isLoading }) => {
 
 interface MessageInputProps {
   onSend: (text: string) => void;
+  onSendMedia: (file: File) => void;
   isSending: boolean;
 }
 
-const MessageInput: React.FC<MessageInputProps> = ({ onSend, isSending }) => {
+const MessageInput: React.FC<MessageInputProps> = ({ onSend, onSendMedia, isSending }) => {
   const [message, setMessage] = useState("");
+  const [showEmoji, setShowEmoji] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSend = () => {
     if (message.trim()) {
       onSend(message);
       setMessage("");
+    }
+  };
+
+  const handleEmojiClick = (emojiData: EmojiClickData) => {
+    setMessage((prev) => prev + emojiData.emoji);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      onSendMedia(file);
+      
+      // Reset input so same file can be selected again
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
@@ -94,12 +116,32 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, isSending }) => {
   return (
     <div className="border-t border-border p-4">
       <div className="flex items-center gap-2 bg-secondary rounded-full px-4 py-2">
-        <button className="p-1 hover:bg-secondary/80 rounded-full transition-colors">
+        <input 
+            type="file" 
+            ref={fileInputRef} 
+            className="hidden" 
+            accept="image/*,video/*"
+            onChange={handleFileSelect}
+        />
+        <button 
+            className="p-1 hover:bg-secondary/80 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isSending}
+        >
           <Image size={20} className="text-primary" />
         </button>
-        <button className="p-1 hover:bg-secondary/80 rounded-full transition-colors">
-          <Smile size={20} className="text-primary" />
-        </button>
+        
+        <Popover open={showEmoji} onOpenChange={setShowEmoji}>
+          <PopoverTrigger asChild>
+            <button className="p-1 hover:bg-secondary/80 rounded-full transition-colors">
+              <Smile size={20} className="text-primary" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent side="top" className="w-auto p-0 border-none">
+            <EmojiPicker onEmojiClick={handleEmojiClick} />
+          </PopoverContent>
+        </Popover>
+
         <input
           type="text"
           placeholder="Start a new message"
@@ -109,12 +151,19 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, isSending }) => {
           disabled={isSending}
           className="flex-1 bg-transparent focus:outline-none px-2 text-foreground placeholder:text-muted-foreground disabled:opacity-50"
         />
-        <button 
-          onClick={handleSend}
-          disabled={!message.trim() || isSending}
-          className="p-1 hover:bg-secondary/80 rounded-full transition-colors disabled:opacity-50">
-          <Send size={20} className="text-primary" />
-        </button>
+        
+        {message.trim() ? (
+          <button 
+            onClick={handleSend}
+            disabled={!message.trim() || isSending}
+            className="p-1 hover:bg-secondary/80 rounded-full transition-colors disabled:opacity-50">
+            <Send size={20} className="text-primary" />
+          </button>
+        ) : (
+          <button className="p-1 hover:bg-secondary/80 rounded-full transition-colors">
+            <Mic size={20} className="text-primary" />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -133,8 +182,8 @@ const EmptyState: React.FC = () => (
 );
 
 const ChatMessages = () => {
-  const { selectedChat, showChatList } = useChat();
-  const { messages, fetchMessages, sendMessage, isSendingMessage, isLoadingMessages } = useChatStore();
+  const { selectedChat, showChatList, isInitializing } = useChat();
+  const { messages, fetchMessages, sendMessage, sendMediaMessage, isSendingMessage, isLoadingMessages } = useChatStore();
   const { user } = useUser();
 
   useEffect(() => {
@@ -144,6 +193,14 @@ const ChatMessages = () => {
   }, [selectedChat?.id, fetchMessages]);
 
   if (!selectedChat) {
+    if (isInitializing) {
+      return (
+        <div className={`flex flex-col items-center justify-center h-full bg-background`}>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
+          <p className="text-muted-foreground">Starting conversation...</p>
+        </div>
+      );
+    }
     return <EmptyState />;
   }
 
@@ -157,6 +214,26 @@ const ChatMessages = () => {
     time: new Date(m.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
   }));
 
+  const handleSendMessage = (text: string) => {
+    const myId = user?._id || user?.id;
+    // Find the other participant
+    const receiver = getOtherParticipant(selectedChat, myId);
+    // If not found (shouldn't happen in DM), default to the first one that isn't me, or just the first one
+    const receiverId = receiver?.id || (receiver as any)?._id || (receiver as any)?.userId;
+    
+    console.log('Resolving receiver:', { myId, participants: selectedChat.participants, receiverId });
+    
+    sendMessage(text, receiverId);
+  };
+
+  const handleSendMedia = (file: File) => {
+    const myId = user?._id || user?.id;
+    const receiver = getOtherParticipant(selectedChat, myId);
+    const receiverId = receiver?.id || (receiver as any)?._id || (receiver as any)?.userId;
+    
+    sendMediaMessage(file, receiverId);
+  };
+
   return (
     <div
       className={`${
@@ -164,7 +241,7 @@ const ChatMessages = () => {
       } lg:flex flex-col h-full bg-background`}>
       <ChatHeader />
       <MessageList messages={displayMessages} isLoading={isLoading} />
-      <MessageInput onSend={sendMessage} isSending={isSendingMessage} />
+      <MessageInput onSend={handleSendMessage} onSendMedia={handleSendMedia} isSending={isSendingMessage} />
     </div>
   );
 };

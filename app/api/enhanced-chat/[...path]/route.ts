@@ -66,9 +66,28 @@ async function proxyRequest(
        });
     }
 
-    const data = await res.json();
+    let data;
+    try {
+      const text = await res.text();
+      try {
+        data = JSON.parse(text);
+      } catch {
+        // Not JSON, probably HTML error page or plain text
+        console.error(`[Proxy] Upstream returned non-JSON for ${targetUrl}:`, text.substring(0, 200));
+        return new NextResponse(text, { 
+            status: res.status,
+            headers: { "Content-Type": res.headers.get("content-type") || "text/plain" }
+        });
+      }
+    } catch (e) {
+      console.error(`[Proxy] Failed to read response text:`, e);
+       return new NextResponse("Failed to read upstream response", { status: 502 });
+    }
 
     if (!res.ok) {
+      console.error(`[Proxy] Upstream error ${res.status} for ${targetUrl}`);
+      // Log response body if possible
+      console.error(`[Proxy] Response:`, JSON.stringify(data).substring(0, 500));
       return NextResponse.json(data, { status: res.status });
     }
 

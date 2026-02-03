@@ -42,7 +42,7 @@
   --background: oklch(1 0 0);
   --foreground: oklch(31.57% 0.057 180.36);
   --primary: oklch(53.37% 0.098 178.17);
-  --primary-foreground: oklch(65.73% 0.121 177.76);
+  --primary-foreground: oklch(1 0 0);
   --secondary: oklch(96.07% 0.017 187.9);
   --secondary-foreground: oklch(31.57% 0.057 180.36);
   --normal-hover: oklch(60.82% 0.112 178.31);

@@ -27,6 +27,11 @@ export async function getUserByHandle(handle: string): Promise<User | null> {
       if (user && (user.username !== cleanHandle && user._id !== cleanHandle)) {
         user = null; // Mismatch
       }
+
+      // Normalize cover picture if backend returns coverPic
+      if (user && !user.coverPicture && (user as any).coverPic) {
+        user.coverPicture = (user as any).coverPic;
+      }
     }
 
     // Fallback to search if direct fetch fails or returns wrong user
@@ -46,7 +51,40 @@ export async function getUserByHandle(handle: string): Promise<User | null> {
           const found = users.find((u: User) => 
             u.username.toLowerCase() === cleanHandle.toLowerCase()
           );
-          if (found) user = found;
+          if (found) {
+            user = found;
+            // Normalize cover picture if backend returns coverPic
+            if (user && !user.coverPicture && (user as any).coverPic) {
+              user.coverPicture = (user as any).coverPic;
+            }
+
+            // If found via search, the user object might be incomplete.
+            // Fetch the full profile using the ID we just found.
+            if (found._id || found.id) {
+               try {
+                 const fullProfileRes = await fetch(`${API_BASE_URL}/api/users/${found._id || found.id}`, {
+                    headers: {
+                      Authorization: `Bearer ${token?.value}`,
+                    },
+                    cache: "no-store",
+                 });
+                 
+                 if (fullProfileRes.ok) {
+                    const fullData = await fullProfileRes.json();
+                    const fullUser = fullData.user || fullData.data || fullData;
+                     if (fullUser) {
+                         user = { ...found, ...fullUser };
+                         // Re-apply normalization just in case
+                         if (user && !user.coverPicture && (user as any).coverPic) {
+                             user.coverPicture = (user as any).coverPic;
+                         }
+                     }
+                 }
+               } catch (err) {
+                 console.error("Error fetching full profile details:", err);
+               }
+            }
+          }
         }
       }
     }

@@ -2,12 +2,17 @@ export interface ChatUser {
   id: string;
   name: string;
   username: string;
-  avatar: string;
+  profilePicture?: string;
+  avatar?: string; // Fallback
+  blueTick?: boolean;
+  goldenTick?: boolean;
+  lastLoginAt?: string;
 }
 
 export interface Chat {
   id: string; // Changed from number to string for consistency with typical DB IDs
-  participants: ChatUser[];
+  members?: ChatUser[]; // New standard field
+  participants: ChatUser[]; // Legacy field (mapped from members if needed)
   lastMessage?: {
     content: string;
     createdAt: string;
@@ -33,9 +38,17 @@ export interface Message {
 }
 
 export interface SendMessageRequest {
-  recipientId?: string; // For new chats
-  chatId?: string; // For existing chats
+  receiverId?: string; // Changed from recipientId to match enhanced-chat spec
+  chatId?: string; 
   content: string;
+  messageType?: 'text' | 'emoji';
+  replyToId?: string;
+}
+
+export interface CreateChatRequest {
+  participants: string[];
+  isGroup: boolean;
+  groupName?: string;
 }
 
 export interface ChatResponse {

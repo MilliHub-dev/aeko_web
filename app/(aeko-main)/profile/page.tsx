@@ -28,6 +28,10 @@ export default async function ProfilePage() {
       if (res.ok) {
         const data = await res.json();
         const detailedUser = data.user || data.data || data;
+        // Normalize cover picture in detailed stats
+        if (detailedUser && !detailedUser.coverPicture && detailedUser.coverPic) {
+          detailedUser.coverPicture = detailedUser.coverPic;
+        }
         // Merge detailed stats into the user object
         user = { ...user, ...detailedUser };
       } else {

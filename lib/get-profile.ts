@@ -33,7 +33,14 @@ export async function getProfile(): Promise<User | null> {
 
       const data = await response.json();
       // Adjust based on actual response shape: { success: true, user: ... }
-      return data.user ?? data;
+      const user = data.user ?? data;
+      
+      // Normalize cover picture if backend returns coverPic
+      if (user && !user.coverPicture && user.coverPic) {
+        user.coverPicture = user.coverPic;
+      }
+      
+      return user;
     } catch (error) {
       console.error("Error fetching profile:", error);
       return null;
@@ -69,7 +76,12 @@ export async function getProfile(): Promise<User | null> {
         return null;
       }
       const data = await response.json();
-      return data.user ?? data;
+      const user = data.user ?? data;
+      // Normalize cover picture if backend returns coverPic
+      if (user && !user.coverPicture && user.coverPic) {
+        user.coverPicture = user.coverPic;
+      }
+      return user;
     } catch (error) {
       console.error("Error fetching profile client-side:", error);
       return null;

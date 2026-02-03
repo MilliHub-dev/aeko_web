@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/
 import { BotChat } from "./bot-chat";
 import { BotSettings } from "./bot-settings";
 
-export function BotDialog({ trigger }: { trigger: React.ReactNode }) {
+export function BotDialog({ trigger, chatId }: { trigger: React.ReactNode; chatId?: string }) {
   const [view, setView] = useState<"chat" | "settings">("chat");
 
   return (
@@ -21,7 +21,7 @@ export function BotDialog({ trigger }: { trigger: React.ReactNode }) {
       <DialogContent className="sm:max-w-[425px] h-[600px] p-0 overflow-hidden flex flex-col">
         <DialogTitle className="sr-only">Bot Interaction</DialogTitle>
         {view === "chat" ? (
-          <BotChat onOpenSettings={() => setView("settings")} />
+          <BotChat onOpenSettings={() => setView("settings")} chatId={chatId} />
         ) : (
           <BotSettings onBack={() => setView("chat")} />
         )}

@@ -5,12 +5,27 @@ import { useChat } from "@/contexts/ChatContext";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useRouter } from "next/navigation";
 import { BotDialog } from "../bot/bot-dialog";
+import { useUser } from "@/components/shared/user-context";
+import { getChatDisplayName, getChatDisplayImage, getChatDisplayUsername } from "@/lib/chat-utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const ChatHeader = () => {
   const router = useRouter();
   const { selectedChat } = useChat();
+  const { user } = useUser();
 
   if (!selectedChat) return null;
+
+  const myId = user?.id || user?._id;
+  
+  const displayName = getChatDisplayName(selectedChat, myId);
+  const displayUsername = getChatDisplayUsername(selectedChat, myId);
+  const displayAvatar = getChatDisplayImage(selectedChat, myId);
 
   return (
     <div className="border-b border-border p-4 flex items-center gap-3">
@@ -21,16 +36,18 @@ const ChatHeader = () => {
         <ArrowLeft size={20} />
       </button>
       <Avatar className="h-10 w-10">
-        <AvatarImage src={selectedChat.avatar} alt={selectedChat.name} />
-        <AvatarFallback>{selectedChat.name?.[0] || "?"}</AvatarFallback>
+        <AvatarImage src={displayAvatar} alt={displayName} />
+        <AvatarFallback>{displayName[0] || "?"}</AvatarFallback>
       </Avatar>
       <div className="flex-1 min-w-0">
         <h2 className="font-semibold text-foreground truncate">
-          {selectedChat.name || "Unknown Chat"}
+          {displayName}
         </h2>
-        <p className="text-sm text-muted-foreground truncate">
-          @{selectedChat.username || "unknown"}
-        </p>
+        {displayUsername && (
+          <p className="text-sm text-muted-foreground truncate">
+            @{displayUsername}
+          </p>
+        )}
       </div>
       
       <BotDialog 
@@ -39,11 +56,29 @@ const ChatHeader = () => {
             <Bot size={20} />
           </button>
         }
+        chatId={selectedChat.id}
       />
 
-      <button className="p-2 hover:bg-secondary/80 rounded-full transition-colors">
-        <MoreHorizontal size={20} />
-      </button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className="p-2 hover:bg-secondary/80 rounded-full transition-colors">
+            <MoreHorizontal size={20} />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {displayUsername && (
+            <DropdownMenuItem onClick={() => router.push(`/${displayUsername}`)}>
+              View Profile
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuItem className="text-destructive">
+            Block User
+          </DropdownMenuItem>
+          <DropdownMenuItem className="text-destructive">
+            Delete Chat
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 };

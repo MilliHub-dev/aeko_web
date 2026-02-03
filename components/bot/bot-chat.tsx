@@ -15,29 +15,53 @@ interface Message {
   createdAt: string;
 }
 
-export function BotChat({ onOpenSettings }: { onOpenSettings: () => void }) {
+export function BotChat({ onOpenSettings, chatId }: { onOpenSettings: () => void; chatId?: string }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollBottomRef = useRef<HTMLDivElement>(null);
+  const [settings, setSettings] = useState<{ botPersonality: string } | null>(null);
+
+  useEffect(() => {
+    // Fetch settings to get personality
+    const fetchSettings = async () => {
+        try {
+            const res = await fetch("/api/enhanced-bot/settings");
+            if (res.ok) {
+                const data = await res.json();
+                setSettings({
+                    botPersonality: data.botPersonality ?? data.personality ?? "friendly"
+                });
+            }
+        } catch (error) {
+            console.error("Failed to fetch bot settings", error);
+        }
+    };
+    fetchSettings();
+  }, []);
 
   useEffect(() => {
     // Fetch history
     const fetchHistory = async () => {
       try {
-        const res = await fetch("/api/enhanced-bot/conversation-history");
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data.messages)) {
-            setMessages(data.messages);
-          }
+        // If specific chatId is provided, we might want to handle history differently
+        // For now, we'll keep the global history or maybe skip it if it's context-specific?
+        // Assuming global history for now unless we have a specific endpoint
+        if (!chatId) {
+            const res = await fetch("/api/enhanced-bot/conversation-history");
+            if (res.ok) {
+              const data = await res.json();
+              if (Array.isArray(data.messages)) {
+                setMessages(data.messages);
+              }
+            }
         }
       } catch (error) {
         console.error("Failed to load bot history", error);
       }
     };
     fetchHistory();
-  }, []);
+  }, [chatId]);
 
   useEffect(() => {
     if (scrollBottomRef.current) {
@@ -61,11 +85,31 @@ export function BotChat({ onOpenSettings }: { onOpenSettings: () => void }) {
     setIsLoading(true);
 
     try {
-      const res = await fetch("/api/enhanced-bot/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMsg.content }),
-      });
+      let res;
+      const personality = settings?.botPersonality || "friendly";
+
+      if (chatId) {
+        // Use Contextual Bot Endpoint
+        res = await fetch("/api/enhanced-chat/bot-chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+                message: userMsg.content,
+                chatId,
+                personality 
+            }),
+        });
+      } else {
+        // Use Standalone Bot Endpoint
+        res = await fetch("/api/enhanced-bot/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+                message: userMsg.content,
+                personalityOverride: personality
+            }),
+        });
+      }
 
       if (!res.ok) throw new Error("Failed to send message");
 

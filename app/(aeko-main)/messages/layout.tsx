@@ -18,6 +18,7 @@ export default function MessagesLayout({
         {/* Chat Screen - Shows selected chat on mobile, always visible on desktop */}
         <div className="flex-1">
           <ChatMessages />
+          {children}
         </div>
       </div>
     </ChatProvider>

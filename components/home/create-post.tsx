@@ -44,6 +44,8 @@ import { createPostAction } from "@/app/(aeko-main)/actions";
 import { useUser } from "@/components/shared/user-context";
 import { UserSelector } from "./post/user-selector";
 import { toast } from "sonner";
+import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface CreatePostProps {
   onPost?: (data: {
@@ -97,12 +99,42 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
     }, 0);
   };
 
+  const handleEmojiClick = (emojiData: EmojiClickData) => {
+    const textarea = textareaRef.current;
+    if (!textarea) {
+        setContent(prev => prev + emojiData.emoji);
+        return;
+    }
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    
+    const before = text.substring(0, start);
+    const after = text.substring(end);
+    
+    const newText = `${before}${emojiData.emoji}${after}`;
+    
+    setContent(newText);
+    
+    // Restore selection/focus after state update
+    setTimeout(() => {
+      textarea.focus();
+      const newCursorPos = start + emojiData.emoji.length;
+      textarea.setSelectionRange(newCursorPos, newCursorPos);
+    }, 0);
+  };
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     // Check if it's an image or video
-    const isVideo = file.type.startsWith("video/");
+    // Robust check for video type: mime type or extension fallback
+    const isVideoType = file.type.startsWith("video/");
+    const isVideoExt = /\.(mp4|mov|webm|ogg|mkv|avi)$/i.test(file.name);
+    const isVideo = isVideoType || isVideoExt;
+
     setPostType(isVideo ? "video" : "image");
 
     // Create preview URL
@@ -312,7 +344,7 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept="image/*,video/*"
+                    accept="image/*,video/*,.jpg,.jpeg,.png,.gif,.mp4,.mov,.webm"
                     onChange={handleFileSelect}
                     className="hidden"
                   />
@@ -325,7 +357,6 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
                     className="text-primary hover:text-primary hover:bg-primary/10 rounded-full h-9 w-9"
                     onClick={() => {
                       if (fileInputRef.current) {
-                        fileInputRef.current.accept = "image/*,video/*";
                         fileInputRef.current.click();
                       }
                     }}
@@ -360,16 +391,23 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
                   </Button>
 
                   {/* Emoji */}
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="text-primary hover:text-primary hover:bg-primary/10 rounded-full h-9 w-9"
-                    disabled={isLoading}
-                    title="Emoji"
-                  >
-                    <Smile className="w-5 h-5" />
-                  </Button>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="text-primary hover:text-primary hover:bg-primary/10 rounded-full h-9 w-9"
+                        disabled={isLoading}
+                        title="Emoji"
+                      >
+                        <Smile className="w-5 h-5" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent side="top" className="w-auto p-0 border-none" align="start">
+                      <EmojiPicker onEmojiClick={handleEmojiClick} />
+                    </PopoverContent>
+                  </Popover>
 
                   {/* Schedule */}
                   <Button
