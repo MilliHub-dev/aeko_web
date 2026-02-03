@@ -1,6 +1,6 @@
 "use client";
 
-import { Send, Image, Smile, Mic } from "lucide-react";
+import { Send, Image, Smile, Mic, X, Play, Pause } from "lucide-react";
 import { useChat } from "@/contexts/ChatContext";
 import { useState, useEffect, useRef } from "react";
 import { ChatHeader } from "./chat-header";
@@ -15,14 +15,83 @@ interface DisplayMessage {
   text: string;
   sent: boolean;
   time: string;
-  type?: 'text' | 'image' | 'video' | 'file' | 'emoji';
+  type?: 'text' | 'image' | 'video' | 'file' | 'emoji' | 'voice';
   mediaUrl?: string;
   attachments?: { url: string; mimeType: string }[];
+  voiceMessage?: {
+    url: string;
+    duration: number;
+    waveform: number[];
+  };
 }
 
 interface MessageBubbleProps {
   message: DisplayMessage;
 }
+
+const VoiceMessageBubble: React.FC<{ message: DisplayMessage }> = ({ message }) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  const togglePlay = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleEnded = () => {
+    setIsPlaying(false);
+  };
+
+  if (!message.voiceMessage) return null;
+
+  return (
+    <div className="flex items-center gap-2 min-w-[200px]">
+      <button 
+        onClick={togglePlay}
+        className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${
+          message.sent 
+            ? "bg-white/20 hover:bg-white/30 text-white" 
+            : "bg-primary/10 hover:bg-primary/20 text-primary"
+        }`}
+      >
+        {isPlaying ? <Pause size={16} /> : <Play size={16} />}
+      </button>
+      <div className="flex flex-col flex-1">
+        <div className="h-8 flex items-center gap-1">
+          {/* Simple visualization of waveform */}
+          {message.voiceMessage.waveform?.map((peak, i) => (
+             <div 
+               key={i} 
+               className="w-1 bg-current rounded-full opacity-50"
+               style={{ height: `${Math.max(20, peak * 100)}%` }}
+             />
+          )) || <div className="h-1 w-full bg-current/20 rounded-full" />}
+        </div>
+        <span className="text-xs opacity-70">
+          {formatDuration(message.voiceMessage.duration)}
+        </span>
+      </div>
+      <audio 
+        ref={audioRef} 
+        src={message.voiceMessage.url} 
+        onEnded={handleEnded}
+        className="hidden" 
+      />
+    </div>
+  );
+};
 
 const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
   // Helper to determine media to show (prefer attachments, fall back to mediaUrl)
@@ -30,6 +99,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
   const isImage = mediaItem?.mimeType.startsWith('image/') || message.type === 'image';
   const isVideo = mediaItem?.mimeType.startsWith('video/') || message.type === 'video';
   const isFile = !isImage && !isVideo && (!!mediaItem || message.type === 'file');
+  const isVoice = message.type === 'voice' && !!message.voiceMessage;
 
   return (
   <div className={`flex ${message.sent ? "justify-end" : "justify-start"}`}>
@@ -51,8 +121,10 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
            <a href={mediaItem.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm underline mb-1">
              📎 Attachment
            </a>
+        ) : isVoice ? (
+           <VoiceMessageBubble message={message} />
         ) : null}
-        <p>{message.text}</p>
+        {message.text && <p>{message.text}</p>}
       </div>
       <p className="text-xs text-muted-foreground mt-1 px-2">{message.time}</p>
     </div>
@@ -95,13 +167,89 @@ const MessageList: React.FC<MessageListProps> = ({ messages, isLoading }) => {
 interface MessageInputProps {
   onSend: (text: string) => void;
   onSendMedia: (file: File) => void;
+  onSendVoice: (voice: Blob, duration: number, waveform: number[]) => void;
   isSending: boolean;
 }
 
-const MessageInput: React.FC<MessageInputProps> = ({ onSend, onSendMedia, isSending }) => {
+const MessageInput: React.FC<MessageInputProps> = ({ onSend, onSendMedia, onSendVoice, isSending }) => {
   const [message, setMessage] = useState("");
   const [showEmoji, setShowEmoji] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/mp3' });
+        // Generate mock waveform for now
+        const waveform = Array.from({ length: 20 }, () => Math.random());
+        onSendVoice(audioBlob, recordingDuration, waveform);
+        
+        // Stop all tracks
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+      setRecordingDuration(0);
+      
+      timerRef.current = setInterval(() => {
+        setRecordingDuration(prev => prev + 1);
+      }, 1000);
+      
+    } catch (error) {
+      console.error("Error accessing microphone:", error);
+      alert("Could not access microphone. Please check permissions.");
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    }
+  };
+
+  const cancelRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      // Override onstop to do nothing or handle differently if needed
+      mediaRecorderRef.current.onstop = null;
+      
+      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      setIsRecording(false);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      setRecordingDuration(0);
+    }
+  };
+
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   const handleSend = () => {
     if (message.trim()) {
@@ -133,6 +281,33 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, onSendMedia, isSend
     }
   };
 
+  if (isRecording) {
+    return (
+      <div className="border-t border-border p-4">
+        <div className="flex items-center justify-between bg-secondary rounded-full px-4 py-2">
+          <div className="flex items-center gap-2 text-red-500 animate-pulse">
+            <div className="w-2 h-2 rounded-full bg-red-500" />
+            <span className="text-sm font-medium">{formatDuration(recordingDuration)}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={cancelRecording}
+              className="p-2 hover:bg-black/10 rounded-full transition-colors text-muted-foreground"
+            >
+              <X size={20} />
+            </button>
+            <button 
+              onClick={stopRecording}
+              className="p-2 bg-primary text-primary-foreground rounded-full transition-colors"
+            >
+              <Send size={20} />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="border-t border-border p-4">
       <div className="flex items-center gap-2 bg-secondary rounded-full px-4 py-2">
@@ -140,7 +315,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, onSendMedia, isSend
             type="file" 
             ref={fileInputRef} 
             className="hidden" 
-            accept="image/*,video/*"
+            accept="image/*,video/*,.pdf,.doc,.docx"
             onChange={handleFileSelect}
         />
         <button 
@@ -153,18 +328,18 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, onSendMedia, isSend
         
         <Popover open={showEmoji} onOpenChange={setShowEmoji}>
           <PopoverTrigger asChild>
-            <button className="p-1 hover:bg-secondary/80 rounded-full transition-colors">
+            <button className="p-1 hover:bg-secondary/80 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled={isSending}>
               <Smile size={20} className="text-primary" />
             </button>
           </PopoverTrigger>
-          <PopoverContent side="top" className="w-auto p-0 border-none">
+          <PopoverContent className="w-full p-0 border-none" align="start">
             <EmojiPicker onEmojiClick={handleEmojiClick} />
           </PopoverContent>
         </Popover>
 
         <input
           type="text"
-          placeholder="Start a new message"
+          placeholder="Message..."
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -180,7 +355,11 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, onSendMedia, isSend
             <Send size={20} className="text-primary" />
           </button>
         ) : (
-          <button className="p-1 hover:bg-secondary/80 rounded-full transition-colors">
+          <button 
+            onClick={startRecording}
+            disabled={isSending}
+            className="p-1 hover:bg-secondary/80 rounded-full transition-colors disabled:opacity-50"
+          >
             <Mic size={20} className="text-primary" />
           </button>
         )}
@@ -203,7 +382,7 @@ const EmptyState: React.FC = () => (
 
 const ChatMessages = () => {
   const { selectedChat, showChatList, isInitializing } = useChat();
-  const { messages, fetchMessages, sendMessage, sendMediaMessage, isSendingMessage, isLoadingMessages } = useChatStore();
+  const { messages, fetchMessages, sendMessage, sendMediaMessage, sendVoiceMessage, isSendingMessage, isLoadingMessages } = useChatStore();
   const { user } = useUser();
 
   useEffect(() => {
@@ -234,7 +413,8 @@ const ChatMessages = () => {
     time: new Date(m.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
     type: m.messageType,
     mediaUrl: m.mediaUrl,
-    attachments: m.attachments
+    attachments: m.attachments,
+    voiceMessage: m.voiceMessage
   }));
 
   const handleSendMessage = (text: string) => {
@@ -257,6 +437,14 @@ const ChatMessages = () => {
     sendMediaMessage(file, receiverId);
   };
 
+  const handleSendVoice = (voice: Blob, duration: number, waveform: number[]) => {
+    const myId = user?._id || user?.id;
+    const receiver = getOtherParticipant(selectedChat, myId);
+    const receiverId = receiver?.id || (receiver as any)?._id || (receiver as any)?.userId;
+    
+    sendVoiceMessage(voice, duration, waveform, receiverId);
+  };
+
   return (
     <div
       className={`${
@@ -264,7 +452,7 @@ const ChatMessages = () => {
       } lg:flex flex-col h-full bg-background`}>
       <ChatHeader />
       <MessageList messages={displayMessages} isLoading={isLoading} />
-      <MessageInput onSend={handleSendMessage} onSendMedia={handleSendMedia} isSending={isSendingMessage} />
+      <MessageInput onSend={handleSendMessage} onSendMedia={handleSendMedia} onSendVoice={handleSendVoice} isSending={isSendingMessage} />
     </div>
   );
 };

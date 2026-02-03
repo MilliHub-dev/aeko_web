@@ -34,12 +34,17 @@ export interface Message {
   createdAt: string;
   readAt?: string;
   // Media support
-  messageType?: 'text' | 'image' | 'video' | 'file' | 'emoji';
+  messageType?: 'text' | 'image' | 'video' | 'file' | 'emoji' | 'voice';
   mediaUrl?: string; // Legacy/Fallback
   attachments?: {
     url: string;
     mimeType: string;
   }[];
+  voiceMessage?: {
+    url: string;
+    duration: number;
+    waveform: number[];
+  };
   // UI helpers
   sent?: boolean; // Derived from current user ID comparison
 }

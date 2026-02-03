@@ -18,6 +18,7 @@ interface ChatState {
   fetchMessages: (chatId: string) => Promise<void>;
   sendMessage: (content: string, receiverId?: string) => Promise<void>;
   sendMediaMessage: (file: File, receiverId?: string) => Promise<void>;
+  sendVoiceMessage: (voice: Blob, duration: number, waveform: number[], receiverId?: string) => Promise<void>;
   addMessage: (message: Message) => void;
   createChat: (participantIds: string[]) => Promise<string | null>;
 }
@@ -193,6 +194,47 @@ export const useChatStore = create<ChatState>((set, get) => ({
     } catch (error) {
       console.error("Error sending media:", error);
       set({ isSendingMessage: false, error: "Failed to send media" });
+    }
+  },
+
+  sendVoiceMessage: async (voice, duration, waveform, receiverId) => {
+    const { selectedChatId } = get();
+    if (!selectedChatId) return;
+
+    set({ isSendingMessage: true });
+    try {
+      console.log('Sending voice message:', { selectedChatId, duration, receiverId });
+      
+      const formData = new FormData();
+      formData.append("voice", voice, "voice.mp3"); // Add filename for Blob
+      formData.append("chatId", selectedChatId);
+      formData.append("duration", duration.toString());
+      formData.append("waveform", JSON.stringify(waveform));
+      
+      if (receiverId) {
+        formData.append("receiverId", receiverId);
+      }
+
+      const res = await fetch("/api/enhanced-chat/upload-voice", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error(`Send voice failed: ${res.status} ${res.statusText}`, errorText);
+        throw new Error(`Failed to send voice: ${res.status} ${res.statusText}`);
+      }
+
+      const rawData = await res.json();
+      const newMessage = rawData.message || rawData.data || rawData;
+      
+      get().addMessage(newMessage);
+      
+      set({ isSendingMessage: false });
+    } catch (error) {
+      console.error("Error sending voice:", error);
+      set({ isSendingMessage: false, error: "Failed to send voice" });
     }
   },
 
