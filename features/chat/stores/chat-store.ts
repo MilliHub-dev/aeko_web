@@ -160,18 +160,16 @@ export const useChatStore = create<ChatState>((set, get) => ({
       
       const formData = new FormData();
       formData.append("chatId", selectedChatId);
-      // messageType based on file type
-      const messageType = file.type.startsWith('image/') ? 'image' : 
-                          file.type.startsWith('video/') ? 'video' : 'file';
-      formData.append("messageType", messageType);
       formData.append("file", file);
+      // Optional caption can be added here if we want to support it in the UI later
+      formData.append("caption", file.name); 
       
       if (receiverId) {
         formData.append("receiverId", receiverId);
       }
 
-      // Use /send-message as per documentation (supports multipart via proxy)
-      const res = await fetch("/api/enhanced-chat/send-message", {
+      // Use correct endpoint /upload-file as per documentation
+      const res = await fetch("/api/enhanced-chat/upload-file", {
         method: "POST",
         body: formData,
       });
@@ -184,6 +182,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
       const rawData = await res.json();
       const newMessage = rawData.message || rawData.data || rawData;
+      
+      // Normalize the message structure if needed before adding to store
+      // The API returns 'attachments' array, we might need to map it for our UI
+      // or ensure UI supports it.
       
       get().addMessage(newMessage);
       

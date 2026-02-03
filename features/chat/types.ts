@@ -33,6 +33,13 @@ export interface Message {
   content: string;
   createdAt: string;
   readAt?: string;
+  // Media support
+  messageType?: 'text' | 'image' | 'video' | 'file' | 'emoji';
+  mediaUrl?: string; // Legacy/Fallback
+  attachments?: {
+    url: string;
+    mimeType: string;
+  }[];
   // UI helpers
   sent?: boolean; // Derived from current user ID comparison
 }
@@ -41,7 +48,7 @@ export interface SendMessageRequest {
   receiverId?: string; // Changed from recipientId to match enhanced-chat spec
   chatId?: string; 
   content: string;
-  messageType?: 'text' | 'emoji';
+  messageType?: 'text' | 'emoji' | 'image' | 'video' | 'file';
   replyToId?: string;
 }
 

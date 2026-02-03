@@ -15,13 +15,23 @@ interface DisplayMessage {
   text: string;
   sent: boolean;
   time: string;
+  type?: 'text' | 'image' | 'video' | 'file' | 'emoji';
+  mediaUrl?: string;
+  attachments?: { url: string; mimeType: string }[];
 }
 
 interface MessageBubbleProps {
   message: DisplayMessage;
 }
 
-const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => (
+const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
+  // Helper to determine media to show (prefer attachments, fall back to mediaUrl)
+  const mediaItem = message.attachments?.[0] || (message.mediaUrl ? { url: message.mediaUrl, mimeType: message.type === 'video' ? 'video/mp4' : 'image/jpeg' } : null);
+  const isImage = mediaItem?.mimeType.startsWith('image/') || message.type === 'image';
+  const isVideo = mediaItem?.mimeType.startsWith('video/') || message.type === 'video';
+  const isFile = !isImage && !isVideo && (!!mediaItem || message.type === 'file');
+
+  return (
   <div className={`flex ${message.sent ? "justify-end" : "justify-start"}`}>
     <div
       className={`max-w-xs lg:max-w-md ${
@@ -33,12 +43,22 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => (
             ? "bg-primary text-primary-foreground rounded-br-sm"
             : "bg-secondary text-foreground rounded-bl-sm"
         }`}>
+        {mediaItem && isImage ? (
+           <img src={mediaItem.url} alt="Image" className="rounded-lg max-w-full h-auto mb-1" />
+        ) : mediaItem && isVideo ? (
+           <video src={mediaItem.url} controls className="rounded-lg max-w-full h-auto mb-1" />
+        ) : mediaItem && isFile ? (
+           <a href={mediaItem.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm underline mb-1">
+             📎 Attachment
+           </a>
+        ) : null}
         <p>{message.text}</p>
       </div>
       <p className="text-xs text-muted-foreground mt-1 px-2">{message.time}</p>
     </div>
   </div>
-);
+  );
+};
 
 interface MessageListProps {
   messages: DisplayMessage[];
@@ -211,7 +231,10 @@ const ChatMessages = () => {
     id: m.id,
     text: m.content,
     sent: m.senderId === (user?._id || user?.id),
-    time: new Date(m.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+    time: new Date(m.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+    type: m.messageType,
+    mediaUrl: m.mediaUrl,
+    attachments: m.attachments
   }));
 
   const handleSendMessage = (text: string) => {
