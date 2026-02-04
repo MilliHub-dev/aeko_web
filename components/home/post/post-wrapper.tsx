@@ -47,7 +47,7 @@ const PostWrapper = ({
 
   return (
     <div className="w-full h-full">
-      <div className="relative w-full h-full snap-start flex flex-col justify-center items-center pt-16 pb-32 md:py-6 max-w-md md:max-w-2xl mx-auto">
+      <div className="relative w-full h-full snap-start flex flex-col justify-center items-center pt-4 pb-16 md:py-6 max-w-2xl md:max-w-3xl mx-auto">
         <div
           ref={ref}
           onClick={handleRoute}
@@ -61,7 +61,7 @@ const PostWrapper = ({
             "relative flex flex-col justify-between md:aspect-9/16 isolate transition-opacity duration-300 cursor-pointer lg:cursor-default",
             "rounded-xl md:rounded-4xl",
             isMedia
-              ? "p-0 md:p-6 aspect-[9/16] w-auto h-full max-w-full md:w-full md:h-auto md:max-h-none"
+              ? "p-0 md:p-6 w-full h-full md:w-full md:h-auto md:max-h-none"
               : "p-6 h-full w-full",
             isActive ? "opacity-100" : "opacity-80",
             isMedia

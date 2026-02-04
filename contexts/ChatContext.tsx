@@ -13,6 +13,7 @@ import { useChatStore } from "@/features/chat/stores/chat-store";
 import { type Chat } from "@/features/chat/types";
 import { useUser } from "@/components/shared/user-context";
 import { getChatDisplayUsername } from "@/lib/chat-utils";
+import { getSocket, disconnectSocket } from "@/lib/socket";
 
 export type ChatPresence = "online" | "offline" | "away";
 
@@ -73,6 +74,53 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     fetchChats();
   }, [fetchChats]);
+
+  // Socket connection
+  const { updateMessage } = useChatStore();
+  
+  useEffect(() => {
+    const initSocket = async () => {
+      try {
+        const res = await fetch("/api/auth/token");
+        if (res.ok) {
+          const { token } = await res.json();
+          if (token) {
+            const socket = getSocket(token);
+
+            socket.on("message_read", (data: { messageId: string, chatId?: string, conversationId?: string }) => {
+              // Find chat ID if not provided
+              const chatId = data.chatId || data.conversationId;
+              
+              if (chatId) {
+                updateMessage(chatId, data.messageId, { readAt: new Date().toISOString() });
+              } else {
+                 // Fallback: search in current messages
+                 const messagesMap = useChatStore.getState().messages;
+                 Object.keys(messagesMap).forEach(cid => {
+                   if (messagesMap[cid].some(m => m.id === data.messageId)) {
+                     updateMessage(cid, data.messageId, { readAt: new Date().toISOString() });
+                   }
+                 });
+              }
+            });
+
+            // Handle message_sent if needed (update status to sent/delivered)
+            socket.on("message_sent", (data) => {
+               // Optional: Update delivery status
+            });
+          }
+        }
+      } catch (e) {
+        console.error("Failed to init socket", e);
+      }
+    };
+
+    initSocket();
+
+    return () => {
+      disconnectSocket();
+    };
+  }, [updateMessage]);
 
   // Sync state with URL pathname changes
   useEffect(() => {

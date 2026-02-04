@@ -193,9 +193,9 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
         toast.error(result.message || "Failed to create post");
         // You might want to show an error message to the user here
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to create post:", error);
-      toast.error("An unexpected error occurred");
+      toast.error(error?.message || "An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }

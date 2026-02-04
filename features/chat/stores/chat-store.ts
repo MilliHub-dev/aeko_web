@@ -20,6 +20,7 @@ interface ChatState {
   sendMediaMessage: (file: File, receiverId?: string) => Promise<void>;
   sendVoiceMessage: (voice: Blob, duration: number, waveform: number[], receiverId?: string) => Promise<void>;
   addMessage: (message: Message) => void;
+  updateMessage: (chatId: string, messageId: string, updates: Partial<Message>) => void;
   createChat: (participantIds: string[]) => Promise<string | null>;
 }
 
@@ -77,9 +78,23 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   selectChat: (chatId) => {
-    set({ selectedChatId: chatId });
+    set((state) => {
+      // Optimistically mark as read locally
+      const updatedChats = state.chats.map((c) => {
+        if (String(c.id) === String(chatId)) {
+          return { ...c, unreadCount: 0 };
+        }
+        return c;
+      });
+      return { selectedChatId: chatId, chats: updatedChats };
+    });
+
     if (chatId) {
       get().fetchMessages(chatId);
+      // Try to notify backend about read status
+      fetch(`/api/enhanced-chat/mark-read/${chatId}`, { method: 'POST' }).catch(err => 
+        console.warn('Failed to mark chat as read on server:', err)
+      );
     }
   },
 
@@ -281,6 +296,21 @@ export const useChatStore = create<ChatState>((set, get) => ({
           ...state.messages,
           [chatId]: [...currentMessages, message],
         },
+      };
+    });
+  },
+
+  updateMessage: (chatId, messageId, updates) => {
+    set((state) => {
+      const currentMessages = state.messages[chatId] || [];
+      const updatedMessages = currentMessages.map((msg) => 
+        msg.id === messageId ? { ...msg, ...updates } : msg
+      );
+      return {
+        messages: {
+          ...state.messages,
+          [chatId]: updatedMessages
+        }
       };
     });
   },

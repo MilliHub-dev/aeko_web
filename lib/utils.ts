@@ -18,3 +18,11 @@ export function formatCount(count: number): string {
   
   return count.toString();
 }
+
+export function formatCurrency(amount: number): string {
+  // Format currency
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(amount);
+}

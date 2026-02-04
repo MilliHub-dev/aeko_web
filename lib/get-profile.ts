@@ -16,10 +16,16 @@ export async function getProfile(): Promise<User | null> {
     const token = cookieStore.get("token");
 
     try {
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+
+      if (token?.value) {
+        headers["Authorization"] = `Bearer ${token.value}`;
+      }
+
       const response = await fetch(`${API_BASE_URL}/api/profile`, {
-        headers: {
-          Authorization: `Bearer ${token?.value}`,
-        },
+        headers,
         cache: "no-store",
       });
 
@@ -42,7 +48,8 @@ export async function getProfile(): Promise<User | null> {
       
       return user;
     } catch (error) {
-      console.error("Error fetching profile:", error);
+      // Log the error but don't crash the page
+      console.error(`[getProfile] Error fetching profile from ${API_BASE_URL}:`, error);
       return null;
     }
   }

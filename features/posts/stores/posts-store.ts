@@ -200,17 +200,29 @@ export const usePostsStore = create<PostState>()(
 
           // Update with actual data from API
           set((state) => {
+            const serverBookmarked = data.bookmarked ?? data.isBookmarked;
+            const newBookmarkedPosts = new Set(state.bookmarkedPosts);
+            
+            if (typeof serverBookmarked === 'boolean') {
+              if (serverBookmarked) {
+                newBookmarkedPosts.add(postId);
+              } else {
+                newBookmarkedPosts.delete(postId);
+              }
+            }
+
             const updatePostWithApiData = (post: FeedPost) => {
               if (post._id === postId) {
                 return {
                   ...post,
-                  bookmarksCount: data.totalBookmarks || post.bookmarksCount,
+                  bookmarksCount: data.totalBookmarks ?? post.bookmarksCount,
                 };
               }
               return post;
             };
 
             return {
+              bookmarkedPosts: newBookmarkedPosts,
               posts: state.posts.map(updatePostWithApiData),
               selectedPost: state.selectedPost
                 ? updatePostWithApiData(state.selectedPost)
@@ -379,7 +391,7 @@ export const usePostsStore = create<PostState>()(
           if (!res.ok) throw new Error("Failed to fetch bookmarks");
           const data = await res.json();
           // Assuming data.posts is the array of bookmarked posts
-          const bookmarkedIds = new Set<string>(data.posts.map((p: any) => p._id));
+          const bookmarkedIds = new Set<string>(data.posts.map((p: any) => p._id || p.id));
           set({ bookmarkedPosts: bookmarkedIds });
         } catch (error) {
           console.error("Error fetching bookmarks:", error);

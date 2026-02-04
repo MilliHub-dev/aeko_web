@@ -1,6 +1,6 @@
 "use client";
 
-import { Send, Image, Smile, Mic, X, Play, Pause } from "lucide-react";
+import { Send, Image, Smile, Mic, X, Play, Pause, CheckCheck } from "lucide-react";
 import { useChat } from "@/contexts/ChatContext";
 import { useState, useEffect, useRef } from "react";
 import { ChatHeader } from "./chat-header";
@@ -10,11 +10,14 @@ import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { getOtherParticipant } from "@/lib/chat-utils";
 
+import { MediaViewerModal } from "./media-viewer-modal";
+
 interface DisplayMessage {
   id: string;
   text: string;
   sent: boolean;
   time: string;
+  readAt?: string;
   type?: 'text' | 'image' | 'video' | 'file' | 'emoji' | 'voice';
   mediaUrl?: string;
   attachments?: { url: string; mimeType: string }[];
@@ -27,6 +30,7 @@ interface DisplayMessage {
 
 interface MessageBubbleProps {
   message: DisplayMessage;
+  onViewMedia: (url: string, type: 'image' | 'video') => void;
 }
 
 const VoiceMessageBubble: React.FC<{ message: DisplayMessage }> = ({ message }) => {
@@ -93,7 +97,7 @@ const VoiceMessageBubble: React.FC<{ message: DisplayMessage }> = ({ message }) 
   );
 };
 
-const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
+const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onViewMedia }) => {
   // Helper to determine media to show (prefer attachments, fall back to mediaUrl)
   const mediaItem = message.attachments?.[0] || (message.mediaUrl ? { url: message.mediaUrl, mimeType: message.type === 'video' ? 'video/mp4' : 'image/jpeg' } : null);
   const isImage = mediaItem?.mimeType.startsWith('image/') || message.type === 'image';
@@ -114,9 +118,19 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
             : "bg-secondary text-foreground rounded-bl-sm"
         }`}>
         {mediaItem && isImage ? (
-           <img src={mediaItem.url} alt="Image" className="rounded-lg max-w-full h-auto mb-1" />
+           <img 
+             src={mediaItem.url} 
+             alt="Image" 
+             className="rounded-lg max-w-full h-auto mb-1 cursor-pointer hover:opacity-90 transition-opacity" 
+             onClick={() => onViewMedia(mediaItem.url, 'image')}
+           />
         ) : mediaItem && isVideo ? (
-           <video src={mediaItem.url} controls className="rounded-lg max-w-full h-auto mb-1" />
+           <div className="relative cursor-pointer group" onClick={() => onViewMedia(mediaItem.url, 'video')}>
+             <video src={mediaItem.url} className="rounded-lg max-w-full h-auto mb-1" />
+             <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors rounded-lg">
+               <Play className="w-8 h-8 text-white opacity-80 group-hover:opacity-100" />
+             </div>
+           </div>
         ) : mediaItem && isFile ? (
            <a href={mediaItem.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm underline mb-1">
              📎 Attachment
@@ -126,7 +140,16 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
         ) : null}
         {message.text && <p>{message.text}</p>}
       </div>
-      <p className="text-xs text-muted-foreground mt-1 px-2">{message.time}</p>
+      <div className={`flex items-center gap-1 mt-1 px-2 ${message.sent ? "justify-end" : "justify-start"}`}>
+        <p className="text-xs text-muted-foreground">{message.time}</p>
+        {message.sent && (
+          message.readAt ? (
+            <CheckCheck className="w-3.5 h-3.5 text-primary" />
+          ) : (
+            <CheckCheck className="w-3.5 h-3.5 text-muted-foreground" />
+          )
+        )}
+      </div>
     </div>
   </div>
   );
@@ -135,9 +158,10 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
 interface MessageListProps {
   messages: DisplayMessage[];
   isLoading: boolean;
+  onViewMedia: (url: string, type: 'image' | 'video') => void;
 }
 
-const MessageList: React.FC<MessageListProps> = ({ messages, isLoading }) => {
+const MessageList: React.FC<MessageListProps> = ({ messages, isLoading, onViewMedia }) => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -156,7 +180,7 @@ const MessageList: React.FC<MessageListProps> = ({ messages, isLoading }) => {
         </div>
       ) : (
         messages.map((msg) => (
-          <MessageBubble key={msg.id} message={msg} />
+          <MessageBubble key={msg.id} message={msg} onViewMedia={onViewMedia} />
         ))
       )}
       <div ref={bottomRef} />
@@ -383,13 +407,50 @@ const EmptyState: React.FC = () => (
 const ChatMessages = () => {
   const { selectedChat, showChatList, isInitializing } = useChat();
   const { messages, fetchMessages, sendMessage, sendMediaMessage, sendVoiceMessage, isSendingMessage, isLoadingMessages } = useChatStore();
-  const { user } = useUser();
+   const { user } = useUser();
+   const [mediaViewer, setMediaViewer] = useState<{ url: string; type: 'image' | 'video'; isOpen: boolean }>({
+     url: '',
+     type: 'image',
+     isOpen: false
+   });
+ 
+   useEffect(() => {
+     if (selectedChat?.id) {
+       fetchMessages(selectedChat.id);
+     }
+   }, [selectedChat?.id, fetchMessages]);
+ 
+   const handleSend = (text: string) => {
+    if (!selectedChat) return;
+    const myId = user?._id || user?.id;
+    const receiver = getOtherParticipant(selectedChat, myId);
+    // Safe check for receiver ID
+    const receiverId = receiver?.id || (receiver as any)?._id || (receiver as any)?.userId;
+    
+    sendMessage(text, receiverId);
+  };
 
-  useEffect(() => {
-    if (selectedChat?.id) {
-      fetchMessages(selectedChat.id);
-    }
-  }, [selectedChat?.id, fetchMessages]);
+  const handleSendMedia = (file: File) => {
+    if (!selectedChat) return;
+    const myId = user?._id || user?.id;
+    const receiver = getOtherParticipant(selectedChat, myId);
+    const receiverId = receiver?.id || (receiver as any)?._id || (receiver as any)?.userId;
+    
+    sendMediaMessage(file, receiverId);
+  };
+
+  const handleSendVoice = (voice: Blob, duration: number, waveform: number[]) => {
+    if (!selectedChat) return;
+    const myId = user?._id || user?.id;
+    const receiver = getOtherParticipant(selectedChat, myId);
+    const receiverId = receiver?.id || (receiver as any)?._id || (receiver as any)?.userId;
+    
+    sendVoiceMessage(voice, duration, waveform, receiverId);
+  };
+
+  const handleViewMedia = (url: string, type: 'image' | 'video') => {
+    setMediaViewer({ url, type, isOpen: true });
+  };
 
   if (!selectedChat) {
     if (isInitializing) {
@@ -403,56 +464,45 @@ const ChatMessages = () => {
     return <EmptyState />;
   }
 
-  const chatMessages = messages[selectedChat.id] || [];
-  const isLoading = isLoadingMessages[selectedChat.id] || false;
-  
+  const chatId = selectedChat.id;
+  const chatMessages = messages[chatId] || [];
+  const isLoading = isLoadingMessages[chatId];
+
   const displayMessages: DisplayMessage[] = chatMessages.map(m => ({
     id: m.id,
     text: m.content,
     sent: m.senderId === (user?._id || user?.id),
     time: new Date(m.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+    readAt: m.readAt,
     type: m.messageType,
     mediaUrl: m.mediaUrl,
     attachments: m.attachments,
     voiceMessage: m.voiceMessage
   }));
 
-  const handleSendMessage = (text: string) => {
-    const myId = user?._id || user?.id;
-    // Find the other participant
-    const receiver = getOtherParticipant(selectedChat, myId);
-    // If not found (shouldn't happen in DM), default to the first one that isn't me, or just the first one
-    const receiverId = receiver?.id || (receiver as any)?._id || (receiver as any)?.userId;
-    
-    console.log('Resolving receiver:', { myId, participants: selectedChat.participants, receiverId });
-    
-    sendMessage(text, receiverId);
-  };
-
-  const handleSendMedia = (file: File) => {
-    const myId = user?._id || user?.id;
-    const receiver = getOtherParticipant(selectedChat, myId);
-    const receiverId = receiver?.id || (receiver as any)?._id || (receiver as any)?.userId;
-    
-    sendMediaMessage(file, receiverId);
-  };
-
-  const handleSendVoice = (voice: Blob, duration: number, waveform: number[]) => {
-    const myId = user?._id || user?.id;
-    const receiver = getOtherParticipant(selectedChat, myId);
-    const receiverId = receiver?.id || (receiver as any)?._id || (receiver as any)?.userId;
-    
-    sendVoiceMessage(voice, duration, waveform, receiverId);
-  };
-
   return (
-    <div
-      className={`${
-        showChatList ? "hidden" : "flex"
-      } lg:flex flex-col h-full bg-background`}>
+    <div className={`flex flex-col h-full ${showChatList ? 'hidden lg:flex' : 'flex'}`}>
       <ChatHeader />
-      <MessageList messages={displayMessages} isLoading={isLoading} />
-      <MessageInput onSend={handleSendMessage} onSendMedia={handleSendMedia} onSendVoice={handleSendVoice} isSending={isSendingMessage} />
+      
+      <MessageList 
+        messages={displayMessages} 
+        isLoading={isLoading} 
+        onViewMedia={handleViewMedia}
+      />
+
+      <MessageInput 
+        onSend={handleSend} 
+        onSendMedia={handleSendMedia}
+        onSendVoice={handleSendVoice}
+        isSending={isSendingMessage} 
+      />
+
+      <MediaViewerModal 
+        isOpen={mediaViewer.isOpen}
+        onClose={() => setMediaViewer(prev => ({ ...prev, isOpen: false }))}
+        url={mediaViewer.url}
+        type={mediaViewer.type}
+      />
     </div>
   );
 };

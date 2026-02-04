@@ -50,9 +50,14 @@ export const getOtherParticipant = (chat: Chat, currentUserId?: string): ChatUse
   // Prioritize profilePicture as per new API spec
   resolved.avatar = resolved.profilePicture || resolved.avatar || resolved.profile_picture || resolved.image;
   
-  // Ensure booleans are preserved
+  // Ensure booleans are preserved and check for aliases
   if (other.blueTick !== undefined) resolved.blueTick = other.blueTick;
   if (other.goldenTick !== undefined) resolved.goldenTick = other.goldenTick;
+
+  // Aggressive check for verification status (handle nested user or aliases)
+  const nestedUser = (other as any).user || {};
+  resolved.blueTick = resolved.blueTick || nestedUser.blueTick || resolved.isVerified || nestedUser.isVerified || false;
+  resolved.goldenTick = resolved.goldenTick || nestedUser.goldenTick || false;
 
   return resolved as ChatUser;
 };

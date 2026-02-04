@@ -82,4 +82,8 @@ export interface User {
   followingCount?: number;
   likesCount?: number;
   bookmarksCount?: number;
+  
+  // Privacy settings from flat update
+  allowComments?: boolean;
+  allowTags?: boolean;
 }

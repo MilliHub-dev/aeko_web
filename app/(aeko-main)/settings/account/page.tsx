@@ -8,55 +8,164 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, UserPen, Lock, Headphones, ChevronRight, Trash2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { useUser } from "@/components/shared/user-context";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export default function AccountSettingsPage() {
+  const { user } = useUser();
+  const router = useRouter();
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
   const sections = [
     {
       href: "/settings/account/edit-profile",
       title: "Edit Profile",
       description: "Update your name, username, bio and pictures",
+      icon: UserPen,
+      color: "text-blue-500",
+      bgColor: "bg-blue-500/10"
     },
     {
       href: "/settings/account/change-password",
       title: "Change Password",
       description: "Update your password with validation",
+      icon: Lock,
+      color: "text-red-500",
+      bgColor: "bg-red-500/10"
     },
     {
       href: "/settings/account/contact-support",
       title: "Contact Support",
       description: "Send a ticket or report a problem",
+      icon: Headphones,
+      color: "text-green-500",
+      bgColor: "bg-green-500/10"
     },
   ];
 
+  const handleDeleteAccount = async () => {
+    if (!user?.id && !user?._id) return;
+    
+    setIsDeleting(true);
+    try {
+      const userId = user.id || user._id;
+      const res = await fetch(`/api/users/${userId}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to delete account");
+      }
+
+      toast.success("Account deleted successfully");
+      // Redirect to login or home
+      router.push("/login");
+      router.refresh();
+      
+    } catch (error) {
+      console.error("Delete account error:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to delete account");
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
+    }
+  };
+
   return (
-    <div className="flex flex-col min-h-screen bg-background p-6">
-      <div className="flex items-center mb-4">
-        <Link href="/settings" legacyBehavior>
-          <Button variant="ghost" className="p-0 mr-2">
-            <ArrowLeft size={20} />
-          </Button>
-        </Link>
-        <h1 className="text-2xl font-bold">Account &amp; Profile</h1>
+    <div className="flex flex-col min-h-screen bg-background px-4 py-8 md:px-8 max-w-7xl mx-auto w-full">
+      {/* Header with back navigation */}
+      <div className="flex items-center mb-8 gap-4">
+        <Button variant="ghost" size="icon" className="rounded-full hover:bg-muted" asChild>
+          <Link href="/settings">
+            <ArrowLeft className="w-6 h-6" />
+          </Link>
+        </Button>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Account & Profile</h1>
+          <p className="text-muted-foreground mt-1 text-sm md:text-base">Manage your personal information and security</p>
+        </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
         {sections.map((sec) => (
-          <Link key={sec.href} href={sec.href} legacyBehavior>
-            <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
-              <CardHeader>
-                <CardTitle>{sec.title}</CardTitle>
-                <CardDescription>{sec.description}</CardDescription>
+          <Link key={sec.href} href={sec.href} className="group block h-full outline-none">
+            <Card className="h-full transition-all duration-300 hover:shadow-lg hover:border-primary/50 border-muted-foreground/10 overflow-hidden relative">
+              <CardHeader className="flex flex-row items-start gap-4 pb-2">
+                <div className={`p-3 rounded-xl ${sec.bgColor} ${sec.color} ring-1 ring-inset ring-black/5 dark:ring-white/10 transition-transform group-hover:scale-110 duration-300`}>
+                  <sec.icon className="w-6 h-6" />
+                </div>
+                <div className="flex-1 space-y-1">
+                  <CardTitle className="text-lg group-hover:text-primary transition-colors flex items-center justify-between">
+                    {sec.title}
+                  </CardTitle>
+                </div>
               </CardHeader>
-              <CardContent className="flex justify-end pt-2">
-                <Button variant="link" className="p-0">
-                  Go →
-                </Button>
+              <CardContent>
+                <CardDescription className="text-sm leading-relaxed mb-4">
+                    {sec.description}
+                </CardDescription>
+                <div className="flex items-center text-sm font-medium text-primary opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 absolute bottom-4 right-4">
+                  Go <ChevronRight className="w-4 h-4 ml-1" />
+                </div>
               </CardContent>
             </Card>
           </Link>
         ))}
+      </div>
+
+      {/* Danger Zone */}
+      <div className="border border-destructive/20 rounded-xl overflow-hidden bg-destructive/5">
+        <div className="p-6">
+          <h3 className="text-lg font-semibold text-destructive flex items-center gap-2 mb-2">
+            <AlertTriangle className="w-5 h-5" />
+            Danger Zone
+          </h3>
+          <p className="text-sm text-muted-foreground mb-6">
+            Permanently delete your account and all of your content. This action cannot be undone.
+          </p>
+          
+          <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="destructive" className="w-full sm:w-auto">
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Account
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Are you absolutely sure?</DialogTitle>
+                <DialogDescription>
+                  This action cannot be undone. This will permanently delete your account
+                  and remove your data from our servers.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="gap-2 sm:gap-0">
+                <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)} disabled={isDeleting}>
+                  Cancel
+                </Button>
+                <Button variant="destructive" onClick={handleDeleteAccount} disabled={isDeleting}>
+                  {isDeleting ? "Deleting..." : "Delete Account"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
     </div>
   );

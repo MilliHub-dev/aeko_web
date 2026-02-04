@@ -18,10 +18,16 @@ export default async function ProfilePage() {
       const cookieStore = await cookies();
       const token = cookieStore.get("token");
       
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+      
+      if (token?.value) {
+        headers["Authorization"] = `Bearer ${token.value}`;
+      }
+
       const res = await fetch(`${API_BASE_URL}/api/users/${user._id || user.id}`, {
-        headers: {
-          Authorization: `Bearer ${token?.value}`,
-        },
+        headers,
         cache: "no-store",
       });
 

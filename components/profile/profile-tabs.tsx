@@ -149,7 +149,10 @@ export function ProfileTabs({ userId, isOwnProfile = false }: ProfileTabsProps) 
     return (
       <div className="flex flex-col gap-4">
         <div className="grid grid-cols-3 gap-0.5 md:gap-4 md:p-4">
-          {items.map((post) => {
+          {items.map((post, index) => {
+             // Handle potential ID mismatch (API might return id or _id)
+             const postId = post._id || (post as any).id;
+             
              const getMediaSource = () => {
                 if (post.mediaUrls && post.mediaUrls.length > 0) return post.mediaUrls[0];
                 if (Array.isArray(post.media) && post.media.length > 0) return post.media[0];
@@ -161,8 +164,8 @@ export function ProfileTabs({ userId, isOwnProfile = false }: ProfileTabsProps) 
              
              return (
                <Link
-                 href={`/${post.user?.username || 'user'}/posts/${post._id}`}
-                 key={post._id}
+                 href={postId ? `/${post.user?.username || 'user'}/posts/${postId}` : '#'}
+                 key={`${postId || 'no-id'}-${index}`}
                  className="relative aspect-[4/5] bg-muted overflow-hidden group cursor-pointer"
                >
                  {mediaUrl ? (

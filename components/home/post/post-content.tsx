@@ -173,10 +173,10 @@ const PostVideo = ({
         muted={muted}
         playsInline
         className={clsx(
-          "absolute inset-0 w-full h-full object-cover",
-          className
-        )}
-      />
+        "absolute inset-0 w-full h-full object-cover object-center",
+        className
+      )}
+    />
       {/* Progress Bar */}
       <div className="absolute top-0 left-0 right-0 h-2 bg-black/30 z-10">
         <motion.div
@@ -218,7 +218,8 @@ const PostImage = ({ backgroundImage, className }: PostImageProps) => {
       alt="Post media"
       fill
       priority
-      className={clsx("object-cover", className)}
+      style={{ objectFit: 'cover' }}
+      className={clsx("object-cover object-center", className)}
       onError={() => setError(true)}
     />
   );

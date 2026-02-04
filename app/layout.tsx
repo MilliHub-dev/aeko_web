@@ -1,4 +1,5 @@
 import { ThemeProvider } from "@/components/theme/theme-provider";
+import { LanguageProvider } from "@/components/shared/language-context";
 import type { Metadata, Viewport } from "next";
 import { Toaster } from "sonner";
 import "./globals.css";
@@ -81,10 +82,12 @@ export default function RootLayout({
 			<body
 				className={`${equitanSans.className} antialiased`}
 			>
-				<ThemeProvider>
-					{children}
-					<Toaster richColors />
-				</ThemeProvider>
+				<LanguageProvider>
+					<ThemeProvider>
+						{children}
+						<Toaster richColors />
+					</ThemeProvider>
+				</LanguageProvider>
 			</body>
 		</html>
 	);

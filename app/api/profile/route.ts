@@ -9,10 +9,16 @@ export async function GET() {
   const token = cookieStore.get("token");
 
   try {
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+    };
+
+    if (token?.value) {
+      headers["Authorization"] = `Bearer ${token.value}`;
+    }
+
     let res = await fetch(`${API_BASE_URL}/api/profile`, {
-      headers: {
-        Authorization: `Bearer ${token?.value}`,
-      },
+      headers,
     });
 
     if (!res.ok) {

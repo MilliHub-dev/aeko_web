@@ -43,7 +43,7 @@ const PostActions = ({
   const storePost = posts.find((p) => p._id === postId) || post;
   const userId = user?._id ?? user?.id;
   const isLiked = userId ? (storePost?.likes?.includes(userId) ?? false) : false;
-  const isBookmarked = bookmarkedPosts.has(postId!);
+  const isBookmarked = bookmarkedPosts.has(postId!) || (userId ? (storePost?.bookmarks?.includes(userId) ?? false) : false);
   const isReposted = userId ? (storePost?.reposts?.includes(userId) ?? false) : false;
 
   const currentLikes = storePost?.likesCount ?? likes ?? 0;

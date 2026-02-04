@@ -18,8 +18,17 @@ export async function createPostAction(formData: FormData) {
 
     console.log(`Create Post Action: Sending request to ${API_BASE_URL}/api/posts/create`);
 
+    // Log formData details for debugging
+    for (const [key, value] of formData.entries()) {
+      if (value instanceof File) {
+        console.log(`Create Post Action Payload: ${key} = File(${value.name}, ${value.type}, ${value.size} bytes)`);
+      } else {
+        console.log(`Create Post Action Payload: ${key} = ${value}`);
+      }
+    }
+
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minutes timeout for large uploads
+    const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minutes timeout for large uploads
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/posts/create`, {

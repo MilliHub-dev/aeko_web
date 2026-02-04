@@ -7,29 +7,25 @@ import { ChatListHeader } from "./chat-list-header";
 import { useChatStore } from "@/features/chat/stores/chat-store";
 import { type Chat } from "@/features/chat/types";
 import { useUser } from "@/components/shared/user-context";
-import { getChatDisplayName, getChatDisplayImage, getChatDisplayUsername } from "@/lib/chat-utils";
+import { getChatDisplayName, getChatDisplayImage, getChatDisplayUsername, getOtherParticipant } from "@/lib/chat-utils";
 
-interface ChatListItemProps {
-  chat: Chat;
-}
-
-const ChatListItem: React.FC<ChatListItemProps> = ({ chat }) => {
+const ChatListItem = ({ chat }: { chat: Chat }) => {
   const { setSelectedChat } = useChat();
   const { user } = useUser();
 
+  const myId = user?.id || user?._id;
+  
   // Helper to format date
   const formatTime = (dateString: string) => {
     if (!dateString) return "";
     const date = new Date(dateString);
-    // Simple formatting, could be improved with date-fns
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
-
-  const myId = user?.id || user?._id;
   
   const displayName = getChatDisplayName(chat, myId);
   const displayUsername = getChatDisplayUsername(chat, myId);
   const displayAvatar = getChatDisplayImage(chat, myId);
+  const otherParticipant = getOtherParticipant(chat, myId);
   
   const lastMessageText = chat.lastMessage?.content || "No messages yet";
   const displayTime = chat.lastMessage?.createdAt 
@@ -54,8 +50,26 @@ const ChatListItem: React.FC<ChatListItemProps> = ({ chat }) => {
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2 min-w-0">
-            <span className="font-semibold text-foreground truncate">
+            <span className="font-semibold text-foreground truncate flex items-center gap-1">
               {displayName}
+              {otherParticipant?.blueTick && (
+                <Image
+                  src="/blue_tick.png"
+                  alt="Verified"
+                  width={12}
+                  height={12}
+                  className="h-3 w-3 shrink-0"
+                />
+              )}
+              {otherParticipant?.goldenTick && (
+                <Image
+                  src="/gold_tick.png"
+                  alt="Gold Verified"
+                  width={12}
+                  height={12}
+                  className="h-3 w-3 shrink-0"
+                />
+              )}
             </span>
             {displayUsername && (
               <span className="text-muted-foreground text-sm truncate">

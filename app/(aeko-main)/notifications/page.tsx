@@ -141,9 +141,9 @@ export default function NotificationsPage() {
         ) : notifications.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">No notifications yet</div>
         ) : (
-          notifications.map((notification) => (
+          notifications.map((notification, index) => (
             <div
-              key={notification._id}
+              key={`${notification._id}-${index}`}
               className={cn(
                 "p-4 flex gap-4 transition-colors hover:bg-muted/50 cursor-pointer relative group",
                 !notification.isRead && "bg-primary/5 hover:bg-primary/10"

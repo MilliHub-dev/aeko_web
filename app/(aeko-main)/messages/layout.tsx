@@ -11,12 +11,12 @@ export default function MessagesLayout({
 }) {
   return (
     <ChatProvider>
-      <div className="flex h-screen w-full bg-gray-50">
+      <div className="flex h-[100dvh] w-full bg-gray-50 overflow-hidden">
         {/* Chat List - Hidden on mobile when chat is selected, always visible on desktop */}
         <ChatList />
 
         {/* Chat Screen - Shows selected chat on mobile, always visible on desktop */}
-        <div className="flex-1">
+        <div className="flex-1 h-full relative">
           <ChatMessages />
           {children}
         </div>

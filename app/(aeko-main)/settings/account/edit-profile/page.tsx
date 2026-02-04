@@ -3,13 +3,14 @@
 import { useState, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, UserPen, Camera, Upload } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 
 export default function EditProfilePage() {
   // ==== Form state ====
@@ -60,124 +61,149 @@ export default function EditProfilePage() {
   const coverPreview = coverPic ? URL.createObjectURL(coverPic) : "/cover.png";
 
   return (
-    <div className="flex flex-col min-h-screen bg-background p-6 max-w-5xl mx-auto">
+    <div className="flex flex-col min-h-screen bg-background px-4 py-8 md:px-8 max-w-7xl mx-auto w-full">
       {/* Header with back navigation */}
-      <div className="flex items-center mb-6">
-        <Link href="/settings/account" legacyBehavior>
-          <Button variant="ghost" className="p-0 mr-2">
-            <ArrowLeft size={20} />
-          </Button>
-        </Link>
-        <h1 className="text-2xl font-bold">Edit Profile</h1>
+      <div className="flex items-center mb-8 gap-4">
+        <Button variant="ghost" size="icon" className="rounded-full hover:bg-muted" asChild>
+          <Link href="/settings/account">
+            <ArrowLeft className="w-6 h-6" />
+          </Link>
+        </Button>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Edit Profile</h1>
+          <p className="text-muted-foreground mt-1 text-sm md:text-base">Update your public profile information</p>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Cover Photo */}
+      <form onSubmit={handleSubmit} className="grid gap-6 max-w-4xl mx-auto w-full">
         <Card>
-          <CardHeader className="flex flex-col items-center">
-            <CardTitle>Cover Photo</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center space-y-4">
-            <div className="relative w-full h-48 rounded-lg overflow-hidden bg-muted">
-              <Image
-                src={coverPreview}
-                alt="Cover preview"
-                fill
-                className="object-cover"
-                unoptimized
-              />
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500">
+                <UserPen className="w-5 h-5" />
+              </div>
+              <CardTitle>Profile Details</CardTitle>
             </div>
-            <Input type="file" accept="image/*" onChange={handleFileChange(setCoverPic)} />
-          </CardContent>
-        </Card>
-
-        {/* Profile Photo & Details */}
-        <Card>
-          <CardHeader className="flex flex-col items-center">
-            <Avatar className="h-32 w-32 border-4 border-background shadow-sm">
-              <AvatarImage src={profilePreview} alt="Profile preview" />
-              <AvatarFallback>{name?.charAt(0) ?? "U"}</AvatarFallback>
-            </Avatar>
-            <CardTitle className="mt-4">Profile Photo</CardTitle>
+            <CardDescription>Customize how you appear to others</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <Input type="file" accept="image/*" onChange={handleFileChange(setProfilePic)} />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Name */}
-              <div className="flex flex-col space-y-1">
-                <label htmlFor="name" className="text-sm font-medium">
-                  Name
-                </label>
+          <CardContent className="space-y-8">
+            {/* Images Section */}
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <Label>Cover Photo</Label>
+                <div className="relative w-full h-48 rounded-lg overflow-hidden bg-muted group cursor-pointer border-2 border-dashed border-muted-foreground/20 hover:border-primary/50 transition-colors">
+                  <Image
+                    src={coverPreview}
+                    alt="Cover preview"
+                    fill
+                    className="object-cover transition-opacity group-hover:opacity-75"
+                    unoptimized
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30">
+                     <Camera className="w-8 h-8 text-white drop-shadow-md" />
+                  </div>
+                  <Input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleFileChange(setCoverPic)} 
+                    className="absolute inset-0 opacity-0 cursor-pointer h-full" 
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-6">
+                <div className="relative group">
+                  <Avatar className="h-24 w-24 border-4 border-background shadow-sm">
+                    <AvatarImage src={profilePreview} alt="Profile preview" />
+                    <AvatarFallback className="text-xl">{name?.charAt(0) ?? "U"}</AvatarFallback>
+                  </Avatar>
+                  <div className="absolute inset-0 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30 cursor-pointer">
+                    <Camera className="w-6 h-6 text-white drop-shadow-md" />
+                    <Input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={handleFileChange(setProfilePic)} 
+                      className="absolute inset-0 opacity-0 cursor-pointer h-full rounded-full" 
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <h3 className="font-medium">Profile Picture</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Recommended dimensions: 400x400px.<br/>
+                    Supported formats: JPG, PNG, GIF.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="name">Display Name</Label>
                 <Input
                   id="name"
+                  placeholder="Your Name"
                   value={name}
                   onChange={(e) => {
                     setName(e.target.value);
                     setTouched(true);
                   }}
-                  required
                 />
               </div>
-
-              {/* Username */}
-              <div className="flex flex-col space-y-1">
-                <label htmlFor="username" className="text-sm font-medium">
-                  Username
-                </label>
-                <Input
-                  id="username"
-                  value={username}
-                  onChange={(e) => {
-                    setUsername(e.target.value);
-                    setTouched(true);
-                  }}
-                  required
-                />
-              </div>
-
-              {/* Email (full‑width) */}
-              <div className="flex flex-col space-y-1 md:col-span-2">
-                <label htmlFor="email" className="text-sm font-medium">
-                  Email
-                </label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    setTouched(true);
-                  }}
-                  required
-                />
+              <div className="space-y-2">
+                <Label htmlFor="username">Username</Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">@</span>
+                  <Input
+                    id="username"
+                    placeholder="username"
+                    value={username}
+                    onChange={(e) => {
+                      setUsername(e.target.value);
+                      setTouched(true);
+                    }}
+                    className="pl-7"
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Bio */}
-            <div className="flex flex-col space-y-1">
-              <label htmlFor="bio" className="text-sm font-medium">
-                Bio (max 276 characters)
-              </label>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email Address</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setTouched(true);
+                }}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="bio">Bio</Label>
               <Textarea
                 id="bio"
+                placeholder="Tell us a little about yourself"
                 value={bio}
                 onChange={(e) => {
-                  if (e.target.value.length <= 276) {
-                    setBio(e.target.value);
-                    setTouched(true);
-                  }
+                  setBio(e.target.value);
+                  setTouched(true);
                 }}
-                rows={4}
-                placeholder="Tell us a little about yourself..."
+                className="resize-none min-h-[100px]"
               />
-              <p className="text-sm text-muted-foreground text-right">
+              <div className="text-xs text-right text-muted-foreground">
                 {bioRemaining} characters remaining
-              </p>
+              </div>
             </div>
 
-            <Button type="submit" disabled={!canSubmit} className="self-end">
-              Update Changes
-            </Button>
+            <div className="flex justify-end pt-4">
+              <Button type="submit" disabled={!canSubmit} size="lg">
+                Save Changes
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </form>
