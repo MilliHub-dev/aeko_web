@@ -92,6 +92,7 @@ export function PostDetailMedia({ post, className }: PostDetailMediaProps) {
         <div className="relative w-full h-full">
           {isVideo ? (
             <video
+              key={resolvedMedia}
               src={resolvedMedia}
               className="w-full h-full object-cover"
               autoPlay

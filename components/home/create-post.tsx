@@ -40,7 +40,6 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useMobile } from "@/hooks/use-mobile";
 import { PostType } from "@/types/post";
-import { createPostAction } from "@/app/(aeko-main)/actions";
 import { useUser } from "@/components/shared/user-context";
 import { UserSelector } from "./post/user-selector";
 import { toast } from "sonner";
@@ -171,9 +170,19 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
         formData.append("media", mediaFile);
       }
 
-      const result = await createPostAction(formData);
+      const response = await fetch("/api/posts/create", {
+        method: "POST",
+        body: formData,
+      });
 
-      if (result.success) {
+      let result;
+      try {
+        result = await response.json();
+      } catch (e) {
+        result = { message: "Invalid server response" };
+      }
+
+      if (response.ok) {
         console.log("Post created successfully");
         toast.success("Post created successfully");
         // Call the onPost callback if provided (e.g. for optimistic updates or parent notification)

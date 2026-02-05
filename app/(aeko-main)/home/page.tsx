@@ -7,6 +7,8 @@ import { Stories } from "@/components/home/story/stories";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAds } from "@/hooks/use-ads";
+import { FeedPost } from "@/types/post";
 
 export default function Home() {
   const posts = usePostsStore((state) => state.posts);
@@ -50,6 +52,29 @@ export default function Home() {
     return posts;
   }, [posts, activeTab]);
 
+  const { ads } = useAds();
+
+  const postsWithAds = useMemo(() => {
+    if (ads.length === 0) return filteredPosts;
+
+    const result: FeedPost[] = [];
+    let adIndex = 0;
+    
+    filteredPosts.forEach((post, index) => {
+      result.push(post);
+      // Insert ad after every 7 posts
+      if ((index + 1) % 7 === 0) {
+        // Use modulus to cycle through ads if we have more slots than ads
+        const ad = ads[adIndex % ads.length];
+        // Create a unique ID for the ad instance to avoid key conflicts
+        result.push({ ...ad, _id: `${ad._id}-instance-${index}` });
+        adIndex++;
+      }
+    });
+    
+    return result;
+  }, [filteredPosts, ads]);
+
   // Reset scroll and index when tab changes
   useEffect(() => {
     setActiveIndex(0);
@@ -70,7 +95,7 @@ export default function Home() {
       if (
         newIndex !== activeIndex &&
         newIndex >= 0 &&
-        newIndex < filteredPosts.length
+        newIndex < postsWithAds.length
       ) {
         setActiveIndex(newIndex);
       }
@@ -78,7 +103,7 @@ export default function Home() {
 
     container.addEventListener("scroll", handleScroll, { passive: true });
     return () => container.removeEventListener("scroll", handleScroll);
-  }, [activeIndex, filteredPosts.length]);
+  }, [activeIndex, postsWithAds.length]);
 
   return (
     <div 
@@ -136,8 +161,8 @@ export default function Home() {
           </div>
         )}
 
-        {filteredPosts.length > 0 ? (
-          filteredPosts.map((post, idx) => (
+        {postsWithAds.length > 0 ? (
+          postsWithAds.map((post, idx) => (
             <div
               key={`post-${post._id || idx}`}
               className="snap-start h-full w-full flex justify-center flex-none"

@@ -35,16 +35,30 @@ const PostCard = ({ isActive, ...post }: FeedPost & { isActive?: boolean }) => {
   // Update store when post prop changes
   useEffect(() => {
     // Always sync the post to ensure it's in the store for actions like like/bookmark
-    syncPost(post);
-  }, [post._id, syncPost]);
+    // But skip ads to avoid polluting the store with ephemeral instances
+    if (!post.isAd) {
+      syncPost(post);
+    }
+  }, [post._id, syncPost, post.isAd]);
 
   // Record view when post is active
   useEffect(() => {
     if (isActive && !hasViewed) {
-      recordView(post._id);
+      if (post.isAd) {
+        // Track ad impression
+        // Extract original ad ID from the instance ID (format: id-instance-index)
+        const originalAdId = post._id.split('-instance-')[0];
+        fetch('/api/ads/track/impression', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ adId: originalAdId })
+        }).catch(err => console.error("Failed to track ad impression:", err));
+      } else {
+        recordView(post._id);
+      }
       setHasViewed(true);
     }
-  }, [isActive, hasViewed, post._id, recordView]);
+  }, [isActive, hasViewed, post._id, recordView, post.isAd]);
   const {
     containerRef,
     showOverlay,
@@ -57,6 +71,23 @@ const PostCard = ({ isActive, ...post }: FeedPost & { isActive?: boolean }) => {
 
   const { videoRef, progress, isPlaying, isMuted, toggleMute, togglePlaying } =
     useVideoControls();
+
+  // Handle video playback based on active state
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || isActive === undefined) return;
+
+    if (isActive) {
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Auto-play was prevented
+        });
+      }
+    } else {
+      video.pause();
+    }
+  }, [isActive, videoRef]);
 
   const handleDoubleClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();

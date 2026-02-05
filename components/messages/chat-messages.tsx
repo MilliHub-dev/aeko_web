@@ -168,6 +168,18 @@ const MessageList: React.FC<MessageListProps> = ({ messages, isLoading, onViewMe
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Scroll to bottom on window resize (e.g. keyboard open)
+  useEffect(() => {
+    const handleResize = () => {
+      if (bottomRef.current) {
+        bottomRef.current.scrollIntoView({ behavior: "auto" });
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">
       {isLoading ? (
@@ -307,7 +319,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, onSendMedia, onSend
 
   if (isRecording) {
     return (
-      <div className="border-t border-border p-4">
+      <div className="border-t border-border px-4 py-1">
         <div className="flex items-center justify-between bg-secondary rounded-full px-4 py-2">
           <div className="flex items-center gap-2 text-red-500 animate-pulse">
             <div className="w-2 h-2 rounded-full bg-red-500" />
@@ -333,7 +345,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, onSendMedia, onSend
   }
 
   return (
-    <div className="border-t border-border p-4">
+    <div className="border-t border-border px-4 py-1">
       <div className="flex items-center gap-2 bg-secondary rounded-full px-4 py-2">
         <input 
             type="file" 

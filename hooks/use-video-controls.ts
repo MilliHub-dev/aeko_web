@@ -15,7 +15,7 @@ export function useVideoControls(): VideoControls {
 	const [isMuted, setIsMuted] = useState(true);
 	const [progress, setProgress] = useState(0);
 
-	// Track progress
+	// Track progress and play state
 	useEffect(() => {
 		const video = videoRef.current;
 		if (!video) return;
@@ -26,15 +26,17 @@ export function useVideoControls(): VideoControls {
 			setProgress((current / total) * 100);
 		};
 
-		video.addEventListener(
-			"timeupdate",
-			updateProgress
-		);
+		const handlePlay = () => setIsPlaying(true);
+		const handlePause = () => setIsPlaying(false);
+
+		video.addEventListener("timeupdate", updateProgress);
+		video.addEventListener("play", handlePlay);
+		video.addEventListener("pause", handlePause);
+		
 		return () => {
-			video.removeEventListener(
-				"timeupdate",
-				updateProgress
-			);
+			video.removeEventListener("timeupdate", updateProgress);
+			video.removeEventListener("play", handlePlay);
+			video.removeEventListener("pause", handlePause);
 		};
 	}, []);
 

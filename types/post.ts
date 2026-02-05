@@ -76,6 +76,8 @@ export interface FeedPost extends Pick<
   | "updatedAt"
 > {
   ad: Ad;
+  isAd?: boolean;
+  targetUrl?: string;
   user: Pick<User, "_id" | "name" | "username" | "email" | "profilePicture" | "blueTick" | "goldenTick">;
   comments: Comment[];
   likes: string[];

@@ -52,6 +52,8 @@ interface PostHeaderProps {
 	isMuted?: boolean;
 	toggleMute?: () => void;
 	views?: number;
+    isAd?: boolean;
+    targetUrl?: string;
 }
 
 const PostHeader = ({
@@ -65,7 +67,9 @@ const PostHeader = ({
 	isHovered = false,
 	isMuted = false,
 	toggleMute,
-	views = 0
+	views = 0,
+    isAd,
+    targetUrl
 }: PostHeaderProps) => {
 	// Extract user info from either flat props or nested user object
 	const displayName = user?.name || username || "Unknown User";
@@ -105,11 +109,22 @@ const PostHeader = ({
         }
     };
 
-    // Show follow button only if:
+    const handleAdClick = () => {
+        if (isAd && postId) {
+            const originalAdId = postId.split('-instance-')[0];
+            fetch('/api/ads/track/click', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ adId: originalAdId })
+            }).catch(console.error);
+        }
+    };
+
+	// Show follow button only if:
 	// 1. We have a valid target user ID
 	// 2. It's not the current user's own post
 	// 3. The current user is not already following them
-	const showFollowButton = targetUserId && !isOwnPost && !isFollowing;
+	const showFollowButton = targetUserId && !isOwnPost && !isFollowing && !isAd;
 
     if (isHidden) return null;
 
@@ -141,7 +156,9 @@ const PostHeader = ({
 		>
 			{/* Left side user info */}
 			<Link
-				href={`/${displayHandle}`}
+				href={isAd ? (targetUrl || "#") : `/${displayHandle}`}
+                target={isAd && targetUrl ? "_blank" : undefined}
+                onClick={handleAdClick}
 				className={clsx(
 					headerBg,
 					"flex items-center space-x-3 rounded-full px-3 h-16 w-[206px] hover:opacity-90 transition-opacity cursor-pointer"
@@ -166,7 +183,7 @@ const PostHeader = ({
 				>
 					<span className="font-semibold text-lg truncate flex items-center gap-1">
 						{displayName}
-                        {user?.blueTick && (
+                        {user?.blueTick && !isAd && (
                             <Image
                                 src="/blue_tick.png"
                                 alt="Verified"
@@ -175,7 +192,7 @@ const PostHeader = ({
                                 className="h-3.5 w-3.5"
                             />
                         )}
-                        {user?.goldenTick && (
+                        {user?.goldenTick && !isAd && (
                             <Image
                                 src="/gold_tick.png"
                                 alt="Gold Verified"
@@ -184,9 +201,12 @@ const PostHeader = ({
                                 className="h-3.5 w-3.5"
                             />
                         )}
+                        {isAd && (
+                            <span className="text-[10px] bg-yellow-400 text-black px-1.5 rounded-full font-bold ml-1">AD</span>
+                        )}
 					</span>
 					<span className="text-sm truncate">
-						{displayHandle}
+						{isAd ? "Sponsored" : displayHandle}
 					</span>
 				</div>
 			</Link>
