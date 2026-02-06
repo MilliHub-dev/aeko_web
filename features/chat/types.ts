@@ -34,7 +34,7 @@ export interface Message {
   createdAt: string;
   readAt?: string;
   // Media support
-  messageType?: 'text' | 'image' | 'video' | 'file' | 'emoji' | 'voice';
+  messageType?: 'text' | 'image' | 'video' | 'file' | 'emoji' | 'voice' | 'call';
   mediaUrl?: string; // Legacy/Fallback
   attachments?: {
     url: string;
@@ -45,6 +45,11 @@ export interface Message {
     duration: number;
     waveform: number[];
   };
+  call?: {
+    type: 'voice' | 'video';
+    duration?: number;
+    status: 'missed' | 'ended' | 'declined';
+  };
   // UI helpers
   sent?: boolean; // Derived from current user ID comparison
 }
@@ -53,8 +58,13 @@ export interface SendMessageRequest {
   receiverId?: string; // Changed from recipientId to match enhanced-chat spec
   chatId?: string; 
   content: string;
-  messageType?: 'text' | 'emoji' | 'image' | 'video' | 'file';
+  messageType?: 'text' | 'emoji' | 'image' | 'video' | 'file' | 'call';
   replyToId?: string;
+  call?: {
+    type: 'voice' | 'video';
+    duration?: number;
+    status: 'missed' | 'ended' | 'declined';
+  };
 }
 
 export interface CreateChatRequest {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Send, Image, Smile, Mic, X, Play, Pause, CheckCheck } from "lucide-react";
+import { Send, Image, Smile, Mic, X, Play, Pause, CheckCheck, Video, Phone } from "lucide-react";
 import { useChat } from "@/contexts/ChatContext";
 import { useState, useEffect, useRef } from "react";
 import { ChatHeader } from "./chat-header";
@@ -18,13 +18,18 @@ interface DisplayMessage {
   sent: boolean;
   time: string;
   readAt?: string;
-  type?: 'text' | 'image' | 'video' | 'file' | 'emoji' | 'voice';
+  type?: 'text' | 'image' | 'video' | 'file' | 'emoji' | 'voice' | 'call';
   mediaUrl?: string;
   attachments?: { url: string; mimeType: string }[];
   voiceMessage?: {
     url: string;
     duration: number;
     waveform: number[];
+  };
+  call?: {
+    type: 'voice' | 'video';
+    duration?: number;
+    status: 'missed' | 'ended' | 'declined';
   };
 }
 
@@ -97,6 +102,41 @@ const VoiceMessageBubble: React.FC<{ message: DisplayMessage }> = ({ message }) 
   );
 };
 
+const CallMessageBubble: React.FC<{ message: DisplayMessage }> = ({ message }) => {
+  if (!message.call) return null;
+
+  const { type, duration, status } = message.call;
+  const isMissed = status === 'missed';
+  const isDeclined = status === 'declined';
+  
+  const formatDuration = (ms?: number) => {
+    if (!ms) return '';
+    const seconds = Math.floor(ms / 1000);
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    if (mins > 0) return `${mins}m ${secs}s`;
+    return `${secs}s`;
+  };
+
+  return (
+    <div className="flex items-center gap-3 min-w-[180px] p-1">
+      <div className={`p-2 rounded-full ${isMissed || isDeclined ? 'bg-red-500/10 text-red-500' : 'bg-green-500/10 text-green-500'}`}>
+        {type === 'video' ? <Video size={20} /> : <Phone size={20} />}
+      </div>
+      <div className="flex flex-col">
+        <span className="font-medium">
+          {isMissed ? 'Missed Call' : isDeclined ? 'Call Declined' : `${type === 'video' ? 'Video' : 'Voice'} Call`}
+        </span>
+        {duration ? (
+          <span className="text-xs opacity-70">{formatDuration(duration)}</span>
+        ) : (
+          <span className="text-xs opacity-70">{status}</span>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onViewMedia }) => {
   // Helper to determine media to show (prefer attachments, fall back to mediaUrl)
   const mediaItem = message.attachments?.[0] || (message.mediaUrl ? { url: message.mediaUrl, mimeType: message.type === 'video' ? 'video/mp4' : 'image/jpeg' } : null);
@@ -137,8 +177,14 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onViewMedia }) =
            </a>
         ) : isVoice ? (
            <VoiceMessageBubble message={message} />
+        ) : message.type === 'call' ? (
+           <CallMessageBubble message={message} />
         ) : null}
-        {message.text && <p>{message.text}</p>}
+        {message.text && message.type !== 'voice' && message.type !== 'call' && (
+           <p className="text-[15px] leading-relaxed whitespace-pre-wrap break-words">
+             {message.text}
+           </p>
+        )}
       </div>
       <div className={`flex items-center gap-1 mt-1 px-2 ${message.sent ? "justify-end" : "justify-start"}`}>
         <p className="text-xs text-muted-foreground">{message.time}</p>
@@ -489,7 +535,8 @@ const ChatMessages = () => {
     type: m.messageType,
     mediaUrl: m.mediaUrl,
     attachments: m.attachments,
-    voiceMessage: m.voiceMessage
+    voiceMessage: m.voiceMessage,
+    call: m.call
   }));
 
   return (

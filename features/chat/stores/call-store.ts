@@ -12,6 +12,7 @@ interface CallState {
   localStream: MediaStream | null;
   isMuted: boolean;
   isVideoEnabled: boolean;
+  startTime: number | null;
   
   // Actions
   startCall: (receiverId: string, type: CallType) => void;
@@ -34,6 +35,7 @@ export const useCallStore = create<CallState>((set) => ({
   localStream: null,
   isMuted: false,
   isVideoEnabled: true,
+  startTime: null,
 
   startCall: (receiverId, type) => set({ 
     status: "calling", 
@@ -53,7 +55,7 @@ export const useCallStore = create<CallState>((set) => ({
     isVideoEnabled: type === "video"
   }),
 
-  acceptCall: () => set({ status: "connected" }),
+  acceptCall: () => set({ status: "connected", startTime: Date.now() }),
 
   endCall: () => {
     // Cleanup streams
@@ -67,7 +69,8 @@ export const useCallStore = create<CallState>((set) => ({
         callerId: null, 
         receiverId: null, 
         remoteStream: null, 
-        localStream: null 
+        localStream: null,
+        startTime: null
       };
     });
   },
@@ -93,5 +96,8 @@ export const useCallStore = create<CallState>((set) => ({
     return { isVideoEnabled: !state.isVideoEnabled };
   }),
   
-  setStatus: (status) => set({ status })
+  setStatus: (status) => set((state) => ({ 
+    status,
+    startTime: status === "connected" && !state.startTime ? Date.now() : state.startTime
+  }))
 }));

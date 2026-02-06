@@ -30,10 +30,36 @@ export function CallOverlay() {
     toggleVideo
   } = useCallStore();
 
-  const { acceptIncomingCall } = useWebRTC();
+  const { acceptIncomingCall, terminateCall } = useWebRTC();
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const [isMinimized, setIsMinimized] = React.useState(false);
+  const [otherUser, setOtherUser] = React.useState<{ name: string; avatar: string } | null>(null);
+
+  useEffect(() => {
+    const targetId = callerId || receiverId;
+    if (!targetId) return;
+
+    const fetchUser = async () => {
+      try {
+        const res = await fetch(`/api/users/${targetId}`);
+        if (res.ok) {
+          const data = await res.json();
+          // Handle different response structures based on inspection of other hooks
+          const user = data.user || data.data;
+          if (user) {
+             setOtherUser({
+               name: user.name || "Unknown User",
+               avatar: user.profilePicture || user.avatar || ""
+             });
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch call user", e);
+      }
+    };
+    fetchUser();
+  }, [callerId, receiverId]);
 
   useEffect(() => {
     if (localVideoRef.current && localStream) {
@@ -97,11 +123,13 @@ export function CallOverlay() {
         ) : (
           <div className="flex flex-col items-center gap-4">
             <Avatar className="w-24 h-24 border-4 border-white/10">
-              <AvatarImage src="" />
-              <AvatarFallback className="text-2xl">User</AvatarFallback>
+              <AvatarImage src={otherUser?.avatar || ""} />
+              <AvatarFallback className="text-2xl text-black">
+                {otherUser?.name?.[0]?.toUpperCase() || "U"}
+              </AvatarFallback>
             </Avatar>
             <h2 className="text-xl font-semibold text-white">
-              {callerId || receiverId}
+              {otherUser?.name || callerId || receiverId}
             </h2>
             <p className="text-white/60 capitalize">{type} Call</p>
           </div>
@@ -113,7 +141,7 @@ export function CallOverlay() {
         {isIncoming ? (
           <>
              <button 
-              onClick={endCall}
+              onClick={terminateCall}
               className="p-4 rounded-full bg-red-500 hover:bg-red-600 text-white transition-colors"
             >
               <PhoneOff size={28} />
@@ -150,7 +178,7 @@ export function CallOverlay() {
             )}
 
             <button 
-              onClick={endCall}
+              onClick={terminateCall}
               className="p-4 rounded-full bg-red-500 hover:bg-red-600 text-white transition-colors"
             >
               <PhoneOff size={28} />

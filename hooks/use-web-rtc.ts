@@ -21,11 +21,14 @@ export function useWebRTC() {
     setRemoteStream, 
     endCall, 
     setStatus,
-    setLocalStream
+    setLocalStream,
+    startCall,
+    acceptCall
   } = useCallStore();
 
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
+  const iceCandidatesQueue = useRef<RTCIceCandidateInit[]>([]);
 
   // Helper to get socket
   const socket = getSocket();
@@ -62,9 +65,27 @@ export function useWebRTC() {
     return pc;
   }, [receiverId, callerId, socket, setRemoteStream, endCall]);
 
+  const processIceQueue = useCallback(async () => {
+    const pc = peerConnectionRef.current;
+    if (!pc || !pc.remoteDescription) return;
+
+    while (iceCandidatesQueue.current.length > 0) {
+      const candidate = iceCandidatesQueue.current.shift();
+      if (candidate) {
+        try {
+          await pc.addIceCandidate(new RTCIceCandidate(candidate));
+        } catch (e) {
+          console.error("Error adding queued ice candidate", e);
+        }
+      }
+    }
+  }, []);
+
   // Start Call (Caller)
   const initiateCall = useCallback(async (targetId: string, callType: CallType) => {
     try {
+      startCall(targetId, callType);
+      
       const stream = await navigator.mediaDevices.getUserMedia({
         video: callType === "video",
         audio: true,
@@ -89,13 +110,16 @@ export function useWebRTC() {
       console.error("Error starting call:", err);
       endCall();
     }
-  }, [createPeerConnection, setLocalStream, socket, endCall]);
+  }, [createPeerConnection, setLocalStream, socket, endCall, startCall]);
 
   // Answer Call (Receiver)
+  // This function seems unused or redundant if we use acceptIncomingCall?
+  // Keeping it but ensuring it uses the queue too if needed, though acceptIncomingCall is the main one used by UI.
   const answerCall = useCallback(async () => {
     if (!callerId || !type) return;
 
     try {
+      acceptCall();
       const stream = await navigator.mediaDevices.getUserMedia({
         video: type === "video",
         audio: true,
@@ -107,18 +131,16 @@ export function useWebRTC() {
       const pc = createPeerConnection();
       stream.getTracks().forEach((track) => pc.addTrack(track, stream));
 
-      // We need the offer first, which should have been set when handling 'call-offer'
-      // But wait, 'call-offer' just sets state to 'incoming'. 
-      // The offer data needs to be stored or passed. 
-      // I'll assume we stored the pending offer in a ref or we process it now?
-      // Actually, we can't process it "now" if we didn't save it.
-      // So I need to update the store to hold the pending offer.
+      // We assume remote description is set in acceptIncomingCall or elsewhere?
+      // Actually, answerCall seems to be an alternative to acceptIncomingCall?
+      // In the previous code, acceptIncomingCall was doing the heavy lifting.
+      // I will leave answerCall alone as it seems like a placeholder or legacy from my previous read.
       
     } catch (err) {
       console.error("Error answering call:", err);
       endCall();
     }
-  }, [callerId, type, createPeerConnection, setLocalStream, endCall]);
+  }, [callerId, type, createPeerConnection, setLocalStream, endCall, acceptCall]);
 
   // We need to store the pending offer to answer it later
   const pendingOfferRef = useRef<RTCSessionDescriptionInit | null>(null);
@@ -156,41 +178,58 @@ export function useWebRTC() {
       }
     };
 
+    const handleCallEnded = () => {
+        endCall();
+    };
+
     const handleCallAnswer = async (data: { answer: RTCSessionDescriptionInit }) => {
       const pc = peerConnectionRef.current;
       if (pc && status === "calling") {
         await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
         setStatus("connected");
+        processIceQueue();
       }
     };
 
     const handleIceCandidate = async (data: { candidate: RTCIceCandidateInit }) => {
       const pc = peerConnectionRef.current;
       if (pc) {
-        await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+        if (pc.remoteDescription) {
+          try {
+            await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+          } catch (e) {
+            console.error("Error adding ice candidate", e);
+          }
+        } else {
+          iceCandidatesQueue.current.push(data.candidate);
+        }
       }
     };
 
     socket.on("call-offer", handleCallOffer);
     socket.on("call-answer", handleCallAnswer);
     socket.on("ice-candidate", handleIceCandidate);
+    socket.on("call-ended", handleCallEnded);
 
     return () => {
       socket.off("call-offer", handleCallOffer);
       socket.off("call-answer", handleCallAnswer);
       socket.off("ice-candidate", handleIceCandidate);
+      socket.off("call-ended", handleCallEnded);
     };
-  }, [socket, status, setIncomingCall, setStatus]);
+  }, [socket, status, setIncomingCall, setStatus, processIceQueue, endCall]);
 
   // Complete Answer Call logic
   const acceptIncomingCall = useCallback(async () => {
     if (!pendingOfferRef.current || !callerId) return;
 
     try {
+      acceptCall();
       const pc = createPeerConnection();
       
       // Set remote desc (the offer)
       await pc.setRemoteDescription(new RTCSessionDescription(pendingOfferRef.current));
+      processIceQueue();
       
       const stream = await navigator.mediaDevices.getUserMedia({
         video: type === "video",
@@ -219,6 +258,49 @@ export function useWebRTC() {
     }
   }, [callerId, type, createPeerConnection, setLocalStream, setStatus, socket, endCall]);
 
+  const terminateCall = useCallback(async () => {
+    const currentState = useCallStore.getState();
+    const { status, callerId, receiverId, type, startTime } = currentState;
+    
+    const target = callerId || receiverId;
+    if (target) {
+      socket.emit("call-ended", { target });
+      
+      try {
+        let callStatus: 'missed' | 'ended' | 'declined' = 'ended';
+        let duration = 0;
+
+        if (status === 'connected' && startTime) {
+          duration = Date.now() - startTime;
+          callStatus = 'ended';
+        } else if (status === 'incoming') {
+          callStatus = 'declined';
+        } else if (status === 'calling') {
+          callStatus = 'missed';
+        }
+
+        await fetch("/api/chat/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            receiverId: target,
+            content: `Call ${callStatus}`,
+            messageType: 'call',
+            call: {
+              type: type || 'voice',
+              duration,
+              status: callStatus
+            }
+          })
+        });
+      } catch (e) {
+        console.error("Failed to send call history message", e);
+      }
+    }
+
+    endCall();
+  }, [socket, endCall]);
+
   // Cleanup
   useEffect(() => {
     return () => {
@@ -234,5 +316,6 @@ export function useWebRTC() {
   return {
     initiateCall,
     acceptIncomingCall,
+    terminateCall
   };
 }
