@@ -144,9 +144,9 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onViewMedia }) =
         <p className="text-xs text-muted-foreground">{message.time}</p>
         {message.sent && (
           message.readAt ? (
-            <CheckCheck className="w-3.5 h-3.5 text-primary" />
+            <CheckCheck className="w-4 h-4 text-blue-500" />
           ) : (
-            <CheckCheck className="w-3.5 h-3.5 text-muted-foreground" />
+            <CheckCheck className="w-4 h-4 text-muted-foreground" />
           )
         )}
       </div>

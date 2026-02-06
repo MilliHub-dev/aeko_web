@@ -1,8 +1,9 @@
 "use client";
 
-import { ArrowLeft, MoreHorizontal, Bot } from "lucide-react";
+import { ArrowLeft, MoreHorizontal, Bot, Phone, Video } from "lucide-react";
 import Image from "next/image";
 import { useChat } from "@/contexts/ChatContext";
+import { useCall } from "@/contexts/CallContext";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useRouter } from "next/navigation";
 import { BotDialog } from "../bot/bot-dialog";
@@ -18,6 +19,7 @@ import {
 const ChatHeader = () => {
   const router = useRouter();
   const { selectedChat } = useChat();
+  const { startCall } = useCall();
   const { user } = useUser();
 
   if (!selectedChat) return null;
@@ -28,6 +30,7 @@ const ChatHeader = () => {
   const displayUsername = getChatDisplayUsername(selectedChat, myId);
   const displayAvatar = getChatDisplayImage(selectedChat, myId);
   const otherParticipant = getOtherParticipant(selectedChat, myId);
+  const otherId = otherParticipant?.id || (otherParticipant as any)?._id || (otherParticipant as any)?.userId;
 
   return (
     <div className="border-b border-border p-4 flex items-center gap-3">
@@ -70,6 +73,25 @@ const ChatHeader = () => {
         )}
       </div>
       
+      {otherId && (
+        <>
+          <button 
+            onClick={() => startCall(otherId, "voice")}
+            className="p-2 hover:bg-secondary/80 rounded-full transition-colors" 
+            aria-label="Voice Call"
+          >
+            <Phone size={20} />
+          </button>
+          <button 
+            onClick={() => startCall(otherId, "video")}
+            className="p-2 hover:bg-secondary/80 rounded-full transition-colors" 
+            aria-label="Video Call"
+          >
+            <Video size={20} />
+          </button>
+        </>
+      )}
+
       <BotDialog 
         trigger={
           <button className="p-2 hover:bg-secondary/80 rounded-full transition-colors text-primary" aria-label="Open Bot">

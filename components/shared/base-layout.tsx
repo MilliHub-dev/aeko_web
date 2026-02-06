@@ -12,6 +12,7 @@ import { CommentsMobileModal } from "@/components/home/post/comments-mobile-moda
 import { MobileMenuProvider } from "./mobile-menu-context";
 import { MobileMenuDrawer } from "./mobile-menu-drawer";
 import { UserProvider } from "./user-context";
+import { CallProvider } from "@/contexts/CallContext";
 
 import { CreatePost } from "@/components/home/create-post";
 import { Plus } from "lucide-react";
@@ -33,7 +34,8 @@ export function BaseLayout({ children }: BaseLayoutProps) {
   return (
     <MobileMenuProvider>
       <UserProvider>
-        <div className="relative w-full max-w-full bg-background">
+        <CallProvider>
+          <div className="relative w-full max-w-full bg-background">
           {showMobileHeader && <MobileHeader />}
           <div className={`xl:px-0 grid min-h-screen items-start ${gridColsClass}`}>
             <MobileLeftSidebar />
@@ -66,6 +68,7 @@ export function BaseLayout({ children }: BaseLayoutProps) {
             </div>
           )}
         </div>
+        </CallProvider>
       </UserProvider>
     </MobileMenuProvider>
   );
