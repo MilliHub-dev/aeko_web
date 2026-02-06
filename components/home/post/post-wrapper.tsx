@@ -36,9 +36,7 @@ const PostWrapper = ({
   const router = useRouter();
 
   const handleRoute = (event: React.MouseEvent<HTMLDivElement>) => {
-    // Disable navigation on desktop (lg breakpoint is usually 1024px)
-    if (window.innerWidth >= 1024) return;
-
+    // Allow navigation on all devices
     if ((event.target as HTMLElement).closest("button, a")) return;
     if (handle && id) {
       router.push(`/${handle}/posts/${id}`);
@@ -58,7 +56,7 @@ const PostWrapper = ({
           onTouchEnd={isMedia ? onTouchEnd : undefined}
           onTouchCancel={isMedia ? onTouchCancel : undefined}
           className={clsx(
-            "relative flex flex-col justify-between md:aspect-9/16 isolate transition-opacity duration-300 cursor-pointer lg:cursor-default",
+            "relative flex flex-col justify-between md:aspect-9/16 isolate transition-opacity duration-300 cursor-pointer",
             "rounded-xl md:rounded-4xl",
             isMedia
               ? "p-0 md:p-6 w-full h-full md:w-full md:h-auto md:max-h-none"

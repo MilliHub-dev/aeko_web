@@ -29,6 +29,8 @@ const getMediaUrl = (url?: string) => {
   return `${API_BASE_URL}${url.startsWith("/") ? "" : "/"}${url}`;
 };
 
+import { PostMediaCarousel } from "./post-media-carousel";
+
 // ---------------------------------------------------------
 // Main Wrapper
 // ---------------------------------------------------------
@@ -37,47 +39,6 @@ interface PostMediaProps extends Partial<FeedPost> {
   progress?: number;
   muted?: boolean;
 }
-
-// ---------------------------------------------------------
-// Grid Component for Multiple Media
-// ---------------------------------------------------------
-const PostMediaGrid = ({ items }: { items: string[] }) => {
-  const gridClass = items.length === 1 
-    ? "grid-cols-1" 
-    : items.length === 2 
-    ? "grid-cols-2" 
-    : "grid-cols-2";
-
-  return (
-    <div className={clsx("grid gap-0.5 w-full aspect-square bg-black overflow-hidden", gridClass)}>
-      {items.map((item, index) => {
-        const resolved = getMediaUrl(item);
-        const isVideo = item.endsWith(".mp4") || item.endsWith(".webm") || item.endsWith(".mov");
-        
-        // Layout logic for 3 items: first item spans full width
-        const isThreeItems = items.length === 3;
-        const itemClass = isThreeItems && index === 0 ? "col-span-2 aspect-[2/1]" : "aspect-square";
-
-        return (
-          <div key={index} className={clsx("relative bg-neutral-900 overflow-hidden", itemClass)}>
-             {isVideo ? (
-               <>
-                 <video src={resolved} className="w-full h-full object-cover" />
-                 <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                   <div className="p-3 bg-black/40 rounded-full backdrop-blur-sm">
-                     <Play className="w-6 h-6 text-white fill-white" />
-                   </div>
-                 </div>
-               </>
-             ) : (
-               <Image src={resolved} alt={`Media ${index}`} fill className="object-cover" />
-             )}
-          </div>
-        );
-      })}
-    </div>
-  );
-};
 
 const PostMedia = ({
   type,
@@ -94,7 +55,7 @@ const PostMedia = ({
   
   if (hasMultiple) {
     const items = mediaUrls && mediaUrls.length > 0 ? mediaUrls : (media as string[]);
-    return <PostMediaGrid items={items} />;
+    return <PostMediaCarousel items={items} />;
   }
 
   // Fallback to single view
@@ -163,7 +124,7 @@ const PostVideo = ({
   className,
 }: PostVideoProps) => {
   return (
-    <div className="flex flex-col justify-between">
+    <div className="flex flex-col justify-between bg-white w-full h-full relative">
       <video
         ref={videoRef}
         src={videoSrc}
@@ -173,7 +134,7 @@ const PostVideo = ({
         muted={muted}
         playsInline
         className={clsx(
-        "absolute inset-0 w-full h-full object-cover object-center",
+        "absolute inset-0 w-full h-full object-contain object-center",
         className
       )}
     />
@@ -213,15 +174,17 @@ const PostImage = ({ backgroundImage, className }: PostImageProps) => {
   }
   
   return (
-    <Image
-      src={backgroundImage}
-      alt="Post media"
-      fill
-      priority
-      style={{ objectFit: 'cover' }}
-      className={clsx("object-cover object-center", className)}
-      onError={() => setError(true)}
-    />
+    <div className={clsx("relative w-full h-full bg-white", className)}>
+      <Image
+        src={backgroundImage}
+        alt="Post media"
+        fill
+        priority
+        style={{ objectFit: 'contain' }}
+        className="object-contain object-center"
+        onError={() => setError(true)}
+      />
+    </div>
   );
 };
 

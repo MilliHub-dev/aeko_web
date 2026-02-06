@@ -1,13 +1,13 @@
 "use client";
 
-import { FeedPost } from "@/types/post";
+import { FeedPost, PostType } from "@/types/post";
 import { CreatePost } from "../home/create-post";
 
 export function MobileRightSidebar() {
   const handleCreatePost = async (postData: {
-    type: FeedPost;
+    type: PostType;
     content: string;
-    media?: File;
+    mediaFiles?: File[];
     hashtags: string[];
   }) => {
     console.log("New post:", postData);

@@ -34,7 +34,9 @@ import {
   Lock,
   User as UserIcon,
   Circle,
-  CheckCircle2
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -45,12 +47,20 @@ import { UserSelector } from "./post/user-selector";
 import { toast } from "sonner";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { motion, AnimatePresence } from "motion/react";
+
+interface MediaItem {
+  id: string;
+  file: File;
+  url: string;
+  type: 'image' | 'video';
+}
 
 interface CreatePostProps {
   onPost?: (data: {
     type: PostType;
     content: string;
-    media?: File;
+    mediaFiles?: File[];
     hashtags: string[];
   }) => void;
   trigger?: React.ReactNode;
@@ -59,8 +69,7 @@ interface CreatePostProps {
 export function CreatePost({ onPost, trigger }: CreatePostProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [content, setContent] = useState("");
-  const [mediaFile, setMediaFile] = useState<File | null>(null);
-  const [mediaPreview, setMediaPreview] = useState<string>("");
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [postType, setPostType] = useState<PostType>("text");
   const [privacy, setPrivacy] = useState<"public" | "followers" | "select_users" | "only_me">("public");
@@ -125,34 +134,65 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    if (!e.target.files?.length) return;
+    
+    const newFiles = Array.from(e.target.files);
+    const newItems: MediaItem[] = newFiles.map(file => {
+      const isVideoType = file.type.startsWith("video/");
+      const isVideoExt = /\.(mp4|mov|webm|ogg|mkv|avi)$/i.test(file.name);
+      const url = URL.createObjectURL(file);
+      return {
+        id: url,
+        file,
+        url,
+        type: (isVideoType || isVideoExt) ? 'video' : 'image'
+      };
+    });
 
-    // Check if it's an image or video
-    // Robust check for video type: mime type or extension fallback
-    const isVideoType = file.type.startsWith("video/");
-    const isVideoExt = /\.(mp4|mov|webm|ogg|mkv|avi)$/i.test(file.name);
-    const isVideo = isVideoType || isVideoExt;
-
-    setPostType(isVideo ? "video" : "image");
-
-    // Create preview URL
-    const previewUrl = URL.createObjectURL(file);
-    setMediaPreview(previewUrl);
-    setMediaFile(file);
+    setMediaItems(prev => {
+      const updated = [...prev, ...newItems];
+      const hasVideo = updated.some(p => p.type === 'video');
+      setPostType(hasVideo ? "video" : "image");
+      return updated;
+    });
   };
 
-  const removeMedia = () => {
-    setMediaFile(null);
-    setMediaPreview("");
-    setPostType("text");
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+  const removeMedia = (index: number) => {
+    setMediaItems(prev => {
+      const newItems = [...prev];
+      if (newItems[index]) {
+        URL.revokeObjectURL(newItems[index].url);
+        newItems.splice(index, 1);
+      }
+      
+      if (newItems.length === 0) {
+        setPostType("text");
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      } else {
+        const hasVideo = newItems.some(p => p.type === 'video');
+        setPostType(hasVideo ? "video" : "image");
+      }
+      
+      return newItems;
+    });
+  };
+
+  const moveMedia = (index: number, direction: 'left' | 'right') => {
+    setMediaItems(prev => {
+      const newItems = [...prev];
+      const targetIndex = direction === 'left' ? index - 1 : index + 1;
+      
+      if (targetIndex >= 0 && targetIndex < newItems.length) {
+        [newItems[index], newItems[targetIndex]] = [newItems[targetIndex], newItems[index]];
+      }
+      return newItems;
+    });
   };
 
   const handlePost = async () => {
-    if (!content.trim() && !mediaFile) return;
+    if (!content.trim() && mediaItems.length === 0) return;
 
     setIsLoading(true);
 
@@ -166,9 +206,9 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
         formData.append("selectedUsers", JSON.stringify(selectedUsers));
       }
 
-      if (mediaFile) {
-        formData.append("media", mediaFile);
-      }
+      mediaItems.forEach(item => {
+        formData.append("media", item.file);
+      });
 
       const response = await fetch("/api/posts/create", {
         method: "POST",
@@ -189,13 +229,18 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
         onPost?.({
           type: postType,
           content,
-          media: mediaFile || undefined,
+          mediaFiles: mediaItems.map(item => item.file),
           hashtags: content.match(/#[\w]+/g)?.map((tag) => tag.slice(1)) || [],
         });
 
         // Reset form
         setContent("");
-        removeMedia();
+        mediaItems.forEach(p => URL.revokeObjectURL(p.url));
+        setMediaItems([]);
+        setPostType("text");
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
         setIsOpen(false);
       } else {
         console.error("Failed to create post:", result.message);
@@ -266,34 +311,77 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
                 />
 
                 {/* Media Preview */}
-                {mediaPreview && (
-                  <div className="relative mt-2 rounded-2xl overflow-hidden bg-muted/30 border border-border/50 group">
-                    <Button
-                      onClick={removeMedia}
-                      variant="ghost"
-                      size="icon"
-                      className="absolute top-2 right-2 h-8 w-8 rounded-full bg-black/50 text-white hover:bg-black/70 hover:text-white z-10 backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100"
-                    >
-                      <X className="w-5 h-5" />
-                    </Button>
-                    
-                    {postType === "image" ? (
-                      <div className="relative w-full aspect-auto max-h-[500px]">
-                        <Image
-                          src={mediaPreview}
-                          alt="Preview"
-                          width={600}
-                          height={600}
-                          className="w-full h-auto object-contain max-h-[500px]"
-                        />
-                      </div>
-                    ) : (
-                      <video
-                        src={mediaPreview}
-                        className="w-full max-h-[500px] object-contain"
-                        controls
-                      />
-                    )}
+                {mediaItems.length > 0 && (
+                  <div className={cn(
+                    "grid gap-2 mt-2",
+                    mediaItems.length === 1 ? "grid-cols-1" : "grid-cols-2"
+                  )}>
+                    <AnimatePresence mode="popLayout">
+                      {mediaItems.map((item, index) => (
+                        <motion.div 
+                          layout
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.8 }}
+                          key={item.id} 
+                          className="relative rounded-2xl overflow-hidden bg-muted/30 border border-border/50 group"
+                        >
+                          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center justify-center gap-3 pointer-events-none">
+                            {index > 0 && (
+                              <Button
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); moveMedia(index, 'left'); }}
+                                variant="ghost"
+                                size="icon"
+                                className="pointer-events-auto h-8 w-8 rounded-full bg-black/60 text-white hover:bg-black/80 hover:text-white backdrop-blur-sm"
+                                title="Move Previous"
+                              >
+                                <ChevronLeft className="w-5 h-5" />
+                              </Button>
+                            )}
+                            
+                            <Button
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); removeMedia(index); }}
+                              variant="ghost"
+                              size="icon"
+                              className="pointer-events-auto h-8 w-8 rounded-full bg-red-500/80 text-white hover:bg-red-600 hover:text-white backdrop-blur-sm"
+                              title="Remove"
+                            >
+                              <X className="w-5 h-5" />
+                            </Button>
+
+                            {index < mediaItems.length - 1 && (
+                              <Button
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); moveMedia(index, 'right'); }}
+                                variant="ghost"
+                                size="icon"
+                                className="pointer-events-auto h-8 w-8 rounded-full bg-black/60 text-white hover:bg-black/80 hover:text-white backdrop-blur-sm"
+                                title="Move Next"
+                              >
+                                <ChevronRight className="w-5 h-5" />
+                              </Button>
+                            )}
+                          </div>
+                          
+                          {item.type === "image" ? (
+                            <div className="relative w-full aspect-auto max-h-[500px]">
+                              <Image
+                                src={item.url}
+                                alt="Preview"
+                                width={600}
+                                height={600}
+                                className="w-full h-auto object-contain max-h-[500px]"
+                              />
+                            </div>
+                          ) : (
+                            <video
+                              src={item.url}
+                              className="w-full max-h-[500px] object-contain"
+                              controls
+                            />
+                          )}
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
                   </div>
                 )}
               </div>
@@ -353,6 +441,7 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
                   <input
                     ref={fileInputRef}
                     type="file"
+                    multiple
                     accept="image/*,video/*,.jpg,.jpeg,.png,.gif,.mp4,.mov,.webm"
                     onChange={handleFileSelect}
                     className="hidden"
@@ -473,10 +562,10 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
 
                 <Button
                   onClick={handlePost}
-                  disabled={(!content.trim() && !mediaFile) || isLoading}
+                  disabled={(!content.trim() && mediaItems.length === 0) || isLoading}
                   className={cn(
                     "min-w-[70px] rounded-full font-bold transition-all px-5 py-2 h-9 text-sm",
-                    (!content.trim() && !mediaFile) 
+                    (!content.trim() && mediaItems.length === 0) 
                       ? "bg-primary/50 text-white opacity-50 cursor-not-allowed" 
                       : "bg-primary text-white hover:bg-primary/90"
                   )}
