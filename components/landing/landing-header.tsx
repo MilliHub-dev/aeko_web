@@ -12,7 +12,7 @@ const LandingHeader = () => {
 					<Logo />
 				</Link>
 			</div>
-			<nav className="flex items-center gap-8 text-md text-gray-600 ">
+			<nav className="flex items-center gap-6 text-md text-gray-500 ">
 				<Link
 					href="/login"
 					className="btn-glass"
@@ -24,6 +24,12 @@ const LandingHeader = () => {
 					className="btn-glass"
 				>
 					Sign up
+				</Link>
+				<Link
+					href="https://chain.aeko.social"
+					className="btn-glass"
+				>
+					Aeko Chain
 				</Link>
 			</nav>
 		</header>

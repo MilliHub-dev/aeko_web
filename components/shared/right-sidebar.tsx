@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useExploreData } from "@/features/explore/hooks/use-explore-data";
+import { useSuggestedUsers } from "@/features/explore/hooks/use-suggested-users";
 import { Loader2, Search, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import { useRouter } from "next/navigation";
 
 export function RightSidebar() {
   const { data, isLoading } = useExploreData();
+  const { users: suggestedUsers } = useSuggestedUsers();
   const router = useRouter();
   
   // Search state
@@ -162,7 +164,7 @@ export function RightSidebar() {
           </div>
 
           {/* Who to Follow Section */}
-          {data?.suggestedUsers && data.suggestedUsers.length > 0 && (
+          {suggestedUsers && suggestedUsers.length > 0 && (
             <section className="space-y-4 rounded-3xl border border-border/60 bg-card/50 p-4 shadow-sm backdrop-blur-sm">
               <div className="flex items-center justify-between px-1">
                 <p className="text-sm font-bold text-foreground">
@@ -175,7 +177,7 @@ export function RightSidebar() {
                 </Link>
               </div>
               <div className="space-y-4">
-                {data.suggestedUsers.slice(0, 3).map((user, index) => (
+                {suggestedUsers.slice(0, 5).map((user, index) => (
                   <div
                     key={`${user._id}-${index}`}
                     className="flex items-center justify-between">
@@ -271,20 +273,20 @@ export function RightSidebar() {
           </section>
 
           {/* Trending Posts Section */}
-          {data?.trending && data.trending.length > 0 && (
-            <section className="space-y-3">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
-                  Trending Posts
-                </p>
-                <Link
-                  href="/explore"
-                  className="text-xs text-primary hover:text-primary/80">
-                  See all
-                </Link>
-              </div>
-              <div className="space-y-3">
-                {data.trending.slice(0, 3).map((post, index) => (
+          <section className="space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
+                Trending Now
+              </p>
+              <Link
+                href="/explore"
+                className="text-xs text-primary hover:text-primary/80">
+                See all
+              </Link>
+            </div>
+            <div className="space-y-3">
+              {data?.trending && data.trending.length > 0 ? (
+                data.trending.slice(0, 3).map((post, index) => (
                   <Link
                     key={`${post._id}-${index}`}
                     href={`/post/${post._id}`}
@@ -293,13 +295,17 @@ export function RightSidebar() {
                       {post.text || "Untitled Post"}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      {post.user.name}
+                      {post.user?.name || "Unknown User"}
                     </span>
                   </Link>
-                ))}
-              </div>
-            </section>
-          )}
+                ))
+              ) : (
+                <div className="text-sm text-muted-foreground px-4 py-3 rounded-2xl border border-border/60 bg-muted/50">
+                  No trending posts right now.
+                </div>
+              )}
+            </div>
+          </section>
 
           {/* Live Streams Section */}
           {data?.liveStreams && data.liveStreams.length > 0 && (

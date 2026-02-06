@@ -89,6 +89,7 @@ export interface SuggestedUser {
   blueTick: boolean;
   goldenTick: boolean;
   followersCount: number;
+  postsCount?: number;
   isFollowing?: boolean; // Optional for search results
 }
 

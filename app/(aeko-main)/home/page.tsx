@@ -9,6 +9,9 @@ import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAds } from "@/hooks/use-ads";
 import { FeedPost } from "@/types/post";
+import { MobileWhoToFollow } from "@/components/home/mobile-who-to-follow";
+
+type FeedItem = FeedPost | { _id: string; isWhoToFollow: true };
 
 export default function Home() {
   const posts = usePostsStore((state) => state.posts);
@@ -55,13 +58,29 @@ export default function Home() {
   const { ads } = useAds();
 
   const postsWithAds = useMemo(() => {
-    if (ads.length === 0) return filteredPosts;
-
-    const result: FeedPost[] = [];
+    const result: FeedItem[] = [];
     let adIndex = 0;
+    
+    // If no ads, just map filteredPosts to result
+    if (ads.length === 0) {
+      filteredPosts.forEach((post, index) => {
+        result.push(post);
+        // Insert "Who to follow" after 5 posts (index 4)
+        if (index === 4) {
+          result.push({ _id: "who-to-follow-section", isWhoToFollow: true });
+        }
+      });
+      return result;
+    }
     
     filteredPosts.forEach((post, index) => {
       result.push(post);
+      
+      // Insert "Who to follow" after 5 posts (index 4)
+      if (index === 4) {
+        result.push({ _id: "who-to-follow-section", isWhoToFollow: true });
+      }
+
       // Insert ad after every 7 posts
       if ((index + 1) % 7 === 0) {
         // Use modulus to cycle through ads if we have more slots than ads
@@ -162,12 +181,21 @@ export default function Home() {
         )}
 
         {postsWithAds.length > 0 ? (
-          postsWithAds.map((post, idx) => (
+          postsWithAds.map((item, idx) => (
             <div
-              key={`post-${post._id || idx}`}
-              className="snap-start h-full w-full flex justify-center flex-none"
+              key={`post-${item._id || idx}`}
+              className={cn(
+                "snap-start h-full w-full flex justify-center flex-none",
+                'isWhoToFollow' in item && "md:hidden"
+              )}
             >
-              <PostCard {...post} isActive={idx === activeIndex} />
+              {'isWhoToFollow' in item ? (
+                 <div className="w-full h-full flex items-center justify-center bg-background/50 backdrop-blur-sm">
+                    <MobileWhoToFollow />
+                 </div>
+              ) : (
+                <PostCard {...(item as FeedPost)} isActive={idx === activeIndex} />
+              )}
             </div>
           ))
         ) : (

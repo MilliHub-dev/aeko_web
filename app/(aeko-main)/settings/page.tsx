@@ -18,7 +18,8 @@ import {
   HelpCircle, 
   ArrowLeft,
   ChevronRight,
-  Megaphone
+  Megaphone,
+  Activity
 } from "lucide-react";
 
 /**
@@ -67,6 +68,14 @@ export default function SettingsPage() {
       icon: Palette,
       color: "text-purple-500",
       bgColor: "bg-purple-500/10"
+    },
+    {
+      href: "/settings/activity",
+      title: "Activity Log",
+      description: "View your recent posts, comments and security events",
+      icon: Activity,
+      color: "text-rose-500",
+      bgColor: "bg-rose-500/10"
     },
     {
       href: "/settings/language",

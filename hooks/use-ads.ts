@@ -21,8 +21,18 @@ export function useAds() {
         const response = await fetch("/api/ads/targeted");
         if (response.ok) {
           const data = await response.json();
+          
+          let adsList: any[] = [];
+          if (Array.isArray(data)) {
+            adsList = data;
+          } else if (data && Array.isArray(data.data)) {
+            adsList = data.data;
+          } else if (data && Array.isArray(data.ads)) {
+             adsList = data.ads;
+          }
+
           // Map ads to FeedPost structure
-          const formattedAds: FeedPost[] = (Array.isArray(data) ? data : data.data || []).map((ad: any) => ({
+          const formattedAds: FeedPost[] = adsList.map((ad: any) => ({
             _id: ad._id,
             text: ad.content || ad.title,
             mediaUrl: ad.mediaUrl,
@@ -32,6 +42,7 @@ export function useAds() {
               _id: "sponsored",
               name: ad.title || "Sponsored",
               username: "sponsored",
+              email: "sponsored@aeko.social",
               profilePicture: "/images/sponsored-avatar.png", // Placeholder
               blueTick: false,
               goldenTick: false,
