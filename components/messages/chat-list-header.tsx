@@ -1,18 +1,44 @@
 "use client";
 
-import { Search, MoreHorizontal } from "lucide-react";
+import { Search, MoreHorizontal, Users } from "lucide-react";
 import { useRouteName } from "@/hooks";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { CreateGroupDialog } from "./create-group-dialog";
+import { useState } from "react";
 
 const ChatListHeader = () => {
   const routeName = useRouteName();
+  const [isGroupDialogOpen, setIsGroupDialogOpen] = useState(false);
 
   return (
     <div className="border-b border-gray-200 p-4">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold">{routeName || "Messages"}</h1>
-        <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-          <MoreHorizontal size={20} />
-        </button>
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+              <MoreHorizontal size={20} />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onSelect={() => setIsGroupDialogOpen(true)}>
+              <Users className="mr-2 h-4 w-4" />
+              Create Group Chat
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <CreateGroupDialog 
+          // Controlled dialog state
+          open={isGroupDialogOpen} 
+          onOpenChange={setIsGroupDialogOpen} 
+        />
       </div>
       <div className="relative">
         <Search

@@ -1,6 +1,6 @@
 "use client";
 
-import { Send, Image, Smile, Mic, X, Play, Pause, CheckCheck, Video, Phone } from "lucide-react";
+import { Send, Image, Smile, Mic, X, Play, Pause, CheckCheck, Video, Phone, Trash2, MoreVertical } from "lucide-react";
 import { useChat } from "@/contexts/ChatContext";
 import { useState, useEffect, useRef } from "react";
 import { ChatHeader } from "./chat-header";
@@ -8,9 +8,16 @@ import { useChatStore } from "@/features/chat/stores/chat-store";
 import { useUser } from "@/components/shared/user-context";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { getOtherParticipant } from "@/lib/chat-utils";
 
 import { MediaViewerModal } from "./media-viewer-modal";
+import { GroupInfoSidebar } from "./group-info-sidebar";
 
 interface DisplayMessage {
   id: string;
@@ -31,11 +38,13 @@ interface DisplayMessage {
     duration?: number;
     status: 'missed' | 'ended' | 'declined';
   };
+  deleted?: boolean;
 }
 
 interface MessageBubbleProps {
   message: DisplayMessage;
   onViewMedia: (url: string, type: 'image' | 'video') => void;
+  onDelete: (messageId: string) => void;
 }
 
 const VoiceMessageBubble: React.FC<{ message: DisplayMessage }> = ({ message }) => {
@@ -137,7 +146,30 @@ const CallMessageBubble: React.FC<{ message: DisplayMessage }> = ({ message }) =
   );
 };
 
-const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onViewMedia }) => {
+const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onViewMedia, onDelete }) => {
+  if (message.deleted) {
+    return (
+      <div className={`flex ${message.sent ? "justify-end" : "justify-start"}`}>
+        <div
+          className={`max-w-xs lg:max-w-md ${
+            message.sent ? "order-2" : "order-1"
+          }`}>
+          <div
+            className={`rounded-2xl px-4 py-2 border border-border bg-background/50 text-muted-foreground italic text-sm ${
+              message.sent
+                ? "rounded-br-sm"
+                : "rounded-bl-sm"
+            }`}>
+             This message was deleted
+          </div>
+          <div className={`flex items-center gap-1 mt-1 px-2 ${message.sent ? "justify-end" : "justify-start"}`}>
+            <p className="text-xs text-muted-foreground">{message.time}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Helper to determine media to show (prefer attachments, fall back to mediaUrl)
   const mediaItem = message.attachments?.[0] || (message.mediaUrl ? { url: message.mediaUrl, mimeType: message.type === 'video' ? 'video/mp4' : 'image/jpeg' } : null);
   const isImage = mediaItem?.mimeType.startsWith('image/') || message.type === 'image';
@@ -146,7 +178,27 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onViewMedia }) =
   const isVoice = message.type === 'voice' && !!message.voiceMessage;
 
   return (
-  <div className={`flex ${message.sent ? "justify-end" : "justify-start"}`}>
+  <div className={`flex group ${message.sent ? "justify-end" : "justify-start"}`}>
+    {message.sent && (
+      <div className="order-1 flex items-center px-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="p-1 hover:bg-secondary rounded-full text-muted-foreground">
+              <MoreVertical size={16} />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem 
+              onClick={() => onDelete(message.id)}
+              className="text-destructive focus:text-destructive"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    )}
     <div
       className={`max-w-xs lg:max-w-md ${
         message.sent ? "order-2" : "order-1"
@@ -205,9 +257,10 @@ interface MessageListProps {
   messages: DisplayMessage[];
   isLoading: boolean;
   onViewMedia: (url: string, type: 'image' | 'video') => void;
+  onDelete: (messageId: string) => void;
 }
 
-const MessageList: React.FC<MessageListProps> = ({ messages, isLoading, onViewMedia }) => {
+const MessageList: React.FC<MessageListProps> = ({ messages, isLoading, onViewMedia, onDelete }) => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -238,7 +291,7 @@ const MessageList: React.FC<MessageListProps> = ({ messages, isLoading, onViewMe
         </div>
       ) : (
         messages.map((msg) => (
-          <MessageBubble key={msg.id} message={msg} onViewMedia={onViewMedia} />
+          <MessageBubble key={msg.id} message={msg} onViewMedia={onViewMedia} onDelete={onDelete} />
         ))
       )}
       <div ref={bottomRef} />
@@ -464,8 +517,9 @@ const EmptyState: React.FC = () => (
 
 const ChatMessages = () => {
   const { selectedChat, showChatList, isInitializing } = useChat();
-  const { messages, fetchMessages, sendMessage, sendMediaMessage, sendVoiceMessage, isSendingMessage, isLoadingMessages } = useChatStore();
+  const { messages, fetchMessages, sendMessage, sendMediaMessage, sendVoiceMessage, deleteMessage, isSendingMessage, isLoadingMessages } = useChatStore();
    const { user } = useUser();
+   const [showGroupInfo, setShowGroupInfo] = useState(false);
    const [mediaViewer, setMediaViewer] = useState<{ url: string; type: 'image' | 'video'; isOpen: boolean }>({
      url: '',
      type: 'image',
@@ -510,6 +564,12 @@ const ChatMessages = () => {
     setMediaViewer({ url, type, isOpen: true });
   };
 
+  const handleDeleteMessage = async (messageId: string) => {
+    if (selectedChat?.id) {
+      await deleteMessage(selectedChat.id, messageId);
+    }
+  };
+
   if (!selectedChat) {
     if (isInitializing) {
       return (
@@ -536,25 +596,35 @@ const ChatMessages = () => {
     mediaUrl: m.mediaUrl,
     attachments: m.attachments,
     voiceMessage: m.voiceMessage,
-    call: m.call
+    call: m.call,
+    deleted: m.deleted
   }));
 
   return (
-    <div className={`flex flex-col h-full ${showChatList ? 'hidden lg:flex' : 'flex'}`}>
-      <ChatHeader />
-      
-      <MessageList 
-        messages={displayMessages} 
-        isLoading={isLoading} 
-        onViewMedia={handleViewMedia}
-      />
+    <div className={`flex h-full ${showChatList ? 'hidden lg:flex' : 'flex'}`}>
+      <div className="flex flex-col flex-1 h-full min-w-0 relative">
+        <ChatHeader onToggleGroupInfo={() => setShowGroupInfo(!showGroupInfo)} />
+        
+        <MessageList 
+          messages={displayMessages} 
+          isLoading={isLoading} 
+          onViewMedia={handleViewMedia}
+          onDelete={handleDeleteMessage}
+        />
 
-      <MessageInput 
-        onSend={handleSend} 
-        onSendMedia={handleSendMedia}
-        onSendVoice={handleSendVoice}
-        isSending={isSendingMessage} 
-      />
+        <MessageInput 
+          onSend={handleSend} 
+          onSendMedia={handleSendMedia}
+          onSendVoice={handleSendVoice}
+          isSending={isSendingMessage} 
+        />
+      </div>
+
+      {showGroupInfo && selectedChat.isGroup && (
+        <div className="w-80 border-l border-border h-full bg-background overflow-hidden absolute inset-y-0 right-0 z-20 shadow-xl xl:static xl:shadow-none xl:z-auto">
+          <GroupInfoSidebar chat={selectedChat} onClose={() => setShowGroupInfo(false)} />
+        </div>
+      )}
 
       <MediaViewerModal 
         isOpen={mediaViewer.isOpen}

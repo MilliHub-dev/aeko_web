@@ -24,6 +24,14 @@ export interface Chat {
   name?: string;
   username?: string;
   avatar?: string;
+  
+  // Group Chat fields
+  isGroup?: boolean;
+  groupName?: string;
+  groupIcon?: string;
+  adminId?: string;
+  groupAdminId?: string;
+  inviteCode?: string;
 }
 
 export interface Message {
@@ -50,6 +58,7 @@ export interface Message {
     duration?: number;
     status: 'missed' | 'ended' | 'declined';
   };
+  deleted?: boolean;
   // UI helpers
   sent?: boolean; // Derived from current user ID comparison
 }
@@ -71,6 +80,7 @@ export interface CreateChatRequest {
   participants: string[];
   isGroup: boolean;
   groupName?: string;
+  groupAdminId?: string;
 }
 
 export interface ChatResponse {

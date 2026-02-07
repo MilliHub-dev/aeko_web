@@ -52,7 +52,7 @@ const ChatListItem = ({ chat }: { chat: Chat }) => {
           <div className="flex items-center gap-2 min-w-0">
             <span className="font-semibold text-foreground truncate flex items-center gap-1">
               {displayName}
-              {otherParticipant?.blueTick && (
+              {!chat.isGroup && otherParticipant?.blueTick && (
                 <Image
                   src="/blue_tick.png"
                   alt="Verified"
@@ -61,7 +61,7 @@ const ChatListItem = ({ chat }: { chat: Chat }) => {
                   className="h-3 w-3 shrink-0"
                 />
               )}
-              {otherParticipant?.goldenTick && (
+              {!chat.isGroup && otherParticipant?.goldenTick && (
                 <Image
                   src="/gold_tick.png"
                   alt="Gold Verified"

@@ -10,7 +10,9 @@ import {
   PhoneOff, 
   X,
   Maximize2,
-  Minimize2
+  Minimize2,
+  Volume2,
+  VolumeX
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -33,8 +35,19 @@ export function CallOverlay() {
   const { acceptIncomingCall, terminateCall } = useWebRTC();
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
+  const remoteAudioRef = useRef<HTMLAudioElement>(null);
   const [isMinimized, setIsMinimized] = React.useState(false);
   const [otherUser, setOtherUser] = React.useState<{ name: string; avatar: string } | null>(null);
+  const [isSpeakerOn, setIsSpeakerOn] = React.useState(true);
+
+  useEffect(() => {
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.muted = !isSpeakerOn;
+    }
+    if (remoteAudioRef.current) {
+      remoteAudioRef.current.muted = !isSpeakerOn;
+    }
+  }, [isSpeakerOn]);
 
   useEffect(() => {
     const targetId = callerId || receiverId;
@@ -67,17 +80,22 @@ export function CallOverlay() {
     }
   }, [localStream]);
 
-  useEffect(() => {
-    if (remoteVideoRef.current && remoteStream) {
-      remoteVideoRef.current.srcObject = remoteStream;
-    }
-  }, [remoteStream]);
-
-  if (status === "idle") return null;
-
   const isVideoCall = type === "video";
   const isIncoming = status === "incoming";
   const isConnected = status === "connected";
+
+  useEffect(() => {
+    if (remoteVideoRef.current && remoteStream) {
+      remoteVideoRef.current.srcObject = remoteStream;
+      remoteVideoRef.current.play().catch(e => console.error("Error playing remote video:", e));
+    }
+    if (remoteAudioRef.current && remoteStream) {
+      remoteAudioRef.current.srcObject = remoteStream;
+      remoteAudioRef.current.play().catch(e => console.error("Error playing remote audio:", e));
+    }
+  }, [remoteStream, isConnected, isVideoCall]);
+
+  if (status === "idle") return null;
 
   return (
     <div className={cn(
@@ -102,6 +120,21 @@ export function CallOverlay() {
 
       {/* Main Content */}
       <div className="relative w-full h-full bg-slate-900 flex items-center justify-center">
+        {/* Ringing Sound (Incoming) */}
+        {status === 'incoming' && (
+          <audio src="/sounds/ringing.mp3" autoPlay loop />
+        )}
+        
+        {/* Dial Sound (Calling) */}
+        {status === 'calling' && (
+          <audio src="/sounds/dial.mp3" autoPlay loop />
+        )}
+
+        {/* Remote Audio for Voice Calls */}
+        {!isVideoCall && isConnected && (
+          <audio ref={remoteAudioRef} autoPlay playsInline />
+        )}
+
         {isConnected && isVideoCall ? (
           <>
             <video 
@@ -163,6 +196,16 @@ export function CallOverlay() {
               )}
             >
               {isMuted ? <MicOff size={24} /> : <Mic size={24} />}
+            </button>
+            
+            <button 
+              onClick={() => setIsSpeakerOn(!isSpeakerOn)}
+              className={cn(
+                "p-3 rounded-full transition-colors",
+                !isSpeakerOn ? "bg-white text-black" : "bg-white/20 text-white hover:bg-white/30"
+              )}
+            >
+              {!isSpeakerOn ? <VolumeX size={24} /> : <Volume2 size={24} />}
             </button>
             
             {isVideoCall && (

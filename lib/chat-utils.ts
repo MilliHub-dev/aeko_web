@@ -63,6 +63,7 @@ export const getOtherParticipant = (chat: Chat, currentUserId?: string): ChatUse
 };
 
 export const getChatDisplayName = (chat: Chat, currentUserId?: string): string => {
+  if (chat.isGroup && chat.groupName) return chat.groupName;
   if (chat.name) return chat.name;
   
   const other = getOtherParticipant(chat, currentUserId);
@@ -70,6 +71,10 @@ export const getChatDisplayName = (chat: Chat, currentUserId?: string): string =
 };
 
 export const getChatDisplayImage = (chat: Chat, currentUserId?: string): string => {
+  if (chat.isGroup) {
+    // Return group icon or a default group placeholder
+    return chat.groupIcon || chat.avatar || "/placeholder.svg?height=40&width=40";
+  }
   if (chat.avatar) return chat.avatar;
   
   const other = getOtherParticipant(chat, currentUserId);
@@ -77,6 +82,7 @@ export const getChatDisplayImage = (chat: Chat, currentUserId?: string): string 
 };
 
 export const getChatDisplayUsername = (chat: Chat, currentUserId?: string): string | undefined => {
+  if (chat.isGroup) return undefined; // Groups don't have a handle/username
   if (chat.username) return chat.username;
 
   const other = getOtherParticipant(chat, currentUserId);

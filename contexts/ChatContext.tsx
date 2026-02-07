@@ -41,7 +41,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     selectChat, 
     selectedChatId,
     createChat,
-    isLoadingChats
+    isLoadingChats,
+    error // Get error from store
   } = useChatStore();
 
   // Derived state for selected chat
@@ -52,6 +53,11 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   // Recovery effect: If selectedChatId is set but selectedChat is null, try to refetch
   useEffect(() => {
+    // Stop retrying if we hit a rate limit or other permanent error
+    if (error && error.includes("Too many requests")) {
+       return;
+    }
+
     // Reset retries if the selected chat ID changes
     if (selectedChatId !== prevSelectedIdRef.current) {
         retryRef.current = 0;
@@ -60,9 +66,19 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
     if (selectedChatId && !selectedChat && !isLoadingChats) {
         if (retryRef.current < 3) {
-            console.warn(`Selected chat ${selectedChatId} not found in chats list. Refetching... (Attempt ${retryRef.current + 1}/3)`);
-            retryRef.current += 1;
-            fetchChats();
+            const attempt = retryRef.current + 1;
+            console.warn(`Selected chat ${selectedChatId} not found in chats list. Refetching... (Attempt ${attempt}/3)`);
+            retryRef.current = attempt;
+            
+            // Add delay to prevent rapid loops and 429 errors
+            const timeoutId = setTimeout(() => {
+                // Double check error before firing
+                if (!useChatStore.getState().error?.includes("Too many requests")) {
+                    fetchChats();
+                }
+            }, 1000 * attempt); // Progressive backoff: 1s, 2s, 3s
+
+            return () => clearTimeout(timeoutId);
         }
     } else if (selectedChat) {
         // Reset retries if we found the chat
@@ -131,16 +147,19 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       // On /messages/[username] route
       const username = pathParts[2];
       
-      const chat = chats.find((c) => 
-        c.id === username || // Check ID first!
-        c.username === username || 
-        c.name === username || 
-        c.participants?.some(p => 
-          p.username === username || 
-          p.id === username ||
-          p.username?.toLowerCase() === username.toLowerCase()
-        )
-      );
+      // Prioritize finding by ID first (for groups or direct ID access)
+      let chat = chats.find((c) => c.id === username);
+      
+      // If not found by ID, look for a Direct Message (DM) with this username
+      if (!chat) {
+        chat = chats.find((c) => 
+          !c.isGroup && // ONLY match DMs for username lookup
+          c.participants?.some(p => 
+            p.username === username || 
+            p.username?.toLowerCase() === username.toLowerCase()
+          )
+        );
+      }
 
       if (chat) {
         if (selectedChatId !== chat.id) {

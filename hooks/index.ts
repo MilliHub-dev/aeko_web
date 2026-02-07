@@ -10,3 +10,4 @@ export {
 } from "./use-media-query";
 export { useBodyScrollLock } from "./use-body-scroll-lock";
 export { useFocusTrap } from "./use-focus-trap";
+export { useDebounce } from "./use-debounce";

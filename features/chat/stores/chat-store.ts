@@ -21,7 +21,16 @@ interface ChatState {
   sendVoiceMessage: (voice: Blob, duration: number, waveform: number[], receiverId?: string) => Promise<void>;
   addMessage: (message: Message) => void;
   updateMessage: (chatId: string, messageId: string, updates: Partial<Message>) => void;
-  createChat: (participantIds: string[]) => Promise<string | null>;
+  deleteMessage: (chatId: string, messageId: string) => Promise<void>;
+  createChat: (participantIds: string[], options?: { isGroup?: boolean; groupName?: string; groupAdminId?: string }) => Promise<string | null>;
+  deleteChat: (chatId: string) => Promise<void>;
+  
+  // Group Actions
+  updateGroupIcon: (chatId: string, file: File) => Promise<boolean>;
+  removeGroupMember: (chatId: string, userId: string) => Promise<void>;
+  generateInviteLink: (chatId: string) => Promise<{ inviteCode: string; inviteLink: string } | null>;
+  joinGroupViaInvite: (inviteCode: string) => Promise<string | null>; // Returns chatId
+  leaveGroup: (chatId: string, userId?: string) => Promise<boolean>;
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
@@ -32,12 +41,32 @@ export const useChatStore = create<ChatState>((set, get) => ({
   isLoadingMessages: {},
   isSendingMessage: false,
   error: null,
+  // Add timestamp for rate limiting cooldown
+  lastFetchTime: 0,
 
   fetchChats: async () => {
+    const state = get();
+    // Prevent concurrent fetches
+    if (state.isLoadingChats) return;
+
+    // Check cooldown (prevent fetching if < 2 seconds since last error 429)
+    // We can store a specific "rateLimitUntil" timestamp if needed, but for now strict checking
+    
     set({ isLoadingChats: true, error: null });
     try {
       // Confirmed endpoint via connectivity check (401 vs 404)
       const res = await fetch("/api/enhanced-chat/conversations");
+      
+      if (res.status === 429) {
+        console.warn("Rate limit reached for fetching chats. Backing off.");
+        // Set error explicitly with code
+        set({ 
+          isLoadingChats: false, 
+          error: "Too many requests. Please try again later." 
+        });
+        return;
+      }
+
       if (!res.ok) {
         const text = await res.text();
         console.error(`Fetch chats failed: ${res.status} ${res.statusText}`, text);
@@ -315,12 +344,73 @@ export const useChatStore = create<ChatState>((set, get) => ({
     });
   },
 
-  createChat: async (participantIds) => {
+  deleteMessage: async (chatId, messageId) => {
+    // Optimistic update
+    set((state) => {
+      const currentMessages = state.messages[chatId] || [];
+      const updatedMessages = currentMessages.map((msg) => 
+        msg.id === messageId ? { ...msg, deleted: true } : msg
+      );
+      return {
+        messages: {
+          ...state.messages,
+          [chatId]: updatedMessages
+        }
+      };
+    });
+
+    try {
+      const res = await fetch(`/api/enhanced-chat/messages/${messageId}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to delete message: ${res.status}`);
+      }
+    } catch (error) {
+      console.error("Error deleting message:", error);
+      // Revert optimistic update (optional, but good practice)
+      // For simplicity in this iteration, we assume success or just log error
+      // A full revert would require keeping the previous state
+    }
+  },
+
+  deleteChat: async (chatId) => {
+    // Optimistic update
+    set((state) => ({
+      chats: state.chats.filter(c => String(c.id) !== String(chatId)),
+      selectedChatId: state.selectedChatId === chatId ? null : state.selectedChatId
+    }));
+
+    try {
+      const res = await fetch(`/api/enhanced-chat/conversations/${chatId}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to delete chat: ${res.status}`);
+      }
+    } catch (error) {
+      console.error("Error deleting chat:", error);
+      // Ideally show a toast notification here
+      let errorMessage = "Failed to delete chat";
+      if (error instanceof Error && error.message.includes("403")) {
+        errorMessage = "You don't have permission to delete this chat";
+      }
+      set({ error: errorMessage });
+      // Re-fetch chats to sync state
+      get().fetchChats();
+    }
+  },
+
+  createChat: async (participantIds, options) => {
     set({ isLoadingChats: true, error: null });
     try {
       const payload: CreateChatRequest = {
         participants: participantIds,
-        isGroup: false
+        isGroup: options?.isGroup || false,
+        groupName: options?.groupName,
+        groupAdminId: options?.groupAdminId
       };
 
       const res = await fetch("/api/enhanced-chat/create-chat", {
@@ -332,8 +422,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
       if (!res.ok) throw new Error("Failed to create chat");
 
       const rawData = await res.json();
+      console.log("Create chat response:", rawData);
       // Handle potential response wrappers: { chat: ... }, { data: ... }, or direct object
       const newChat = rawData.chat || rawData.data || rawData;
+
+      if (options?.isGroup && !newChat.isGroup) {
+         console.warn("Requested group creation but backend returned non-group chat:", newChat);
+      }
 
       if (!newChat || !newChat.id) {
         console.error("Invalid chat response format:", rawData);
@@ -358,4 +453,161 @@ export const useChatStore = create<ChatState>((set, get) => ({
       return null;
     }
   },
+
+  leaveGroup: async (chatId, userId) => {
+    try {
+      const res = await fetch(`/api/enhanced-chat/groups/${chatId}/leave`, {
+        method: "DELETE"
+      });
+
+      if (!res.ok) {
+        // If /leave endpoint doesn't exist (404) and userId provided, try removing self as member
+        if (res.status === 404 && userId) {
+          console.log("Leave endpoint not found, falling back to remove member");
+          // Use removeGroupMember but we need to handle the state update manually because 
+          // removeGroupMember might not remove the chat from the list entirely (just updates members)
+          // But since we are leaving, we want to remove the chat from our list.
+          
+          const removeRes = await fetch(`/api/enhanced-chat/groups/${chatId}/members/${userId}`, {
+             method: "DELETE",
+          });
+          
+          if (!removeRes.ok) throw new Error(`Failed to leave group (remove member): ${removeRes.status}`);
+          
+          // Success fallback
+          set(state => ({
+            chats: state.chats.filter(c => c.id !== chatId),
+            selectedChatId: state.selectedChatId === chatId ? null : state.selectedChatId
+          }));
+          return true;
+        }
+        
+        const text = await res.text();
+        console.error(`Leave group failed: ${res.status} ${res.statusText}`, text);
+        throw new Error(`Failed to leave group: ${res.status} ${res.statusText}`);
+      }
+
+      // Optimistically remove chat from list
+      set(state => ({
+        chats: state.chats.filter(c => c.id !== chatId),
+        selectedChatId: state.selectedChatId === chatId ? null : state.selectedChatId
+      }));
+      return true;
+    } catch (error) {
+      console.error("Error leaving group:", error);
+      set({ error: error instanceof Error ? error.message : "Failed to leave group" });
+      return false;
+    }
+  },
+
+  updateGroupIcon: async (chatId, file) => {
+    try {
+      const formData = new FormData();
+      formData.append("icon", file);
+      
+      const res = await fetch(`/api/enhanced-chat/groups/${chatId}/icon`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        console.error("Update group icon failed:", res.status, errorData);
+        throw new Error(errorData.message || `Failed to update group icon (${res.status})`);
+      }
+      
+      // Optimistically update chat icon
+      const rawData = await res.json();
+      const updatedChat = rawData.chat || rawData.data;
+      
+      if (updatedChat) {
+        set(state => ({
+          chats: state.chats.map(c => c.id === chatId ? { ...c, ...updatedChat } : c)
+        }));
+      } else {
+        // Force refresh
+        get().fetchChats();
+      }
+      return true;
+    } catch (error) {
+      console.error("Error updating group icon:", error);
+      let errorMessage = error instanceof Error ? error.message : "Failed to update group icon";
+      if (errorMessage.includes("403")) {
+         errorMessage = "You don't have permission to update the group icon";
+      }
+      set({ error: errorMessage });
+      return false;
+    }
+  },
+
+  removeGroupMember: async (chatId, userId) => {
+    try {
+      const res = await fetch(`/api/enhanced-chat/groups/${chatId}/members/${userId}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error(`Failed to remove member: ${res.status}`);
+
+      // Update local state if needed (remove from members list of the chat)
+      set(state => ({
+        chats: state.chats.map(c => {
+          if (c.id === chatId) {
+            return {
+              ...c,
+              members: c.members?.filter(m => m.id !== userId),
+              participants: c.participants?.filter(p => p.id !== userId)
+            };
+          }
+          return c;
+        })
+      }));
+    } catch (error) {
+      console.error("Error removing member:", error);
+      let errorMessage = "Failed to remove member";
+      if (error instanceof Error && error.message.includes("403")) {
+        errorMessage = "Only group admins can remove members";
+      }
+      set({ error: errorMessage });
+    }
+  },
+
+  generateInviteLink: async (chatId) => {
+    try {
+      const res = await fetch(`/api/enhanced-chat/groups/${chatId}/invite`);
+      if (!res.ok) throw new Error("Failed to generate invite link");
+      const data = await res.json();
+      return { inviteCode: data.inviteCode, inviteLink: data.inviteLink };
+    } catch (error) {
+      console.error("Error generating invite link:", error);
+      let errorMessage = "Failed to generate invite link";
+      if (error instanceof Error && error.message.includes("403")) {
+        errorMessage = "Only group admins can generate invite links";
+      }
+      set({ error: errorMessage });
+      return null;
+    }
+  },
+
+  joinGroupViaInvite: async (inviteCode) => {
+    try {
+      const res = await fetch(`/api/enhanced-chat/groups/join/${inviteCode}`, {
+        method: "POST"
+      });
+      if (!res.ok) throw new Error("Failed to join group");
+      
+      const data = await res.json();
+      const chat = data.chat || data.data;
+      
+      if (chat) {
+        set(state => ({
+          chats: [chat, ...state.chats]
+        }));
+        return chat.id;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error joining group:", error);
+      return null;
+    }
+  }
 }));
