@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, MoreHorizontal, Trash2 } from "lucide-react";
+import { ArrowLeft, MoreHorizontal, Trash2, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -24,19 +24,30 @@ import {
     DialogClose
   } from "@/components/ui/dialog";
 import { ReportDialog } from "@/components/report/report-dialog";
+import { usePostsStore } from "@/features/posts/stores";
+import { EditPostDialog } from "@/components/home/post/edit-post-dialog";
+import { FeedPost } from "@/types/post";
 
 interface PostDetailHeaderProps {
   onBack?: () => void;
   postId?: string;
   authorId?: string;
+  initialPost?: Partial<FeedPost>;
 }
 
-export function PostDetailHeader({ onBack, postId, authorId }: PostDetailHeaderProps) {
+export function PostDetailHeader({ onBack, postId, authorId, initialPost }: PostDetailHeaderProps) {
   const router = useRouter();
   const { user } = useUser();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  
+  const { posts } = usePostsStore();
+  const storePost = posts.find(p => p._id === postId);
+  // Use store post if available (for updates), otherwise fall back to initialPost
+  // We need to cast initialPost to FeedPost or handle Partial, but text is usually present
+  const post = storePost || (initialPost as FeedPost | undefined);
 
   const isOwner = user && authorId && (user._id === authorId || user.id === authorId);
 
@@ -123,6 +134,10 @@ export function PostDetailHeader({ onBack, postId, authorId }: PostDetailHeaderP
             <DropdownMenuSeparator />
             {isOwner ? (
                 <>
+                <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
+                    <Pencil className="w-4 h-4 mr-2" />
+                    Edit post
+                </DropdownMenuItem>
                 <DropdownMenuItem 
                     className="text-red-500 focus:text-red-500 focus:bg-red-50 dark:focus:bg-red-950/20"
                     onClick={() => setShowDeleteDialog(true)}
@@ -174,6 +189,13 @@ export function PostDetailHeader({ onBack, postId, authorId }: PostDetailHeaderP
         entityId={postId || ""}
         entityType="POST"
         reportedId={authorId}
+    />
+
+    <EditPostDialog 
+        isOpen={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        postId={postId || ""}
+        currentText={post?.text || ""}
     />
     </>
   );

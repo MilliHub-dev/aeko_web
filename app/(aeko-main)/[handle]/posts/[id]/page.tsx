@@ -34,6 +34,7 @@ export default async function PostDetailPage({
       <PostDetailHeader 
         postId={post._id}
         authorId={post.user?._id}
+        initialPost={post}
       />
 
       {/* Content (conditional based on type) */}

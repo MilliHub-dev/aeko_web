@@ -266,8 +266,10 @@ export function RightSidebar() {
                 </div>
               </div>
 
-              <Button className="w-full rounded-full bg-foreground text-background hover:bg-foreground/90 font-semibold shadow-lg shadow-primary/5">
-                Subscribe Now
+              <Button asChild className="w-full rounded-full bg-foreground text-background hover:bg-foreground/90 font-semibold shadow-lg shadow-primary/5">
+                <Link href="/subscription">
+                  Subscribe Now
+                </Link>
               </Button>
             </div>
           </section>

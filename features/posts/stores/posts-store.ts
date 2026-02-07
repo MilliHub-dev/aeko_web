@@ -32,6 +32,7 @@ interface PostState {
   shareToStatus: (postId: string, content: string) => Promise<void>;
   fetchBookmarks: () => Promise<void>;
   recordView: (postId: string) => Promise<void>;
+  editPost: (postId: string, text: string) => Promise<boolean>;
 }
 
 export const usePostsStore = create<PostState>()(
@@ -412,6 +413,36 @@ export const usePostsStore = create<PostState>()(
           // But usually views are just fire-and-forget for analytics
         } catch (error) {
           console.error("Error recording view:", error);
+        }
+      },
+
+      editPost: async (postId: string, text: string) => {
+        try {
+          const res = await fetch(`/api/posts/${postId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text }),
+          });
+
+          if (!res.ok) throw new Error("Failed to edit post");
+
+          const data = await res.json();
+          // The backend might return the updated post in `data.post` or `data`
+          const updatedPost = data.post || data.data || data;
+
+          set((state) => ({
+            posts: state.posts.map((p) =>
+              p._id === postId ? { ...p, ...updatedPost } : p
+            ),
+            selectedPost:
+              state.selectedPost?._id === postId
+                ? { ...state.selectedPost, ...updatedPost }
+                : state.selectedPost,
+          }));
+          return true;
+        } catch (error) {
+          console.error("Error editing post:", error);
+          return false;
         }
       },
     })

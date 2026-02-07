@@ -31,6 +31,8 @@ import { formatCount } from "@/lib/utils";
 import { ReportDialog } from "@/components/report/report-dialog";
 import { toast } from "sonner";
 import { useState } from "react";
+import { usePostsStore } from "@/features/posts/stores";
+import { EditPostDialog } from "./edit-post-dialog";
 
 interface PostHeaderProps {
 	postId?: string;
@@ -83,8 +85,14 @@ const PostHeader = ({
 	const isOwnPost = currentUserId && targetUserId && currentUserId === targetUserId;
 	const { isFollowing, toggleFollow } = useFollowUser(targetUserId);
 
+    const { posts } = usePostsStore();
+    const post = posts.find(p => p._id === postId);
+
     // State for Report Dialog
     const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+    
+    // State for Edit Dialog
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     
     // State for hiding post (Not Interested)
     const [isHidden, setIsHidden] = useState(false);
@@ -280,6 +288,14 @@ const PostHeader = ({
 						align="end"
 						className="w-48 bg-gray-50 px-4"
 					>
+                        {isOwnPost && (
+                            <>
+                                <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
+                                    Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                            </>
+                        )}
 						{!isOwnPost && (
 							<>
 								<DropdownMenuItem onClick={handleNotInterested}>
@@ -317,6 +333,14 @@ const PostHeader = ({
                 entityId={postId || ""}
                 entityType="POST"
                 reportedId={targetUserId}
+            />
+
+            {/* Edit Post Dialog */}
+            <EditPostDialog 
+                isOpen={isEditDialogOpen}
+                onOpenChange={setIsEditDialogOpen}
+                postId={postId || ""}
+                currentText={post?.text || ""}
             />
 		</motion.div>
 	);

@@ -97,6 +97,49 @@ export async function GET(
   }
 }
 
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ postId: string }> },
+) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token");
+  const { postId } = await params;
+
+  if (!token) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const body = await request.json();
+    
+    const res = await fetch(
+      `${API_BASE_URL}/api/posts/${postId}`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      },
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return NextResponse.json(data, { status: res.status });
+    }
+
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error("Edit Post API error:", error);
+    return NextResponse.json(
+      { success: false, message: "Internal Server Error" },
+      { status: 500 },
+    );
+  }
+}
+
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ postId: string }> },
