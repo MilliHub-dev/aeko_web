@@ -137,9 +137,12 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
     if (!e.target.files?.length) return;
     
     const newFiles = Array.from(e.target.files);
+    console.log("Files selected:", newFiles.map(f => ({ name: f.name, type: f.type, size: f.size })));
+    
     const newItems: MediaItem[] = newFiles.map(file => {
       const isVideoType = file.type.startsWith("video/");
-      const isVideoExt = /\.(mp4|mov|webm|ogg|mkv|avi)$/i.test(file.name);
+      // Some mobile browsers might not provide a type, or it might be generic
+      const isVideoExt = /\.(mp4|mov|webm|ogg|mkv|avi|quicktime)$/i.test(file.name) || file.type === "video/quicktime";
       const url = URL.createObjectURL(file);
       return {
         id: url,
@@ -195,6 +198,7 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
     if (!content.trim() && mediaItems.length === 0) return;
 
     setIsLoading(true);
+    console.log("Attempting to post with media:", mediaItems.map(m => m.type));
 
     try {
       const formData = new FormData();
@@ -442,7 +446,7 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
                     ref={fileInputRef}
                     type="file"
                     multiple
-                    accept="image/*,video/*,.jpg,.jpeg,.png,.gif,.mp4,.mov,.webm"
+                    accept="image/*,video/*,.jpg,.jpeg,.png,.gif,.mp4,.mov,.webm,.quicktime"
                     onChange={handleFileSelect}
                     className="hidden"
                   />
