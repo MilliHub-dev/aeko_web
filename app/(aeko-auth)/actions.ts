@@ -301,3 +301,122 @@ export async function logoutAction() {
   await deleteSessionToken();
   redirect("/login");
 }
+
+export type ForgotPasswordState = {
+  message: string;
+  errors: {
+    email?: string[];
+  };
+  success: boolean;
+};
+
+export async function forgotPasswordAction(
+  prevState: ForgotPasswordState,
+  formData: FormData
+): Promise<ForgotPasswordState> {
+  const email = formData.get("email");
+
+  if (!email || typeof email !== "string" || !email.includes("@")) {
+    return {
+      message: "Please enter a valid email address",
+      errors: { email: ["Invalid email"] },
+      success: false,
+    };
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return {
+        message: data.message || "Failed to send reset link",
+        errors: {},
+        success: false,
+      };
+    }
+
+    return {
+      message: "Reset link sent to your email",
+      errors: {},
+      success: true,
+    };
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    return {
+      message: "An unexpected error occurred",
+      errors: {},
+      success: false,
+    };
+  }
+}
+
+export type ResetPasswordState = {
+  message: string;
+  errors: {
+    password?: string[];
+  };
+  success: boolean;
+};
+
+export async function resetPasswordAction(
+  prevState: ResetPasswordState,
+  formData: FormData
+): Promise<ResetPasswordState> {
+  const password = formData.get("password");
+  const confirm = formData.get("confirm");
+  const token = formData.get("token");
+
+  if (password !== confirm) {
+    return {
+      message: "Passwords do not match",
+      errors: { password: ["Passwords do not match"] },
+      success: false,
+    };
+  }
+
+  if (!password || typeof password !== "string" || password.length < 6) {
+     return {
+      message: "Password must be at least 6 characters",
+      errors: { password: ["Password too short"] },
+      success: false,
+    };
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ token, newPassword: password }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return {
+        message: data.message || "Failed to reset password",
+        errors: {},
+        success: false,
+      };
+    }
+  } catch (error) {
+    console.error("Reset password error:", error);
+    return {
+      message: "An unexpected error occurred",
+      errors: {},
+      success: false,
+    };
+  }
+  
+  redirect("/login?reset=success");
+}
+
