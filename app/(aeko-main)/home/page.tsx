@@ -194,9 +194,9 @@ export default function Home() {
               )}
             >
               {"isWhoToFollow" in item ? (
-                 <div className="w-full h-full flex items-center justify-center bg-background/50 backdrop-blur-sm">
-                    <MobileWhoToFollow />
-                 </div>
+                <div className="w-full">
+                  <MobileWhoToFollow />
+                </div>
               ) : (
                 <PostCard {...(item as FeedPost)} isActive={idx === activeIndex} />
               )}
