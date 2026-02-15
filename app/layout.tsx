@@ -78,7 +78,6 @@ export default function RootLayout({
 		<html
 			lang="en"
 			suppressHydrationWarning
-			className="snap-y snap-proximity"
 		>
 			<body
 				className={`${equitanSans.className} antialiased`}

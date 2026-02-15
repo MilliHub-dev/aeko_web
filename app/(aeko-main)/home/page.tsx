@@ -168,7 +168,10 @@ export default function Home() {
 
       <div
         ref={containerRef}
-        className="flex-1 w-full flex flex-col items-center overflow-y-auto snap-y snap-mandatory scrollbar-none"
+        className={cn(
+          "flex-1 w-full flex flex-col items-center overflow-y-auto scrollbar-none",
+          activeTab === "reels" && "snap-y snap-mandatory"
+        )}
         style={{
           scrollbarWidth: "none",
           msOverflowStyle: "none",
@@ -185,11 +188,12 @@ export default function Home() {
             <div
               key={`post-${item._id || idx}`}
               className={cn(
-                "snap-start h-full w-full flex justify-center flex-none",
-                'isWhoToFollow' in item && "md:hidden"
+                "w-full flex justify-center flex-none",
+                activeTab === "reels" ? "snap-start h-full" : "py-4",
+                "isWhoToFollow" in item && "md:hidden"
               )}
             >
-              {'isWhoToFollow' in item ? (
+              {"isWhoToFollow" in item ? (
                  <div className="w-full h-full flex items-center justify-center bg-background/50 backdrop-blur-sm">
                     <MobileWhoToFollow />
                  </div>
