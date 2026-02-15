@@ -126,7 +126,7 @@ export default function Home() {
 
   return (
     <div 
-      className="flex flex-col h-dvh overflow-hidden"
+      className="flex flex-col min-h-dvh"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
