@@ -148,7 +148,27 @@ function UserCard({ user }: { user: SuggestedUser }) {
       </div>
 
       <div className="text-center w-full">
-        <p className="font-semibold text-sm truncate w-full">{user.name}</p>
+        <div className="flex items-center justify-center gap-1 max-w-full">
+          <p className="font-semibold text-sm truncate">{user.name}</p>
+          {user.blueTick && (
+            <Image
+              src="/blue_tick.png"
+              alt="Verified"
+              width={14}
+              height={14}
+              className="h-3.5 w-3.5 flex-shrink-0"
+            />
+          )}
+          {user.goldenTick && (
+            <Image
+              src="/gold_tick.png"
+              alt="Gold Verified"
+              width={14}
+              height={14}
+              className="h-3.5 w-3.5 flex-shrink-0"
+            />
+          )}
+        </div>
         <p className="text-xs text-muted-foreground truncate w-full">
           @{user.username}
         </p>
@@ -198,7 +218,27 @@ function UserRow({ user }: { user: SuggestedUser }) {
           </AvatarFallback>
         </Avatar>
         <div className="flex flex-col min-w-0">
-          <span className="text-sm font-semibold truncate">{user.name}</span>
+          <div className="flex items-center gap-1 max-w-full">
+            <span className="text-sm font-semibold truncate">{user.name}</span>
+            {user.blueTick && (
+              <Image
+                src="/blue_tick.png"
+                alt="Verified"
+                width={14}
+                height={14}
+                className="h-3.5 w-3.5 flex-shrink-0"
+              />
+            )}
+            {user.goldenTick && (
+              <Image
+                src="/gold_tick.png"
+                alt="Gold Verified"
+                width={14}
+                height={14}
+                className="h-3.5 w-3.5 flex-shrink-0"
+              />
+            )}
+          </div>
           <span className="text-xs text-muted-foreground truncate">
             @{user.username}
           </span>
