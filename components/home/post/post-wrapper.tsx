@@ -56,7 +56,7 @@ const PostWrapper = ({
           onTouchEnd={isMedia ? onTouchEnd : undefined}
           onTouchCancel={isMedia ? onTouchCancel : undefined}
           className={clsx(
-            "relative flex flex-col justify-between md:aspect-9/16 isolate transition-opacity duration-300 cursor-pointer",
+            "relative flex flex-col justify-between aspect-[4/5] md:aspect-9/16 isolate transition-opacity duration-300 cursor-pointer",
             "rounded-xl md:rounded-4xl",
             isMedia
               ? "p-0 md:p-6 w-full h-full md:w-full md:h-auto md:max-h-none"

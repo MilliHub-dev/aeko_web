@@ -1,5 +1,6 @@
-"use client";
+ "use client";
 
+import { useState, useMemo } from "react";
 import { useSuggestedUsers } from "@/features/explore/hooks/use-suggested-users";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -7,11 +8,24 @@ import { Card } from "@/components/ui/card";
 import { useFollowUser } from "@/features/profile/hooks/use-follow-user";
 import { SuggestedUser } from "@/types/explore";
 import Image from "next/image";
-import Link from "next/link";
-import { Loader2 } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 export function MobileWhoToFollow() {
   const { users, isLoading } = useSuggestedUsers();
+  const [isOpen, setIsOpen] = useState(false);
+  const [query, setQuery] = useState("");
+
+  const filteredUsers = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return users;
+    return users.filter((u) =>
+      [u.name, u.username]
+        .filter(Boolean)
+        .some((field) => field!.toLowerCase().includes(q))
+    );
+  }, [users, query]);
 
   if (isLoading) {
     return (
@@ -19,9 +33,9 @@ export function MobileWhoToFollow() {
         <div className="flex items-center justify-between pr-4 mb-3">
           <h3 className="font-semibold text-lg">Who to follow</h3>
         </div>
-        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="min-w-[140px] w-[140px] flex flex-col items-center gap-2 p-3 rounded-xl border border-border/60 bg-card">
+        <div className="flex gap-4 pb-2">
+          {[1, 2].map((i) => (
+            <div key={i} className="flex-1 max-w-[46vw] flex flex-col items-center gap-2 p-3 rounded-xl border border-border/60 bg-card">
               <div className="w-16 h-16 rounded-full bg-muted animate-pulse" />
               <div className="w-20 h-4 bg-muted rounded animate-pulse" />
               <div className="w-16 h-8 bg-muted rounded-full animate-pulse mt-1" />
@@ -34,29 +48,69 @@ export function MobileWhoToFollow() {
 
   if (users.length === 0) return null;
 
+  const topUsers = users.slice(0, 2);
+
   return (
-    <div className="w-full py-4 border-b border-border/40 bg-background/50 backdrop-blur-sm">
-      <div className="flex items-center justify-between px-4 mb-3">
-        <h3 className="font-semibold text-lg">Who to follow</h3>
-        <Link href="/communities" className="text-sm text-primary font-medium hover:underline">
-          See all
-        </Link>
+    <>
+      <div className="w-full py-4 border-b border-border/40 bg-background/50 backdrop-blur-sm">
+        <div className="flex items-center justify-between px-4 mb-3">
+          <h3 className="font-semibold text-lg">Who to follow</h3>
+          <button
+            type="button"
+            onClick={() => setIsOpen(true)}
+            className="text-sm text-primary font-medium hover:underline"
+          >
+            See all
+          </button>
+        </div>
+
+        <div className="flex gap-3 px-4">
+          {topUsers.map((user, index) => (
+            <div
+              key={user._id || user.username || index}
+              className="flex-1 max-w-[46vw]"
+            >
+              <UserCard user={user} />
+            </div>
+          ))}
+        </div>
       </div>
-      
-      <div 
-        className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-none snap-x snap-mandatory"
-        style={{
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-        }}
-      >
-        {users.map((user, index) => (
-          <div key={`${user._id}-${index}`} className="snap-center">
-            <UserCard user={user} />
+
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="sm:max-w-md w-[95vw] max-h-[80vh] flex flex-col">
+          <DialogHeader className="pb-2">
+            <DialogTitle className="text-base">Who to follow</DialogTitle>
+          </DialogHeader>
+
+          <div className="flex items-center gap-2 mb-3">
+            <div className="relative w-full">
+              <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+              <Input
+                placeholder="Search users"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="pl-9 h-9 text-sm"
+              />
+            </div>
           </div>
-        ))}
-      </div>
-    </div>
+
+          <div className="flex-1 overflow-y-auto pr-1 space-y-2">
+            {filteredUsers.map((user, index) => (
+              <UserRow
+                key={user._id || user.username || index}
+                user={user}
+              />
+            ))}
+
+            {filteredUsers.length === 0 && (
+              <div className="py-6 text-sm text-muted-foreground text-center">
+                No users found
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
@@ -67,7 +121,7 @@ function UserCard({ user }: { user: SuggestedUser }) {
   );
 
   return (
-    <Card className="min-w-[150px] w-[150px] flex flex-col items-center p-3 gap-2 rounded-xl border border-border/60 bg-card hover:bg-muted/50 transition-colors">
+    <Card className="w-full flex flex-col items-center p-3 gap-2 rounded-xl border border-border/60 bg-card hover:bg-muted/50 transition-colors">
       <div className="relative">
         <Avatar className="w-16 h-16 border-2 border-background">
           <AvatarImage src={user.profilePicture} alt={user.name} />
@@ -82,14 +136,22 @@ function UserCard({ user }: { user: SuggestedUser }) {
         </Avatar>
         {user.blueTick && (
           <div className="absolute bottom-0 right-0 rounded-full bg-background p-0.5">
-             <Image src="/blue_tick.png" alt="Verified" width={16} height={16} className="w-4 h-4" />
+            <Image
+              src="/blue_tick.png"
+              alt="Verified"
+              width={16}
+              height={16}
+              className="w-4 h-4"
+            />
           </div>
         )}
       </div>
 
       <div className="text-center w-full">
         <p className="font-semibold text-sm truncate w-full">{user.name}</p>
-        <p className="text-xs text-muted-foreground truncate w-full">@{user.username}</p>
+        <p className="text-xs text-muted-foreground truncate w-full">
+          @{user.username}
+        </p>
       </div>
 
       <Button
@@ -98,8 +160,8 @@ function UserCard({ user }: { user: SuggestedUser }) {
         disabled={isLoading}
         variant={isFollowing ? "outline" : "default"}
         className={`w-full h-8 rounded-full text-xs font-medium ${
-          isFollowing 
-            ? "border-primary/50 text-primary hover:text-primary hover:bg-primary/10" 
+          isFollowing
+            ? "border-primary/50 text-primary hover:text-primary hover:bg-primary/10"
             : "bg-primary text-primary-foreground hover:bg-primary/90"
         }`}
       >
@@ -112,5 +174,51 @@ function UserCard({ user }: { user: SuggestedUser }) {
         )}
       </Button>
     </Card>
+  );
+}
+
+function UserRow({ user }: { user: SuggestedUser }) {
+  const { isFollowing, toggleFollow, isLoading } = useFollowUser(
+    user._id,
+    user.isFollowing
+  );
+
+  return (
+    <div className="flex items-center justify-between gap-3 py-1">
+      <div className="flex items-center gap-3 min-w-0">
+        <Avatar className="h-9 w-9 border border-border/40">
+          <AvatarImage src={user.profilePicture} />
+          <AvatarFallback>
+            <Image
+              src="/profile_icon.jpg"
+              alt="Profile"
+              fill
+              className="object-cover"
+            />
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col min-w-0">
+          <span className="text-sm font-semibold truncate">{user.name}</span>
+          <span className="text-xs text-muted-foreground truncate">
+            @{user.username}
+          </span>
+        </div>
+      </div>
+      <Button
+        size="sm"
+        onClick={toggleFollow}
+        disabled={isLoading}
+        variant={isFollowing ? "outline" : "secondary"}
+        className="h-8 px-3 text-xs"
+      >
+        {isLoading ? (
+          <Loader2 className="w-3 h-3 animate-spin" />
+        ) : isFollowing ? (
+          "Following"
+        ) : (
+          "Follow"
+        )}
+      </Button>
+    </div>
   );
 }

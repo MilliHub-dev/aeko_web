@@ -46,19 +46,23 @@ export const useFollowUser = (userId: string, initialIsFollowing?: boolean) => {
       const endpoint = willFollow
         ? `/api/profile/follow/${userId}`
         : `/api/profile/unfollow/${userId}`;
-      
-      const method = willFollow ? "PUT" : "DELETE";
 
       const res = await fetch(endpoint, {
-        method,
+        method: "PUT",
       });
 
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
+        const errorText = await res.text().catch(() => "");
+        let errorData: any = {};
+        try {
+          errorData = errorText ? JSON.parse(errorText) : {};
+        } catch {
+          errorData = { message: "Failed to parse error response", raw: errorText };
+        }
+
         console.error("Follow/Unfollow failed:", res.status, errorData);
         throw new Error(errorData.message || "Failed to update follow status");
       }
-      
     } catch (error) {
       console.error(error);
       // Revert optimistic update

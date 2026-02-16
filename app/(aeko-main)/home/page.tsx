@@ -103,6 +103,8 @@ export default function Home() {
   }, [activeTab]);
 
   useEffect(() => {
+    if (activeTab !== "reels") return;
+
     const container = containerRef.current;
     if (!container) return;
 
@@ -122,7 +124,7 @@ export default function Home() {
 
     container.addEventListener("scroll", handleScroll, { passive: true });
     return () => container.removeEventListener("scroll", handleScroll);
-  }, [activeIndex, postsWithAds.length]);
+  }, [activeTab, activeIndex, postsWithAds.length]);
 
   return (
     <div 
@@ -198,7 +200,10 @@ export default function Home() {
                   <MobileWhoToFollow />
                 </div>
               ) : (
-                <PostCard {...(item as FeedPost)} isActive={idx === activeIndex} />
+                <PostCard
+                  {...(item as FeedPost)}
+                  isActive={activeTab === "reels" && idx === activeIndex}
+                />
               )}
             </div>
           ))

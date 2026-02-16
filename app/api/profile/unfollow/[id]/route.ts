@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { API_BASE_URL } from "@/lib/config";
 
-export async function DELETE(
+export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -15,21 +15,26 @@ export async function DELETE(
   }
 
   try {
-    // Updated endpoint to match backend requirement: /api/profile/unfollow/:id
-    console.log(`[Proxy] Unfollowing user ${id} at ${API_BASE_URL}/api/profile/unfollow/${id}`);
+    console.log(
+      `[Proxy] Unfollowing user ${id} at ${API_BASE_URL}/api/profile/unfollow/${id}`
+    );
     const res = await fetch(`${API_BASE_URL}/api/profile/unfollow/${id}`, {
-      method: "DELETE",
+      method: "PUT",
       headers: {
         Authorization: `Bearer ${token.value}`,
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify({}),
     });
 
-    let data;
+    let data: any = null;
+    const text = await res.text();
+
     try {
-      data = await res.json();
+      data = text ? JSON.parse(text) : {};
     } catch (e) {
       console.error("[Proxy] Failed to parse JSON response:", e);
-      data = { message: "Failed to parse response" };
+      data = { message: "Failed to parse response", raw: text };
     }
 
     if (!res.ok) {
