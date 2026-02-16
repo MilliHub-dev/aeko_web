@@ -135,7 +135,7 @@ function UserCard({ user }: { user: SuggestedUser }) {
           </AvatarFallback>
         </Avatar>
         {user.blueTick && (
-          <div className="absolute bottom-0 right-0 rounded-full bg-background p-0.5">
+          <div className="absolute bottom-0 right-0 p-0.5">
             <Image
               src="/blue_tick.png"
               alt="Verified"

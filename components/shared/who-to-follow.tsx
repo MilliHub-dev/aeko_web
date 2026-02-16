@@ -69,7 +69,10 @@ function UserItem({ user }: { user: SuggestedUser }) {
 
   return (
     <div className="flex items-center justify-between">
-      <div className="flex items-center gap-4">
+      <Link
+        href={`/${user.username}`}
+        className="flex items-center gap-4 flex-1 min-w-0"
+      >
         <Avatar className="h-10 w-10 aspect-square outline-2 outline-offset-2 outline-normal-active">
           <AvatarImage src={user.profilePicture || "/placeholder.svg"} />
           <AvatarFallback className="bg-gray-300 text-gray-600">
@@ -86,7 +89,7 @@ function UserItem({ user }: { user: SuggestedUser }) {
           <div className="font-semibold text-sm truncate">{user.name}</div>
           <div className="text-primary text-sm truncate">@{user.username}</div>
         </div>
-      </div>
+      </Link>
       <Button
         onClick={toggleFollow}
         disabled={isLoading}

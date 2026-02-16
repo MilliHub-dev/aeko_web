@@ -14,10 +14,78 @@ import type { SuggestedUser, ExploreCommunity } from "@/types/explore";
 import type { FeedPost } from "@/types/post";
 import { useOnClickOutside } from "@/hooks/use-on-click-outside";
 import { useRouter } from "next/navigation";
+import { useFollowUser } from "@/features/profile/hooks/use-follow-user";
+import { useUserRelationsStore } from "@/features/profile/stores/user-relations-store";
+
+function RightSidebarSuggestedUserRow({ user }: { user: SuggestedUser }) {
+  const { isFollowing, toggleFollow, isLoading } = useFollowUser(
+    user._id,
+    user.isFollowing
+  );
+
+  return (
+    <div className="flex items-center justify-between">
+      <Link
+        href={`/${user.username}`}
+        className="flex items-center gap-3 overflow-hidden flex-1 min-w-0"
+      >
+        <Avatar className="h-10 w-10 border border-border/50">
+          <AvatarImage src={user.profilePicture} alt={user.name} />
+          <AvatarFallback>
+            <Image
+              src="/profile_icon.jpg"
+              alt="Profile"
+              fill
+              className="object-cover"
+            />
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col overflow-hidden">
+          <div className="flex items-center gap-1">
+            <span className="truncate text-sm font-semibold text-foreground">
+              {user.name}
+            </span>
+            {user.blueTick && (
+              <Image
+                src="/blue_tick.png"
+                alt="Verified"
+                width={12}
+                height={12}
+                className="h-3 w-3"
+              />
+            )}
+            {user.goldenTick && (
+              <Image
+                src="/gold_tick.png"
+                alt="Gold Verified"
+                width={12}
+                height={12}
+                className="h-3 w-3"
+              />
+            )}
+          </div>
+          <span className="truncate text-xs text-muted-foreground">
+            @{user.username}
+          </span>
+        </div>
+      </Link>
+      <Button
+        size="sm"
+        onClick={toggleFollow}
+        disabled={isLoading}
+        variant={isFollowing ? "outline" : "secondary"}
+        className="h-8 rounded-full px-3 text-xs font-medium hover:bg-primary hover:text-primary-foreground transition-colors ml-2"
+      >
+        {isFollowing ? "Following" : "Follow"}
+      </Button>
+    </div>
+  );
+}
 
 export function RightSidebar() {
   const { data, isLoading } = useExploreData();
-  const { users: suggestedUsers } = useSuggestedUsers();
+  const { users: rawSuggestedUsers } = useSuggestedUsers();
+  const following = useUserRelationsStore((state) => state.following);
   const router = useRouter();
   
   // Search state
@@ -164,7 +232,7 @@ export function RightSidebar() {
           </div>
 
           {/* Who to Follow Section */}
-          {suggestedUsers && suggestedUsers.length > 0 && (
+          {rawSuggestedUsers && rawSuggestedUsers.length > 0 && (
             <section className="space-y-4 rounded-3xl border border-border/60 bg-card/50 p-4 shadow-sm backdrop-blur-sm">
               <div className="flex items-center justify-between px-1">
                 <p className="text-sm font-bold text-foreground">
@@ -177,59 +245,14 @@ export function RightSidebar() {
                 </Link>
               </div>
               <div className="space-y-4">
-                {suggestedUsers.slice(0, 5).map((user, index) => (
-                  <div
+                {rawSuggestedUsers
+                  .filter((user) => !following.has(user._id))
+                  .slice(0, 5)
+                  .map((user, index) => (
+                  <RightSidebarSuggestedUserRow
                     key={`${user._id}-${index}`}
-                    className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 overflow-hidden">
-                      <Avatar className="h-10 w-10 border border-border/50">
-                        <AvatarImage src={user.profilePicture} alt={user.name} />
-                        <AvatarFallback>
-                          <Image
-                            src="/profile_icon.jpg"
-                            alt="Profile"
-                            fill
-                            className="object-cover"
-                          />
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex flex-col overflow-hidden">
-                        <div className="flex items-center gap-1">
-                          <span className="truncate text-sm font-semibold text-foreground">
-                            {user.name}
-                          </span>
-                          {user.blueTick && (
-                            <Image
-                              src="/blue_tick.png"
-                              alt="Verified"
-                              width={12}
-                              height={12}
-                              className="h-3 w-3"
-                            />
-                          )}
-                          {user.goldenTick && (
-                            <Image
-                              src="/gold_tick.png"
-                              alt="Gold Verified"
-                              width={12}
-                              height={12}
-                              className="h-3 w-3"
-                            />
-                          )}
-                        </div>
-                        <span className="truncate text-xs text-muted-foreground">
-                          @{user.username}
-                        </span>
-                      </div>
-                    </div>
-                    <Button 
-                      size="sm" 
-                      variant="secondary" 
-                      className="h-8 rounded-full px-3 text-xs font-medium hover:bg-primary hover:text-primary-foreground transition-colors"
-                    >
-                      Follow
-                    </Button>
-                  </div>
+                    user={user}
+                  />
                 ))}
               </div>
             </section>

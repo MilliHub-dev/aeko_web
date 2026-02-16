@@ -191,27 +191,29 @@ const PostHeader = ({
 				>
 					<span className="font-semibold text-lg truncate flex items-center gap-1">
 						{displayName}
-                        {user?.blueTick && !isAd && (
-                            <Image
-                                src="/blue_tick.png"
-                                alt="Verified"
-                                width={14}
-                                height={14}
-                                className="h-3.5 w-3.5"
-                            />
-                        )}
-                        {user?.goldenTick && !isAd && (
-                            <Image
-                                src="/gold_tick.png"
-                                alt="Gold Verified"
-                                width={14}
-                                height={14}
-                                className="h-3.5 w-3.5"
-                            />
-                        )}
-                        {isAd && (
-                            <span className="text-[10px] bg-yellow-400 text-black px-1.5 rounded-full font-bold ml-1">AD</span>
-                        )}
+            {user?.blueTick && !isAd && (
+              <Image
+                src="/blue_tick.png"
+                alt="Verified"
+                width={14}
+                height={14}
+                className="h-3.5 w-3.5"
+              />
+            )}
+            {user?.goldenTick && !isAd && (
+              <Image
+                src="/gold_tick.png"
+                alt="Gold Verified"
+                width={14}
+                height={14}
+                className="h-3.5 w-3.5"
+              />
+            )}
+            {isAd && (
+              <span className="text-[10px] bg-yellow-400 text-black px-1.5 rounded-full font-bold ml-1">
+                AD
+              </span>
+            )}
 					</span>
 					<span className="text-sm truncate">
 						{isAd ? "Sponsored" : displayHandle}
