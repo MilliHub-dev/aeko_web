@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useUser } from "@/components/shared/user-context";
 import { useEffect } from "react";
+import { Switch } from "@/components/ui/switch";
 
 interface UserProfile {
   name: string;
@@ -21,6 +22,11 @@ interface UserProfile {
   coverPicture?: string;
   email: string;
   location?: string;
+  blueTick?: boolean;
+  goldenTick?: boolean;
+  prideTick?: boolean;
+  businessTick?: boolean;
+  subscriptionStatus?: string;
 }
 
 interface EditProfileModalProps {
@@ -42,12 +48,16 @@ export function EditProfileModal({ user, isOpen, onOpenChange }: EditProfileModa
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
+  const [prideTick, setPrideTick] = useState<boolean>(!!user.prideTick);
+  const [businessTick, setBusinessTick] = useState<boolean>(!!user.businessTick);
 
   useEffect(() => {
     if (isOpen) {
       setUsername(user.username || "");
       setBio(user.bio || "");
       setLocation(user.location || "");
+      setPrideTick(!!user.prideTick);
+      setBusinessTick(!!user.businessTick);
     }
   }, [isOpen, user]);
 
@@ -122,6 +132,11 @@ export function EditProfileModal({ user, isOpen, onOpenChange }: EditProfileModa
         bio,
         location,
       };
+
+      if (user.subscriptionStatus === "active") {
+        updatePayload.prideTick = prideTick;
+        updatePayload.businessTick = businessTick;
+      }
       
       if (newProfilePicUrl) updatePayload.profilePic = newProfilePicUrl;
       if (newCoverPicUrl) updatePayload.coverPic = newCoverPicUrl;
@@ -249,6 +264,45 @@ export function EditProfileModal({ user, isOpen, onOpenChange }: EditProfileModa
               placeholder="City, Country"
             />
           </div>
+
+          {user.subscriptionStatus === "active" && (
+            <div className="rounded-xl border border-border/60 bg-muted/40 px-4 py-3 space-y-3">
+              <p className="text-sm font-medium">Profile badges</p>
+              <p className="text-xs text-muted-foreground">
+                Choose an additional badge to display on your verified tick if it fits you.
+              </p>
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium">Pride tick</span>
+                  <span className="text-xs text-muted-foreground">
+                    For members of the pride community.
+                  </span>
+                </div>
+                <Switch
+                  checked={prideTick}
+                  onCheckedChange={(checked) => {
+                    setPrideTick(checked);
+                    if (checked) setBusinessTick(false);
+                  }}
+                />
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium">Business tick</span>
+                  <span className="text-xs text-muted-foreground">
+                    For businesses and brands.
+                  </span>
+                </div>
+                <Switch
+                  checked={businessTick}
+                  onCheckedChange={(checked) => {
+                    setBusinessTick(checked);
+                    if (checked) setPrideTick(false);
+                  }}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         <DialogFooter>

@@ -88,6 +88,8 @@ export interface SuggestedUser {
   followers: string[];
   blueTick: boolean;
   goldenTick: boolean;
+  prideTick?: boolean;
+  businessTick?: boolean;
   followersCount: number;
   postsCount?: number;
   isFollowing?: boolean; // Optional for search results

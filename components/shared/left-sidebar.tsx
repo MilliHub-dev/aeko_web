@@ -69,20 +69,38 @@ export function LeftSidebar() {
                 <p className="text-lg font-semibold">{user?.name}</p>
                 {user?.blueTick && (
                   <Image
-                    src="/blue_tick.png"
+                    src="/ticks/blue_tick.jpg"
                     alt="Verified"
-                    width={16}
-                    height={16}
-                    className="h-4 w-4 shrink-0"
+                    width={20}
+                    height={20}
+                    className="h-5 w-5 shrink-0"
                   />
                 )}
                 {user?.goldenTick && (
                   <Image
-                    src="/gold_tick.png"
+                    src="/ticks/gold_tick.jpg"
                     alt="Gold Verified"
-                    width={16}
-                    height={16}
-                    className="h-4 w-4 shrink-0"
+                    width={20}
+                    height={20}
+                    className="h-5 w-5 shrink-0"
+                  />
+                )}
+                {user?.prideTick && (
+                  <Image
+                    src="/ticks/pride_tick.jpg"
+                    alt="Pride Verified"
+                    width={20}
+                    height={20}
+                    className="h-5 w-5 shrink-0"
+                  />
+                )}
+                {user?.businessTick && (
+                  <Image
+                    src="/ticks/green_tick.jpg"
+                    alt="Business Verified"
+                    width={20}
+                    height={20}
+                    className="h-5 w-5 shrink-0"
                   />
                 )}
               </div>
@@ -212,19 +230,14 @@ export function LeftSidebar() {
               </section>
             </div>
 
-            <div className="rounded-[28px] bg-muted p-5">
-              <h3 className="text-base font-semibold text-foreground">
-                Let&apos;s create something
-              </h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Create a new post and share what&apos;s trending.
-              </p>
-              <CreatePost
-                trigger={
-                  <button className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/30 transition hover:bg-primary/90">
-                    Add New Post
-                  </button>
-                }
+            <div className="rounded-[28px] bg-muted p-5 flex items-center justify-center">
+              <Image
+                src="/aeko-logo.png"
+                alt="Aeko Logo"
+                width={160}
+                height={50}
+                className="h-10 w-auto"
+                priority
               />
             </div>
           </div>

@@ -6,6 +6,8 @@ export interface ChatUser {
   avatar?: string; // Fallback
   blueTick?: boolean;
   goldenTick?: boolean;
+   prideTick?: boolean;
+   businessTick?: boolean;
   lastLoginAt?: string;
 }
 

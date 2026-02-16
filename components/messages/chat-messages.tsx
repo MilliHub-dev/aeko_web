@@ -232,7 +232,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onViewMedia, onD
         ) : message.type === 'call' ? (
            <CallMessageBubble message={message} />
         ) : null}
-        {message.text && message.type !== 'voice' && message.type !== 'call' && (
+        {message.text && message.type !== 'voice' && (message.type !== 'call' || !message.call) && (
            <p className="text-[15px] leading-relaxed whitespace-pre-wrap break-words">
              {message.text}
            </p>

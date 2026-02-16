@@ -46,8 +46,10 @@ interface PostHeaderProps {
 		username?: string;
 		email?: string;
 		profilePicture?: string;
-        blueTick?: boolean;
-        goldenTick?: boolean;
+    blueTick?: boolean;
+    goldenTick?: boolean;
+    prideTick?: boolean;
+    businessTick?: boolean;
 	};
 	className?: string;
 	isHovered?: boolean;
@@ -193,20 +195,38 @@ const PostHeader = ({
 						{displayName}
             {user?.blueTick && !isAd && (
               <Image
-                src="/blue_tick.png"
+                src="/ticks/blue_tick.jpg"
                 alt="Verified"
-                width={14}
-                height={14}
-                className="h-3.5 w-3.5"
+                width={16}
+                height={16}
+                className="h-4 w-4"
               />
             )}
             {user?.goldenTick && !isAd && (
               <Image
-                src="/gold_tick.png"
+                src="/ticks/gold_tick.jpg"
                 alt="Gold Verified"
-                width={14}
-                height={14}
-                className="h-3.5 w-3.5"
+                width={16}
+                height={16}
+                className="h-4 w-4"
+              />
+            )}
+            {user?.prideTick && !isAd && (
+              <Image
+                src="/ticks/pride_tick.jpg"
+                alt="Pride Verified"
+                width={16}
+                height={16}
+                className="h-4 w-4"
+              />
+            )}
+            {user?.businessTick && !isAd && (
+              <Image
+                src="/ticks/green_tick.jpg"
+                alt="Business Verified"
+                width={16}
+                height={16}
+                className="h-4 w-4"
               />
             )}
             {isAd && (

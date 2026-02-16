@@ -78,7 +78,18 @@ export interface FeedPost extends Pick<
   ad: Ad;
   isAd?: boolean;
   targetUrl?: string;
-  user: Pick<User, "_id" | "name" | "username" | "email" | "profilePicture" | "blueTick" | "goldenTick">;
+  user: Pick<
+    User,
+    | "_id"
+    | "name"
+    | "username"
+    | "email"
+    | "profilePicture"
+    | "blueTick"
+    | "goldenTick"
+    | "prideTick"
+    | "businessTick"
+  >;
   comments: Comment[];
   likes: string[];
   bookmarks: string[];
@@ -158,6 +169,8 @@ const userPost: FeedPost = {
     profilePicture: "",
     blueTick: false,
     goldenTick: false,
+    prideTick: false,
+    businessTick: false,
   },
   text: "{@}[Bob Johnson](3)  weldone ",
   media: "",

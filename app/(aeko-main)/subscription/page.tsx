@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -242,6 +243,27 @@ export default function SubscriptionPage() {
                       </li>
                     ))}
                   </ul>
+                  {isElite && (
+                    <div className="mt-4 flex items-center gap-2">
+                      <Image
+                        src="/ticks/pride_tick.jpg"
+                        alt="Pride Tick"
+                        width={20}
+                        height={20}
+                        className="h-5 w-5"
+                      />
+                      <Image
+                        src="/ticks/green_tick.jpg"
+                        alt="Green Business Tick"
+                        width={20}
+                        height={20}
+                        className="h-5 w-5"
+                      />
+                      <span className="text-xs font-medium text-amber-600">
+                        Exclusive on Aeko Elite
+                      </span>
+                    </div>
+                  )}
                 </CardContent>
 
                 <CardFooter className="flex flex-col gap-4">

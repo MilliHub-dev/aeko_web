@@ -109,20 +109,38 @@ export function SearchResultsDropdown({
                         </p>
                         {user.blueTick && (
                           <Image
-                            src="/blue_tick.png"
+                            src="/ticks/blue_tick.jpg"
                             alt="Verified"
-                            width={16}
-                            height={16}
-                            className="h-4 w-4 shrink-0"
+                            width={20}
+                            height={20}
+                            className="h-5 w-5 shrink-0"
                           />
                         )}
                         {user.goldenTick && (
                           <Image
-                            src="/gold_tick.png"
+                            src="/ticks/gold_tick.jpg"
                             alt="Gold Verified"
-                            width={16}
-                            height={16}
-                            className="h-4 w-4 shrink-0"
+                            width={20}
+                            height={20}
+                            className="h-5 w-5 shrink-0"
+                          />
+                        )}
+                        {user.prideTick && (
+                          <Image
+                            src="/ticks/pride_tick.jpg"
+                            alt="Pride Verified"
+                            width={20}
+                            height={20}
+                            className="h-5 w-5 shrink-0"
+                          />
+                        )}
+                        {user.businessTick && (
+                          <Image
+                            src="/ticks/green_tick.jpg"
+                            alt="Business Verified"
+                            width={20}
+                            height={20}
+                            className="h-5 w-5 shrink-0"
                           />
                         )}
                       </div>

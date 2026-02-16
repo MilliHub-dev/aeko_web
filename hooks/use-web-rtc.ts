@@ -279,7 +279,7 @@ export function useWebRTC() {
           callStatus = 'missed';
         }
 
-        await fetch("/api/chat/send", {
+        const res = await fetch("/api/chat/send", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -293,6 +293,16 @@ export function useWebRTC() {
             }
           })
         });
+        try {
+          const raw = await res.json();
+          const message = raw?.message || raw?.data || raw;
+          if (message?.chatId) {
+            const { addMessage } = (await import("@/features/chat/stores/chat-store")).useChatStore.getState();
+            addMessage(message);
+          }
+        } catch (_) {
+          // Ignore parse/add failures; server/socket will sync later
+        }
       } catch (e) {
         console.error("Failed to send call history message", e);
       }

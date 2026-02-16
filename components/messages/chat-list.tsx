@@ -54,20 +54,38 @@ const ChatListItem = ({ chat }: { chat: Chat }) => {
               {displayName}
               {!chat.isGroup && otherParticipant?.blueTick && (
                 <Image
-                  src="/blue_tick.png"
+                  src="/ticks/blue_tick.jpg"
                   alt="Verified"
-                  width={12}
-                  height={12}
-                  className="h-3 w-3 shrink-0"
+                  width={16}
+                  height={16}
+                  className="h-4 w-4 shrink-0"
                 />
               )}
               {!chat.isGroup && otherParticipant?.goldenTick && (
                 <Image
-                  src="/gold_tick.png"
+                  src="/ticks/gold_tick.jpg"
                   alt="Gold Verified"
-                  width={12}
-                  height={12}
-                  className="h-3 w-3 shrink-0"
+                  width={16}
+                  height={16}
+                  className="h-4 w-4 shrink-0"
+                />
+              )}
+              {!chat.isGroup && otherParticipant?.prideTick && (
+                <Image
+                  src="/ticks/pride_tick.jpg"
+                  alt="Pride Verified"
+                  width={16}
+                  height={16}
+                  className="h-4 w-4 shrink-0"
+                />
+              )}
+              {!chat.isGroup && otherParticipant?.businessTick && (
+                <Image
+                  src="/ticks/green_tick.jpg"
+                  alt="Business Verified"
+                  width={16}
+                  height={16}
+                  className="h-4 w-4 shrink-0"
                 />
               )}
             </span>

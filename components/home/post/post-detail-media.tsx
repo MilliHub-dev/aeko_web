@@ -169,20 +169,38 @@ export function PostDetailMedia({ post, className }: PostDetailMediaProps) {
                   {displayName}
                   {post.user?.blueTick && (
                     <Image
-                      src="/blue_tick.png"
+                      src="/ticks/blue_tick.jpg"
                       alt="Verified"
-                      width={14}
-                      height={14}
-                      className="h-3.5 w-3.5"
+                      width={16}
+                      height={16}
+                      className="h-4 w-4"
                     />
                   )}
                   {post.user?.goldenTick && (
                     <Image
-                      src="/gold_tick.png"
+                      src="/ticks/gold_tick.jpg"
                       alt="Gold Verified"
-                      width={14}
-                      height={14}
-                      className="h-3.5 w-3.5"
+                      width={16}
+                      height={16}
+                      className="h-4 w-4"
+                    />
+                  )}
+                  {post.user?.prideTick && (
+                    <Image
+                      src="/ticks/pride_tick.jpg"
+                      alt="Pride Verified"
+                      width={16}
+                      height={16}
+                      className="h-4 w-4"
+                    />
+                  )}
+                  {post.user?.businessTick && (
+                    <Image
+                      src="/ticks/green_tick.jpg"
+                      alt="Business Verified"
+                      width={16}
+                      height={16}
+                      className="h-4 w-4"
                     />
                   )}
                 </span>

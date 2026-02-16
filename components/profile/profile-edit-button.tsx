@@ -12,6 +12,12 @@ interface UserProfile {
   profilePicture: string;
   coverPicture?: string;
   email: string;
+  location?: string;
+  blueTick?: boolean;
+  goldenTick?: boolean;
+  prideTick?: boolean;
+  businessTick?: boolean;
+  subscriptionStatus?: string;
 }
 
 export function ProfileEditButton({ user }: { user: UserProfile }) {

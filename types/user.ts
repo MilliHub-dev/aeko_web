@@ -44,6 +44,8 @@ export interface User {
   aekoBalance: number;
   blueTick: boolean;
   goldenTick: boolean;
+  prideTick?: boolean;
+  businessTick?: boolean;
   subscriptionStatus: "active" | "inactive";
   subscriptionExpiry: string | null;
   banned: boolean;

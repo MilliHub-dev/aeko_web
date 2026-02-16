@@ -109,20 +109,38 @@ export default async function UserProfilePage({ params }: PageProps) {
               {targetUser.name}
               {targetUser.blueTick && (
                 <Image
-                  src="/blue_tick.png"
+                  src="/ticks/blue_tick.jpg"
                   alt="Verified"
-                  width={20}
-                  height={20}
-                  className="h-5 w-5"
+                  width={24}
+                  height={24}
+                  className="h-6 w-6"
                 />
               )}
               {targetUser.goldenTick && (
                 <Image
-                  src="/gold_tick.png"
+                  src="/ticks/gold_tick.jpg"
                   alt="Gold Verified"
-                  width={20}
-                  height={20}
-                  className="h-5 w-5"
+                  width={24}
+                  height={24}
+                  className="h-6 w-6"
+                />
+              )}
+              {targetUser.prideTick && (
+                <Image
+                  src="/ticks/pride_tick.jpg"
+                  alt="Pride Verified"
+                  width={24}
+                  height={24}
+                  className="h-6 w-6"
+                />
+              )}
+              {targetUser.businessTick && (
+                <Image
+                  src="/ticks/green_tick.jpg"
+                  alt="Business Verified"
+                  width={24}
+                  height={24}
+                  className="h-6 w-6"
                 />
               )}
             </h1>
