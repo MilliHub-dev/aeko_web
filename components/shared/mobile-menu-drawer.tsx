@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
-import { Logo } from "../logo";
+import Image from "next/image";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import {
   Bookmark,
@@ -84,7 +84,7 @@ export function MobileMenuDrawer() {
             onClick={closeMenu}
           />
           <motion.aside
-            className="fixed left-0 top-0 bottom-0 z-101 w-[85vw] max-w-88 bg-white md:hidden shadow-2xl border-r border-black/10"
+            className="fixed left-0 top-0 bottom-0 z-101 w-[85vw] max-w-88 bg-white md:hidden shadow-2xl border-r border-black/10 flex flex-col"
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
@@ -103,16 +103,24 @@ export function MobileMenuDrawer() {
             }}
             role="dialog"
             aria-modal="true">
-            <div className="p-5">
-              <div className="w-20">
-                <Logo />
-              </div>
-            </div>
-            <div className="px-6">
+            <div
+              className="px-6 pt-6 flex-1 overflow-y-auto"
+              style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 1rem)" }}
+            >
               <div className="flex flex-col items-center gap-3 pb-4">
                 <Avatar className="h-20 w-20 outline-2 outline-offset-2 outline-primary">
-                  <AvatarImage src={user?.profilePicture} />
-                  <AvatarFallback>{user?.name?.charAt(0)}</AvatarFallback>
+                  <AvatarImage src={user?.profilePicture || user?.avatar} />
+                  <AvatarFallback>
+                    {user?.profilePicture || user?.avatar ? (
+                      user?.name?.charAt(0) || "U"
+                    ) : (
+                      <img
+                        src="/aeko-logo.png"
+                        alt="Aeko"
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="text-center">
                   <p className="text-lg font-semibold">
@@ -188,6 +196,18 @@ export function MobileMenuDrawer() {
                   );
                 })}
               </nav>
+            </div>
+            <div className="p-5 border-t">
+              <div className="w-28 mx-auto">
+                <Image
+                  src="/aeko-logo.png"
+                  alt="Aeko"
+                  width={140}
+                  height={40}
+                  className="h-8 w-auto object-contain"
+                  priority
+                />
+              </div>
             </div>
           </motion.aside>
         </>
