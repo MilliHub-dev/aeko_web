@@ -15,24 +15,34 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // We stream the body directly to the backend to avoid buffering in Next.js
-    // ensuring we pass the Content-Type header which contains the boundary
-    const contentType = request.headers.get("content-type");
-    
-    if (!contentType?.includes("multipart/form-data")) {
-       return NextResponse.json({ message: "Invalid content type" }, { status: 400 });
+    const contentType = request.headers.get("content-type") || "";
+
+    let body: any = request.body;
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${token.value}`,
+    };
+
+    const isMultipart = contentType.includes("multipart/form-data");
+
+    if (isMultipart && body) {
+      headers["Content-Type"] = contentType;
+    }
+
+    if (!body) {
+      if (isMultipart) {
+        body = await request.formData();
+      } else {
+        return NextResponse.json({ message: "Invalid content type" }, { status: 400 });
+      }
     }
 
     const res = await fetch(`${API_BASE_URL}/api/posts/create`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token.value}`,
-        "Content-Type": contentType,
-      },
-      body: request.body,
+      headers,
+      body,
       // @ts-ignore - Required for streaming body in Node.js fetch
-      duplex: "half", 
-    });
+      duplex: isMultipart && body === request.body ? "half" : undefined,
+    } as any);
 
     // Handle non-JSON responses
     let data;

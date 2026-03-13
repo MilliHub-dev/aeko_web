@@ -87,6 +87,9 @@
 }
 
 @layer base {
+  html, body {
+    @apply overflow-x-hidden;
+  }
   * {
     @apply border-border outline-ring/50;
   }

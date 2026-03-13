@@ -276,8 +276,18 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
             </button>
           )}
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[600px] p-0 gap-0 overflow-hidden bg-background border-border rounded-2xl">
-        <DialogHeader className="p-3 flex flex-row items-center justify-between border-none">
+        <DialogContent
+          className={cn(
+            "p-0 gap-0 overflow-hidden bg-background border-border flex flex-col",
+            isMobile
+              ? "top-0 left-0 translate-x-0 translate-y-0 h-[100dvh] w-[100dvw] max-w-none rounded-none"
+              : "sm:max-w-[600px] rounded-2xl"
+          )}
+        >
+        <DialogHeader className={cn(
+          "p-3 flex flex-row items-center justify-between border-none",
+          isMobile && "shrink-0"
+        )}>
           <DialogTitle className="hidden">Create Post</DialogTitle>
           <Button
             variant="ghost"
@@ -295,7 +305,19 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
           </Button>
         </DialogHeader>
 
-        <div className="flex flex-col px-4 pb-4 gap-2">
+        <div
+          className={cn(
+            "flex flex-col px-4 pb-4 gap-2",
+            isMobile && "flex-1 overflow-y-auto"
+          )}
+          style={
+            isMobile
+              ? {
+                  paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)",
+                }
+              : undefined
+          }
+        >
           <div className="flex gap-3">
             <div className="pt-1 flex-shrink-0">
               <Avatar className="w-10 h-10 border border-border/50">
@@ -305,7 +327,7 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
             </div>
             
             <div className="flex-1 flex flex-col gap-3 min-w-0">
-              <div className="max-h-[60vh] overflow-y-auto custom-scrollbar">
+              <div className={cn("overflow-y-auto custom-scrollbar", isMobile ? "max-h-none" : "max-h-[60vh]")}>
                 <Textarea
                   ref={textareaRef}
                   placeholder="Aeko your thought"
@@ -381,6 +403,8 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
                               src={item.url}
                               className="w-full max-h-[500px] object-contain"
                               controls
+                              playsInline
+                              preload="metadata"
                             />
                           )}
                         </motion.div>
@@ -440,7 +464,7 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
               </div>
 
               {/* Tools & Post Button */}
-              <div className="flex items-center justify-between pt-2">
+              <div className={cn("flex items-center justify-between pt-2", isMobile && "sticky bottom-0 bg-background pb-2")}>
                 <div className="flex items-center gap-0.5 -ml-2">
                   <input
                     ref={fileInputRef}

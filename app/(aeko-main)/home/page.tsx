@@ -128,7 +128,7 @@ export default function Home() {
 
   return (
     <div 
-      className="flex flex-col min-h-dvh"
+      className="flex flex-col min-h-[100dvh]"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}

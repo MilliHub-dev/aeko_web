@@ -86,7 +86,7 @@ export function PostDetailMedia({ post, className }: PostDetailMediaProps) {
   const hashtags: string[] = [];
 
   return (
-    <div className={cn("relative w-full min-h-screen bg-black", className)}>
+    <div className={cn("relative w-full min-h-[100dvh] bg-black", className)}>
       {/* Media Content */}
       {resolvedMedia && (
         <div className="relative w-full h-full">

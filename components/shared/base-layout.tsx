@@ -35,9 +35,9 @@ export function BaseLayout({ children }: BaseLayoutProps) {
     <MobileMenuProvider>
       <UserProvider>
         <CallProvider>
-          <div className="relative w-full max-w-full bg-background">
+          <div className="relative w-full max-w-full overflow-x-hidden bg-background min-h-[100dvh]">
           {showMobileHeader && <MobileHeader />}
-          <div className={`xl:px-0 grid min-h-screen items-start ${gridColsClass}`}>
+          <div className={`xl:px-0 grid min-h-[100dvh] items-start ${gridColsClass}`}>
             <MobileLeftSidebar />
             <LeftSidebar />
             <main className={`relative ${showMobileHeader ? "pt-24 md:pt-0" : ""}`}>
