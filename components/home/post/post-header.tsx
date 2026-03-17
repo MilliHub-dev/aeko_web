@@ -171,7 +171,7 @@ const PostHeader = ({
                 onClick={handleAdClick}
 				className={clsx(
 					headerBg,
-					"flex items-center space-x-3 rounded-full px-3 h-16 w-[206px] hover:opacity-90 transition-opacity cursor-pointer"
+					"flex flex-1 min-w-0 items-center space-x-3 rounded-full px-3 h-14 md:h-16 hover:opacity-90 transition-opacity cursor-pointer"
 				)}
 			>
 				<Avatar className="h-10 w-10 aspect-square outline-2 outline-offset-2 outline-normal-active">
@@ -242,12 +242,12 @@ const PostHeader = ({
 			</Link>
 
 			{/* Right side actions */}
-			<div className="flex gap-2 md:gap-4">
+			<div className="flex gap-2 md:gap-4 shrink-0">
 				{/* Views Counter */}
 				<div
 					className={clsx(
 						buttonBg,
-						"h-16 px-5 rounded-full flex items-center justify-center gap-2"
+						"h-14 md:h-16 px-3 md:px-5 rounded-full flex items-center justify-center gap-2"
 					)}
 				>
 					<Eye className={clsx("w-5 h-5", iconColor)} />
@@ -260,7 +260,7 @@ const PostHeader = ({
 					<Button
 						className={clsx(
 							buttonBg,
-							"w-16 h-16 rounded-full flex items-center justify-center cursor-pointer"
+							"w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center cursor-pointer"
 						)}
 						onClick={(e) => toggleFollow(e)}
 					>
@@ -278,7 +278,7 @@ const PostHeader = ({
 					<Button
 						className={clsx(
 							buttonBg,
-							"w-16 h-16 rounded-full flex items-center justify-center cursor-pointer"
+							"w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center cursor-pointer"
 						)}
 						onClick={toggleMute}
 					>
@@ -294,7 +294,7 @@ const PostHeader = ({
 					<DropdownMenuTrigger
 						className={clsx(
 							buttonBg,
-							"w-16 h-16 rounded-full flex items-center justify-center cursor-pointer"
+							"w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center cursor-pointer"
 						)}
 					>
 						<MoreVertical
