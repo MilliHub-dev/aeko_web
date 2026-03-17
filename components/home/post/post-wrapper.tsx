@@ -45,7 +45,7 @@ const PostWrapper = ({
 
   return (
     <div className="w-full h-full">
-      <div className="relative w-full h-full snap-start flex flex-col justify-center items-center pt-3 pb-10 md:py-6 max-w-2xl md:max-w-3xl mx-auto">
+      <div className="relative w-full h-full snap-start flex flex-col justify-center items-center pt-3 pb-10 md:py-6 px-3 md:px-0 max-w-2xl md:max-w-3xl mx-auto">
         <div
           ref={ref}
           onClick={handleRoute}
