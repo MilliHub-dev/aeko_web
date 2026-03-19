@@ -141,7 +141,7 @@ const PostHeader = ({
 	// shared style sets
 	const isText = type === "text";
 	const glassStyles =
-		"bg-black/30 backdrop-blur-md border border-white/20 shadow-[inset_0_1px_4px_rgba(255,255,255,0.25),0_4px_10px_rgba(0,0,0,0.35),0_0_12px_rgba(255,255,255,0.15)]";
+		"bg-black/68 border border-white/18 shadow-[0_12px_36px_rgba(0,0,0,0.35)]";
 
 	const containerPosition = isText
 		? "top-4 relative"

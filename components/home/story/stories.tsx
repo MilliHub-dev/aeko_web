@@ -8,12 +8,6 @@ import type { UserStoryGroup } from "@/types/story";
 import { useUser } from "@/components/shared/user-context";
 import { toast } from "sonner";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -22,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ImagePlus, Type, Loader2, Check } from "lucide-react";
+import { Type, Loader2, Check } from "lucide-react";
 
 /**
  * Stories sidebar
@@ -388,31 +382,30 @@ export function Stories() {
   };
 
   const AddStoryButton = () => (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <div className="flex flex-col items-center gap-2">
+      <button
+        type="button"
+        onClick={() => fileInputRef.current?.click()}
+        className="group relative flex flex-col items-center"
+      >
+        <div className="relative h-16 w-16 overflow-hidden rounded-full border-2 border-dashed border-muted-foreground/30 p-[2px] transition-all group-hover:border-primary">
+          <div className="flex h-full w-full items-center justify-center rounded-full bg-muted/50">
+            <span className="text-2xl text-muted-foreground group-hover:text-primary">+</span>
+          </div>
+        </div>
+      </button>
+      <div className="flex flex-col items-center gap-1">
+        <span className="text-xs font-medium text-muted-foreground">Add Story</span>
         <button
           type="button"
-          className="group relative flex flex-col items-center gap-2"
+          onClick={() => setIsTextStoryOpen(true)}
+          className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[10px] font-medium text-muted-foreground transition-colors hover:border-primary hover:text-primary"
         >
-          <div className="relative h-16 w-16 overflow-hidden rounded-full border-2 border-dashed border-muted-foreground/30 p-[2px] transition-all group-hover:border-primary">
-            <div className="flex h-full w-full items-center justify-center rounded-full bg-muted/50">
-              <span className="text-2xl text-muted-foreground group-hover:text-primary">+</span>
-            </div>
-          </div>
-          <span className="text-xs font-medium text-muted-foreground">Add Story</span>
+          <Type className="h-3 w-3" />
+          Text
         </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
-        <DropdownMenuItem onClick={() => fileInputRef.current?.click()} className="cursor-pointer">
-          <ImagePlus className="w-4 h-4 mr-2" />
-          Photo / Video
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setIsTextStoryOpen(true)} className="cursor-pointer">
-          <Type className="w-4 h-4 mr-2" />
-          Text Story
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </div>
+    </div>
   );
 
   return (

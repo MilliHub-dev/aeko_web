@@ -29,7 +29,7 @@ const PostFooter = ({
 
   const detailPanel = clsx(
     "rounded-3xl px-6 py-6 shadow-[0_28px_85px_-48px_rgba(15,23,42,0.85)] transition-colors duration-300",
-    "bg-white/12 border border-white/20 backdrop-blur-xl text-white/90"
+    "bg-slate-950/78 border border-white/16 text-white"
   );
 
   return (
