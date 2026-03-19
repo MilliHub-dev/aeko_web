@@ -219,11 +219,14 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
         body: formData,
       });
 
+      const responseText = await response.text();
       let result;
       try {
-        result = await response.json();
+        result = responseText ? JSON.parse(responseText) : {};
       } catch (e) {
-        result = { message: "Invalid server response" };
+        result = {
+          message: responseText || `Request failed with status ${response.status}`,
+        };
       }
 
       if (response.ok) {

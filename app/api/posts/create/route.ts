@@ -16,33 +16,22 @@ export async function POST(request: NextRequest) {
 
   try {
     const contentType = request.headers.get("content-type") || "";
-
-    let body: any = request.body;
-    const headers: Record<string, string> = {
-      Authorization: `Bearer ${token.value}`,
-    };
-
     const isMultipart = contentType.includes("multipart/form-data");
-
-    if (isMultipart && body) {
-      headers["Content-Type"] = contentType;
+    if (!isMultipart) {
+      return NextResponse.json({ message: "Invalid content type" }, { status: 400 });
     }
 
-    if (!body) {
-      if (isMultipart) {
-        body = await request.formData();
-      } else {
-        return NextResponse.json({ message: "Invalid content type" }, { status: 400 });
-      }
-    }
+    // Rebuild multipart payload instead of forwarding the raw request stream.
+    // This avoids boundary/body mismatches that can show up on mobile uploads.
+    const formData = await request.formData();
 
     const res = await fetch(`${API_BASE_URL}/api/posts/create`, {
       method: "POST",
-      headers,
-      body,
-      // @ts-ignore - Required for streaming body in Node.js fetch
-      duplex: isMultipart && body === request.body ? "half" : undefined,
-    } as any);
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+      },
+      body: formData,
+    });
 
     // Handle non-JSON responses
     let data;
@@ -52,10 +41,10 @@ export async function POST(request: NextRequest) {
     } catch (e) {
       console.error("Backend returned non-JSON:", responseText);
       if (!res.ok) {
-         return NextResponse.json(
-            { message: responseText || `Request failed with status ${res.status}` },
-            { status: res.status }
-         );
+        return NextResponse.json(
+          { message: responseText || `Request failed with status ${res.status}` },
+          { status: res.status }
+        );
       }
       return NextResponse.json(
         { message: "Invalid response from backend" },
