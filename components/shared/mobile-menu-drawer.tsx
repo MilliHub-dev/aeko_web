@@ -27,8 +27,49 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
 
-function MobileWaitlistCard({ onJoined }: { onJoined?: () => void }) {
-  const [isOpen, setIsOpen] = useState(false);
+function MobileWaitlistCard({
+  onOpen,
+}: {
+  onOpen: () => void;
+}) {
+  return (
+    <div className="rounded-[28px] border border-primary/20 bg-[radial-gradient(120%_120%_at_0%_0%,rgba(0,127,109,0.18),transparent_55%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,250,249,0.96))] p-4 shadow-sm">
+      <div className="space-y-3">
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/12 text-primary ring-1 ring-primary/15">
+            <Coins className="h-5 w-5" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-primary/80">
+              Aeko Coin
+            </p>
+            <h3 className="text-base font-bold text-foreground">Join the waitlist</h3>
+            <p className="text-sm text-muted-foreground">
+              Early access and airdrop chance up to 3000 $AEKO.
+            </p>
+          </div>
+        </div>
+
+        <Button
+          className="w-full rounded-full bg-foreground font-semibold text-background hover:bg-foreground/90"
+          onClick={onOpen}
+        >
+          Join Waitlist
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function MobileWaitlistDialog({
+  open,
+  onOpenChange,
+  onJoined,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onJoined?: () => void;
+}) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -72,7 +113,7 @@ function MobileWaitlistCard({ onJoined }: { onJoined?: () => void }) {
 
       toast.success("You’re on the Aeko Coin waitlist");
       resetForm();
-      setIsOpen(false);
+      onOpenChange(false);
       onJoined?.();
     } catch (error) {
       console.error("Waitlist signup failed:", error);
@@ -83,80 +124,52 @@ function MobileWaitlistCard({ onJoined }: { onJoined?: () => void }) {
   };
 
   return (
-    <>
-      <div className="mt-auto rounded-[28px] border border-primary/20 bg-[radial-gradient(120%_120%_at_0%_0%,rgba(0,127,109,0.18),transparent_55%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,250,249,0.96))] p-4 shadow-sm">
-        <div className="space-y-3">
-          <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/12 text-primary ring-1 ring-primary/15">
-              <Coins className="h-5 w-5" />
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="z-[140] max-w-[92vw] overflow-hidden rounded-[28px] p-0">
+        <div className="bg-[radial-gradient(120%_120%_at_0%_0%,rgba(0,127,109,0.14),transparent_52%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,250,249,0.95))] p-6">
+          <DialogHeader className="space-y-3 text-left">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/12 text-primary ring-1 ring-primary/15">
+              <Coins className="h-6 w-6" />
             </div>
-            <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-primary/80">
-                Aeko Coin
-              </p>
-              <h3 className="text-base font-bold text-foreground">Join the waitlist</h3>
-              <p className="text-sm text-muted-foreground">
-                Early access and airdrop chance up to 3000 $AEKO.
-              </p>
+            <div>
+              <DialogTitle className="text-xl font-semibold text-foreground">
+                Join the $AEKO waitlist
+              </DialogTitle>
+              <DialogDescription className="pt-1">
+                Enter your details for early access and an airdrop opportunity of up to 3000 $AEKO.
+              </DialogDescription>
             </div>
-          </div>
+          </DialogHeader>
 
-          <Button
-            className="w-full rounded-full bg-foreground font-semibold text-background hover:bg-foreground/90"
-            onClick={() => setIsOpen(true)}
-          >
-            Join Waitlist
-          </Button>
+          <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+            <Input
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              placeholder="Your name"
+              className="rounded-full border-border/70 bg-background"
+              disabled={isSubmitting}
+              required
+            />
+            <Input
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="your@email.com"
+              className="rounded-full border-border/70 bg-background"
+              disabled={isSubmitting}
+              required
+            />
+            <Button
+              type="submit"
+              className="w-full rounded-full bg-foreground font-semibold text-background hover:bg-foreground/90"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Joining..." : "Secure My Spot"}
+            </Button>
+          </form>
         </div>
-      </div>
-
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-[92vw] rounded-[28px] p-0 overflow-hidden">
-          <div className="bg-[radial-gradient(120%_120%_at_0%_0%,rgba(0,127,109,0.14),transparent_52%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,250,249,0.95))] p-6">
-            <DialogHeader className="space-y-3 text-left">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/12 text-primary ring-1 ring-primary/15">
-                <Coins className="h-6 w-6" />
-              </div>
-              <div>
-                <DialogTitle className="text-xl font-semibold text-foreground">
-                  Join the $AEKO waitlist
-                </DialogTitle>
-                <DialogDescription className="pt-1">
-                  Enter your details for early access and an airdrop opportunity of up to 3000 $AEKO.
-                </DialogDescription>
-              </div>
-            </DialogHeader>
-
-            <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-              <Input
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                placeholder="Your name"
-                className="rounded-full border-border/70 bg-background"
-                disabled={isSubmitting}
-                required
-              />
-              <Input
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="your@email.com"
-                className="rounded-full border-border/70 bg-background"
-                disabled={isSubmitting}
-                required
-              />
-              <Button
-                type="submit"
-                className="w-full rounded-full bg-foreground font-semibold text-background hover:bg-foreground/90"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Joining..." : "Secure My Spot"}
-              </Button>
-            </form>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -164,6 +177,7 @@ export function MobileMenuDrawer() {
   const { open, closeMenu } = useMobileMenu();
   const { user } = useUser();
   const [mounted, setMounted] = useState(false);
+  const [waitlistOpen, setWaitlistOpen] = useState(false);
 
   useEffect(() => setMounted(true), []);
 
@@ -204,15 +218,15 @@ export function MobileMenuDrawer() {
     },
     { label: "Profile", href: "/profile", icon: User },
     { label: "Settings", href: "/settings", icon: SettingsIcon },
-    { label: "Logout", href: "/#", icon: LogOut },
   ];
 
   if (!mounted) return null;
 
   return createPortal(
-    <AnimatePresence>
-      {open && (
-        <>
+    <>
+      <AnimatePresence>
+        {open && (
+          <>
           <motion.div
             className="fixed inset-0 z-100 bg-black/40 md:hidden"
             initial={{ opacity: 0 }}
@@ -266,7 +280,9 @@ export function MobileMenuDrawer() {
                 </div>
                 <div className="flex items-center gap-8 text-center text-sm">
                   <div>
-                    <p className="font-semibold">{user?.posts?.length || 0}</p>
+                    <p className="font-semibold">
+                      {user?.postsCount ?? user?.postCount ?? user?.posts?.length ?? 0}
+                    </p>
                     <p className="text-muted-foreground">Posts</p>
                   </div>
                   <div>
@@ -285,21 +301,6 @@ export function MobileMenuDrawer() {
               </div>
               <nav className="flex flex-col gap-4 py-6">
                 {items.map(({ label, href, icon: Icon, badge }) => {
-                  if (label === "Logout") {
-                    return (
-                      <button
-                        key={label}
-                        onClick={() => {
-                          logoutAction();
-                          closeMenu();
-                        }}
-                        className="flex items-center gap-3 rounded-lg px-2 py-3 text-lg hover:bg-gray-100 w-full text-left">
-                        <Icon className="shrink-0" size={22} />
-                        <span>{label}</span>
-                      </button>
-                    );
-                  }
-
                   if (href === "/wallet") {
                     return (
                       <div
@@ -332,9 +333,24 @@ export function MobileMenuDrawer() {
                     </Link>
                   );
                 })}
-              </nav>
 
-              <MobileWaitlistCard onJoined={closeMenu} />
+                <MobileWaitlistCard
+                  onOpen={() => {
+                    setWaitlistOpen(true);
+                    closeMenu();
+                  }}
+                />
+
+                <button
+                  onClick={() => {
+                    logoutAction();
+                    closeMenu();
+                  }}
+                  className="flex items-center gap-3 rounded-lg px-2 py-3 text-lg hover:bg-gray-100 w-full text-left">
+                  <LogOut className="shrink-0" size={22} />
+                  <span>Logout</span>
+                </button>
+              </nav>
             </div>
             <div className="p-5 border-t">
               <div className="w-28 mx-auto">
@@ -349,9 +365,15 @@ export function MobileMenuDrawer() {
               </div>
             </div>
           </motion.aside>
-        </>
-      )}
-    </AnimatePresence>,
+          </>
+        )}
+      </AnimatePresence>
+
+      <MobileWaitlistDialog
+        open={waitlistOpen}
+        onOpenChange={setWaitlistOpen}
+      />
+    </>,
     document.body
   );
 }
