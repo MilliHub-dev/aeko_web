@@ -23,10 +23,10 @@ export default function LiveStreamsPage() {
   const [activeCategory, setActiveCategory] = useState("All");
 
   return (
-    <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(70%_120%_at_0%_0%,rgba(0,127,109,0.18),transparent_55%),radial-gradient(55%_100%_at_100%_10%,rgba(15,23,42,0.12),transparent_55%)]" />
-      <section className="relative overflow-hidden rounded-[32px] border border-border/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(244,248,247,0.92))] shadow-[0_26px_90px_-56px_rgba(15,23,42,0.45)]">
-        <div className="flex flex-col gap-6 p-5 md:p-7">
+    <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-6 px-3 py-3 sm:px-6 lg:px-8 lg:py-6">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-52 bg-[radial-gradient(70%_120%_at_0%_0%,rgba(0,127,109,0.18),transparent_55%),radial-gradient(55%_100%_at_100%_10%,rgba(15,23,42,0.12),transparent_55%)] sm:h-64" />
+      <section className="relative overflow-hidden rounded-[26px] border border-border/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(244,248,247,0.92))] shadow-[0_26px_90px_-56px_rgba(15,23,42,0.45)] sm:rounded-[32px]">
+        <div className="flex flex-col gap-5 p-4 sm:p-5 md:p-7">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-3">
               <div className="inline-flex w-fit items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-primary">
@@ -34,10 +34,10 @@ export default function LiveStreamsPage() {
                 Broadcast
               </div>
               <div className="space-y-2">
-                <h1 className="text-3xl font-bold tracking-tight text-foreground">
+                <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                   Live Streams
                 </h1>
-                <p className="max-w-2xl text-sm text-muted-foreground md:text-base">
+                <p className="max-w-2xl text-sm leading-6 text-muted-foreground md:text-base">
                   Discover rooms that are heating up right now and jump straight into the conversation.
                 </p>
               </div>
@@ -51,7 +51,7 @@ export default function LiveStreamsPage() {
                 <p className="mt-2 text-lg font-semibold text-foreground">{activeCategory}</p>
               </div>
               <Link href="/live-streams/create">
-                <Button className="gap-2 rounded-full">
+                <Button className="w-full gap-2 rounded-full sm:w-auto">
                   <Radio className="h-4 w-4" />
                   Go Live
                 </Button>

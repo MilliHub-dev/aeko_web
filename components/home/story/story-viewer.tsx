@@ -406,20 +406,20 @@ const StoryViewer = ({ userStories, storyId, prevUser, nextUser }: StoryViewerPr
       >
         <BaseDialog.Portal>
           <BaseDialog.Backdrop className="isolate relative">
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+            <div className="fixed inset-0 bg-[radial-gradient(120%_120%_at_0%_0%,rgba(0,127,109,0.2),transparent_40%),radial-gradient(100%_120%_at_100%_0%,rgba(255,255,255,0.08),transparent_35%),rgba(3,7,18,0.92)] backdrop-blur-md" />
           </BaseDialog.Backdrop>
           <BaseDialog.Popup
-            className="fixed inset-0 flex items-center justify-center outline-none m-0 gap-6"
+            className="fixed inset-0 m-0 flex items-center justify-center gap-2 px-2 py-3 outline-none sm:gap-4 sm:px-4 sm:py-6 lg:gap-6"
             ref={focusTrapRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="story-viewer-title"
           >
             {/* Close Button */}
-            <div className="fixed top-8 right-12 z-10">
+            <div className="fixed right-3 top-3 z-40 sm:right-6 sm:top-6">
               <BaseDialog.Close
                 autoFocus
-                className="bg-black/30 backdrop-blur-md border border-white/20 shadow-[inset_0_1px_4px_rgba(255,255,255,0.25),0_4px_10px_rgba(0,0,0,0.35),0_0_12px_rgba(255,255,255,0.15)] w-16 h-16 rounded-full flex items-center justify-center cursor-pointer select-none focus-visible:outline-2 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                className="flex h-11 w-11 cursor-pointer select-none items-center justify-center rounded-full border border-white/15 bg-black/35 shadow-[0_18px_44px_-22px_rgba(0,0,0,0.8)] backdrop-blur-md focus-visible:border-ring focus-visible:outline-2 focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:h-12 sm:w-12"
                 onClick={handleClose}
                 aria-label="Close story viewer"
                 type="button"
@@ -432,16 +432,16 @@ const StoryViewer = ({ userStories, storyId, prevUser, nextUser }: StoryViewerPr
           <Button
             size="icon"
             onClick={goPrev}
-            className="bg-black/30 backdrop-blur-md border border-white/20 shadow-[inset_0_1px_4px_rgba(255,255,255,0.25),0_4px_10px_rgba(0,0,0,0.35),0_0_12px_rgba(255,255,255,0.15)] w-16 h-16 rounded-full flex items-center justify-center cursor-pointer hover:bg-black/40 transition-colors z-10"
+            className="z-20 hidden h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/35 shadow-[0_18px_44px_-22px_rgba(0,0,0,0.8)] backdrop-blur-md transition-colors hover:bg-black/50 sm:flex lg:h-14 lg:w-14"
             aria-label="Previous story"
             type="button"
           >
-            <ArrowLeft className="w-6 h-6 text-white" />
+            <ArrowLeft className="h-5 w-5 text-white lg:h-6 lg:w-6" />
           </Button>
 
           {/* Story Container */}
           <div
-            className="relative flex flex-col items-center justify-center bg-black lg:w-[35rem] lg:h-[61.12rem] w-[40rem] h-[71.12rem] rounded-lg overflow-hidden cursor-pointer select-none"
+            className="relative flex h-[100dvh] w-full max-w-[420px] flex-col items-center justify-center overflow-hidden rounded-none bg-black cursor-pointer select-none sm:h-[88dvh] sm:max-h-[820px] sm:rounded-[32px] lg:max-w-[560px]"
             onClick={handleStoryClick}
             onPointerDown={onPointerDown}
             onPointerUp={onPointerUp}
@@ -450,29 +450,48 @@ const StoryViewer = ({ userStories, storyId, prevUser, nextUser }: StoryViewerPr
             role="region"
             aria-label={`Story by ${userStories.username}`}
           >
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),transparent_18%,transparent_82%,rgba(255,255,255,0.06))]" />
             {/* Progress Bar */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-black/30 z-20">
-              <div
-                className="h-full bg-white transition-all duration-75 ease-linear"
-                style={{ width: `${progress}%` }}
-                aria-valuenow={progress}
-                aria-valuemin={0}
-                aria-valuemax={100}
-                role="progressbar"
-                aria-label="Story progress"
-              />
+            <div className="absolute left-0 right-0 top-0 z-30 px-3 pt-3 sm:px-4 sm:pt-4">
+              <div className="flex gap-1">
+                {userStories.stories.map((story, index) => {
+                  const isCurrent = index === currentStoryIndex;
+                  const isComplete = index < currentStoryIndex;
+                  const width = isCurrent ? `${progress}%` : isComplete ? "100%" : "0%";
+
+                  return (
+                    <div
+                      key={story.id}
+                      className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-white/20"
+                      aria-label={`Story ${index + 1} of ${userStories.stories.length}`}
+                    >
+                      <div
+                        className="absolute inset-y-0 left-0 rounded-full bg-white transition-all duration-75 ease-linear"
+                        style={{ width }}
+                        aria-valuenow={isCurrent ? progress : isComplete ? 100 : 0}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        role={isCurrent ? "progressbar" : undefined}
+                        aria-label={isCurrent ? "Story progress" : undefined}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             {/* User Info Header */}
-            <div className="absolute top-4 left-4 right-4 z-20 flex items-center gap-3">
+            <div className="absolute left-0 right-0 top-0 z-30 px-3 pt-8 sm:px-4 sm:pt-10">
+              <div className="rounded-[24px] border border-white/12 bg-black/26 p-3 shadow-[0_18px_44px_-22px_rgba(0,0,0,0.75)] backdrop-blur-md">
+                <div className="flex items-center gap-3">
               <div 
-                className="flex items-center gap-2 flex-1 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
+                className="flex min-w-0 flex-1 items-center gap-3 cursor-pointer transition-opacity hover:opacity-80"
                 onClick={(e) => {
                   e.stopPropagation();
                   router.push(`/${userStories.username}`);
                 }}
               >
-                <div className="relative h-10 w-10 rounded-full overflow-hidden border-2 border-white flex-shrink-0">
+                <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full border border-white/40">
                   <Image
                     src={userStories.avatarUrl}
                     alt={`${userStories.username}'s avatar`}
@@ -480,20 +499,29 @@ const StoryViewer = ({ userStories, storyId, prevUser, nextUser }: StoryViewerPr
                     className="object-cover"
                   />
                 </div>
-                <span id="story-viewer-title" className="text-white font-semibold text-sm truncate">
-                  {userStories.username}
-                </span>
+                <div className="min-w-0">
+                  <span id="story-viewer-title" className="block truncate text-sm font-semibold text-white">
+                    {userStories.username}
+                  </span>
+                  <span className="block truncate text-xs text-white/70">
+                    {currentStoryIndex + 1} of {userStories.stories.length}
+                  </span>
+                </div>
               </div>
               {isPaused && (
-                <div className="text-white text-xs bg-black/30 px-2 py-1 rounded">Paused</div>
+                <div className="rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[11px] font-medium text-white">
+                  Paused
+                </div>
               )}
+            </div>
+              </div>
             </div>
 
             {/* Media Content */}
             <div className="flex items-center justify-center w-full h-full relative">
               {isText ? (
-                <div className={`w-full h-full flex items-center justify-center p-8 text-center ${currentStory.backgroundColor || "bg-gradient-to-br from-purple-500 to-pink-500"}`}>
-                  <p className={`text-white text-2xl font-bold break-words whitespace-pre-wrap max-w-full overflow-hidden text-ellipsis ${currentStory.font || "font-sans"}`}>
+                <div className={`flex h-full w-full items-center justify-center p-6 text-center sm:p-10 ${currentStory.backgroundColor || "bg-gradient-to-br from-[#0f766e] via-[#115e59] to-[#111827]"}`}>
+                  <p className={`max-w-[90%] whitespace-pre-wrap break-words text-2xl font-bold text-white sm:text-3xl ${currentStory.font || "font-sans"}`}>
                     {currentStory.content}
                   </p>
                 </div>
@@ -519,7 +547,7 @@ const StoryViewer = ({ userStories, storyId, prevUser, nextUser }: StoryViewerPr
                   autoPlay
                   muted
                   playsInline
-                  className="w-full h-full object-contain"
+                  className="h-full w-full object-contain"
                   onError={() => {
                     // If video fails to load, skip to next story (within user)
                     setTimeout(() => goNextStory(), 1000);
@@ -530,41 +558,34 @@ const StoryViewer = ({ userStories, storyId, prevUser, nextUser }: StoryViewerPr
 
             {/* Caption/Description Overlay */}
             {(!isText && currentStory.content) && (
-              <div className="absolute bottom-0 left-0 right-0 p-8 pt-12 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-20 pointer-events-none">
-                <p className="text-white text-base font-medium break-words whitespace-pre-wrap drop-shadow-md">
+              <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/80 via-black/45 to-transparent px-4 pb-24 pt-16 sm:px-5 sm:pb-28">
+                <p className="max-w-[92%] whitespace-pre-wrap break-words text-sm font-medium text-white drop-shadow-md sm:text-base">
                   {currentStory.content}
                 </p>
               </div>
             )}
-            
-            {/* Story Index Indicator */}
-            <div className="absolute bottom-4 left-4 right-32 z-20">
-              <div className="flex gap-1 justify-center">
-                {userStories.stories.map((story, index) => (
-                  <div
-                    key={story.id}
-                    className={`h-1 rounded-full transition-all ${
-                      index === currentStoryIndex
-                        ? "bg-white flex-1"
-                        : "bg-white/30 flex-1 max-w-[40px]"
-                    }`}
-                    aria-label={`Story ${index + 1} of ${userStories.stories.length}`}
-                  />
-                ))}
-              </div>
-            </div>
 
             {/* Action Buttons */}
-            <div className="absolute bottom-4 right-4 z-30 flex items-center gap-2">
+            <div className="absolute bottom-3 left-3 right-3 z-30 sm:bottom-4 sm:left-4 sm:right-4">
+              <div className="flex items-center justify-between gap-3 rounded-[24px] border border-white/12 bg-black/30 px-3 py-2.5 shadow-[0_18px_44px_-22px_rgba(0,0,0,0.75)] backdrop-blur-md sm:px-4">
+                <div className="min-w-0">
+                  <p className="truncate text-xs uppercase tracking-[0.22em] text-white/60">
+                    {isText ? "Text status" : isVideo ? "Video status" : "Photo status"}
+                  </p>
+                  <p className="truncate text-sm font-medium text-white/90">
+                    Tap right to continue, left to go back
+                  </p>
+                </div>
+                <div className="flex items-center gap-1">
               {/* Delete Button (Owner Only) */}
               {isOwner && (
                 <button
                   onClick={handleDelete}
                   disabled={isDeleting}
-                  className="p-2 rounded-full hover:bg-black/20 transition-colors"
+                  className="rounded-full p-2 transition-colors hover:bg-white/10"
                   aria-label="Delete story"
                 >
-                   <Trash2 className="w-6 h-6 text-white hover:text-red-500 transition-colors" />
+                   <Trash2 className="h-5 w-5 text-white transition-colors hover:text-red-400 sm:h-6 sm:w-6" />
                 </button>
               )}
 
@@ -572,15 +593,15 @@ const StoryViewer = ({ userStories, storyId, prevUser, nextUser }: StoryViewerPr
               <button
                 onClick={handleReshare}
                 disabled={isResharing}
-                className="p-2 rounded-full hover:bg-black/20 transition-colors"
+                className="rounded-full p-2 transition-colors hover:bg-white/10"
                 aria-label="Reshare story"
               >
-                <div className="relative w-6 h-6">
+                <div className="relative h-5 w-5 sm:h-6 sm:w-6">
                    <Image 
                      src="/aeko-dark.png" 
                      alt="Reshare" 
                      fill 
-                     className="object-contain invert brightness-0 invert-100" // Invert to white if the icon is dark
+                     className="object-contain invert brightness-0 invert-100"
                    />
                 </div>
               </button>
@@ -591,13 +612,15 @@ const StoryViewer = ({ userStories, storyId, prevUser, nextUser }: StoryViewerPr
                   e.stopPropagation();
                   setIsLiked(!isLiked);
                 }}
-                className="p-2 rounded-full hover:bg-black/20 transition-colors"
+                className="rounded-full p-2 transition-colors hover:bg-white/10"
                 aria-label={isLiked ? "Unlike story" : "Like story"}
               >
                 <Heart 
-                  className={clsx("w-8 h-8 transition-colors", isLiked ? "fill-red-500 text-red-500" : "text-white")} 
+                  className={clsx("h-6 w-6 transition-colors sm:h-7 sm:w-7", isLiked ? "fill-red-500 text-red-500" : "text-white")} 
                 />
               </button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -605,11 +628,11 @@ const StoryViewer = ({ userStories, storyId, prevUser, nextUser }: StoryViewerPr
           <Button
             size="icon"
             onClick={goNext}
-            className="bg-black/30 backdrop-blur-md border border-white/20 shadow-[inset_0_1px_4px_rgba(255,255,255,0.25),0_4px_10px_rgba(0,0,0,0.35),0_0_12px_rgba(255,255,255,0.15)] w-16 h-16 rounded-full flex items-center justify-center cursor-pointer hover:bg-black/40 transition-colors z-10"
+            className="z-20 hidden h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/35 shadow-[0_18px_44px_-22px_rgba(0,0,0,0.8)] backdrop-blur-md transition-colors hover:bg-black/50 sm:flex lg:h-14 lg:w-14"
             aria-label="Next story"
             type="button"
           >
-            <ArrowRight className="w-6 h-6 text-white" />
+            <ArrowRight className="h-5 w-5 text-white lg:h-6 lg:w-6" />
           </Button>
           </BaseDialog.Popup>
         </BaseDialog.Portal>

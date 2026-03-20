@@ -34,7 +34,7 @@ const LiveStreamCard = ({ stream }: { stream: LiveStream }) => {
         "hover:-translate-y-2 hover:shadow-xl hover:border-primary/30"
       )}>
       {/* Thumbnail */}
-      <div className="relative aspect-[16/9]">
+      <div className="relative aspect-[16/10] sm:aspect-[16/9]">
         <Image
           src={stream.thumbnail || "/placeholder.svg"}
           alt={stream.title}
@@ -46,13 +46,13 @@ const LiveStreamCard = ({ stream }: { stream: LiveStream }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
 
         {/* Top badges */}
-        <div className="absolute inset-x-4 top-4 flex items-center justify-between">
-          <Badge className="rounded-full bg-red-500/90 px-3 py-1 text-xs font-semibold text-white shadow-lg">
+        <div className="absolute inset-x-3 top-3 flex items-start justify-between gap-2 sm:inset-x-4 sm:top-4">
+          <Badge className="shrink-0 rounded-full bg-red-500/90 px-2.5 py-1 text-[11px] font-semibold text-white shadow-lg sm:px-3 sm:text-xs">
             LIVE
           </Badge>
-          <Badge className="rounded-full border border-white/20 bg-black/30 px-3 py-1 text-xs font-medium text-white backdrop-blur-md shadow-lg">
+          <Badge className="max-w-[56%] rounded-full border border-white/20 bg-black/30 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-md shadow-lg sm:px-3 sm:text-xs">
             <Users className="mr-1.5 h-3 w-3" />
-            {stream.viewers.toLocaleString()}
+            <span className="truncate">{stream.viewers.toLocaleString()}</span>
           </Badge>
         </div>
 
@@ -64,7 +64,7 @@ const LiveStreamCard = ({ stream }: { stream: LiveStream }) => {
         </div>
 
         {/* Bottom content on image */}
-        <div className="absolute inset-x-4 bottom-4 space-y-2 text-white">
+        <div className="absolute inset-x-3 bottom-3 space-y-2 text-white sm:inset-x-4 sm:bottom-4">
           <div className="flex items-center gap-2">
             <Avatar className="h-8 w-8 border-2 border-white/30">
               <AvatarImage
@@ -76,27 +76,27 @@ const LiveStreamCard = ({ stream }: { stream: LiveStream }) => {
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold leading-tight line-clamp-1 drop-shadow-md">
+              <p className="line-clamp-1 text-sm font-semibold leading-tight drop-shadow-md">
                 {stream.streamer.name}
               </p>
-              <p className="text-xs text-white/80 leading-tight drop-shadow-md">
+              <p className="line-clamp-1 text-xs leading-tight text-white/80 drop-shadow-md">
                 {stream.streamer.username}
               </p>
             </div>
           </div>
 
-          <h3 className="text-base font-semibold leading-tight line-clamp-2 drop-shadow-md">
+          <h3 className="line-clamp-2 text-sm font-semibold leading-tight drop-shadow-md sm:text-base">
             {stream.title}
           </h3>
 
-          <div className="flex items-center gap-2">
-            <Badge className="rounded-full bg-primary/90 px-2.5 py-0.5 text-xs font-semibold text-primary-foreground shadow-lg">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge className="rounded-full bg-primary/90 px-2.5 py-0.5 text-[11px] font-semibold text-primary-foreground shadow-lg sm:text-xs">
               {stream.category}
             </Badge>
             {stream.tags && stream.tags.length > 0 && (
               <Badge
                 variant="outline"
-                className="rounded-full border-white/30 bg-white/10 px-2.5 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
+                className="max-w-full rounded-full border-white/30 bg-white/10 px-2.5 py-0.5 text-[11px] font-medium text-white backdrop-blur-sm sm:text-xs">
                 #{stream.tags[0]}
               </Badge>
             )}
@@ -119,7 +119,7 @@ const UpcomingStreamCard = ({ stream }: { stream: LiveStream }) => {
         "hover:-translate-y-2 hover:shadow-xl hover:border-primary/30"
       )}>
       {/* Thumbnail */}
-      <div className="relative aspect-[16/9]">
+      <div className="relative aspect-[16/10] sm:aspect-[16/9]">
         <Image
           src={stream.thumbnail || "/placeholder.svg"}
           alt={stream.title}
@@ -131,13 +131,13 @@ const UpcomingStreamCard = ({ stream }: { stream: LiveStream }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
 
         {/* Top badges */}
-        <div className="absolute inset-x-4 top-4 flex items-center justify-between">
-          <Badge className="rounded-full bg-primary/90 px-3 py-1 text-xs font-semibold text-primary-foreground shadow-lg">
+        <div className="absolute inset-x-3 top-3 flex items-start justify-between gap-2 sm:inset-x-4 sm:top-4">
+          <Badge className="shrink-0 rounded-full bg-primary/90 px-2.5 py-1 text-[11px] font-semibold text-primary-foreground shadow-lg sm:px-3 sm:text-xs">
             UPCOMING
           </Badge>
-          <Badge className="rounded-full border border-white/20 bg-black/30 px-3 py-1 text-xs font-medium text-white backdrop-blur-md shadow-lg">
+          <Badge className="max-w-[62%] rounded-full border border-white/20 bg-black/30 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-md shadow-lg sm:px-3 sm:text-xs">
             <Bell className="mr-1.5 h-3 w-3" />
-            {stream.scheduledFor}
+            <span className="truncate">{stream.scheduledFor}</span>
           </Badge>
         </div>
 
@@ -156,7 +156,7 @@ const UpcomingStreamCard = ({ stream }: { stream: LiveStream }) => {
         </div>
 
         {/* Bottom content on image */}
-        <div className="absolute inset-x-4 bottom-4 space-y-2 text-white">
+        <div className="absolute inset-x-3 bottom-3 space-y-2 text-white sm:inset-x-4 sm:bottom-4">
           <div className="flex items-center gap-2">
             <Avatar className="h-8 w-8 border-2 border-white/30">
               <AvatarImage
@@ -168,27 +168,27 @@ const UpcomingStreamCard = ({ stream }: { stream: LiveStream }) => {
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold leading-tight line-clamp-1 drop-shadow-md">
+              <p className="line-clamp-1 text-sm font-semibold leading-tight drop-shadow-md">
                 {stream.streamer.name}
               </p>
-              <p className="text-xs text-white/80 leading-tight drop-shadow-md">
+              <p className="line-clamp-1 text-xs leading-tight text-white/80 drop-shadow-md">
                 {stream.streamer.username}
               </p>
             </div>
           </div>
 
-          <h3 className="text-base font-semibold leading-tight line-clamp-2 drop-shadow-md">
+          <h3 className="line-clamp-2 text-sm font-semibold leading-tight drop-shadow-md sm:text-base">
             {stream.title}
           </h3>
 
-          <div className="flex items-center gap-2">
-            <Badge className="rounded-full bg-primary/90 px-2.5 py-0.5 text-xs font-semibold text-primary-foreground shadow-lg">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge className="rounded-full bg-primary/90 px-2.5 py-0.5 text-[11px] font-semibold text-primary-foreground shadow-lg sm:text-xs">
               {stream.category}
             </Badge>
             {stream.tags && stream.tags.length > 0 && (
               <Badge
                 variant="outline"
-                className="rounded-full border-white/30 bg-white/10 px-2.5 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
+                className="max-w-full rounded-full border-white/30 bg-white/10 px-2.5 py-0.5 text-[11px] font-medium text-white backdrop-blur-sm sm:text-xs">
                 #{stream.tags[0]}
               </Badge>
             )}

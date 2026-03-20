@@ -37,7 +37,7 @@ const CategoryTabs = ({
 	};
 
 	return (
-		<div className="w-full -ml-5 md:w-full md:mx-auto md:px-6.5 lg:px-3 backdrop-blur-md rounded-lg relative">
+		<div className="relative w-full rounded-lg backdrop-blur-md">
 			{/* Left Navigation Button */}
 			<Button
 				variant="ghost"
@@ -60,9 +60,9 @@ const CategoryTabs = ({
 
 			<div
 				ref={scrollContainerRef}
-				className="w-full flex overflow-x-auto pb-3 pt-2 snap-x snap-mandatory no-scrollbar"
+				className="flex w-full snap-x snap-mandatory overflow-x-auto pb-2 pt-2 no-scrollbar"
 			>
-				<div className="flex gap-2 px-3 md:ml-1 lg:ml-6">
+				<div className="flex gap-2 px-1 sm:px-2 md:ml-1 lg:ml-6">
 					{categories?.map((category) => (
 						<button
 							key={category}
@@ -71,10 +71,10 @@ const CategoryTabs = ({
 									category
 								)
 							}
-							className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors snap-center ${
+							className={`snap-center whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-medium transition-colors sm:px-4 ${
 								activeCategory === category
 									? "bg-primary text-white"
-									: "border border-primary text-black "
+									: "border border-primary bg-background text-black "
 							}`}
 						>
 							{category}

@@ -38,7 +38,7 @@ export function LiveStreamContent({
   const upcoming = filteredStreams.filter((stream) => !stream.isLive);
 
   return (
-    <div className="mt-12 space-y-12 text-foreground">
+    <div className="mt-8 space-y-8 text-foreground sm:mt-10 sm:space-y-10 lg:mt-12 lg:space-y-12">
       {liveNow.length > 0 && (
         <section className="space-y-6">
           <header className="flex flex-col justify-between gap-4 border-b border-border/60 pb-4 sm:flex-row sm:items-end">
@@ -46,7 +46,7 @@ export function LiveStreamContent({
               <Badge className="w-fit rounded-full bg-primary/15 text-xs font-medium uppercase tracking-wide text-primary">
                 Live now
               </Badge>
-              <h2 className="text-2xl font-semibold">Rooms heating up right now</h2>
+              <h2 className="text-xl font-semibold sm:text-2xl">Rooms heating up right now</h2>
               <p className="text-sm text-muted-foreground">
                 TikTok-inspired vertical energy, responsive overlays, and community shoutouts in real time.
               </p>
@@ -55,7 +55,7 @@ export function LiveStreamContent({
               Updated moments ago
             </p>
           </header>
-          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 sm:gap-6 xl:grid-cols-3">
             {liveNow.map((stream) => (
               <LiveStreamCard key={stream.id} stream={stream} />
             ))}
@@ -70,7 +70,7 @@ export function LiveStreamContent({
               <Badge variant="outline" className="w-fit rounded-full border-primary/40 text-xs font-medium uppercase tracking-wide text-primary">
                 Upcoming
               </Badge>
-              <h2 className="text-2xl font-semibold">Secure your spot before the countdown ends</h2>
+              <h2 className="text-xl font-semibold sm:text-2xl">Secure your spot before the countdown ends</h2>
               <p className="text-sm text-muted-foreground">
                 RSVP to unlock pre-show chat perks and get a reminder the moment creators go live.
               </p>
@@ -79,7 +79,7 @@ export function LiveStreamContent({
               {upcoming.length} sessions in queue
             </p>
           </header>
-          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 sm:gap-6 xl:grid-cols-3">
             {upcoming.map((stream) => (
               <UpcomingStreamCard key={stream.id} stream={stream} />
             ))}
