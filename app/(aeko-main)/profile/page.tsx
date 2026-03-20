@@ -43,6 +43,37 @@ export default async function ProfilePage() {
       } else {
         console.error(`Failed to fetch detailed stats: ${res.status}`);
       }
+
+      // Likes on profile should represent likes received on the user's posts,
+      // not the count of posts this user has liked.
+      const userPostsRes = await fetch(
+        `${API_BASE_URL}/api/posts/user/${user._id || user.id}?page=1&limit=100`,
+        {
+          headers,
+          cache: "no-store",
+        }
+      );
+
+      if (userPostsRes.ok) {
+        const postsData = await userPostsRes.json();
+        const posts = Array.isArray(postsData)
+          ? postsData
+          : postsData.posts || postsData.data || [];
+
+        const likesReceived = posts.reduce((total: number, post: any) => {
+          const postLikes =
+            post.likesCount ??
+            post.engagement?.totalLikes ??
+            (Array.isArray(post.likes) ? post.likes.length : 0) ??
+            0;
+          return total + postLikes;
+        }, 0);
+
+        user = {
+          ...user,
+          likesCount: likesReceived,
+        };
+      }
     } catch (error) {
       console.error("Failed to fetch detailed user stats:", error);
     }

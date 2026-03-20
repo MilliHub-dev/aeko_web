@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 import type { FocusEvent } from "react";
 
 import { cn } from "@/lib/utils";
-import { ExploreHeader } from "@/components/explore/explore-header";
 import { ExploreSearchBar } from "@/components/explore/explore-search-bar";
 import { SearchResultsDropdown } from "@/components/explore/search-results-dropdown";
 import { ExploreCommunities } from "@/components/explore/explore-communities";
@@ -12,7 +11,7 @@ import { SuggestedUsers } from "@/components/explore/suggested-users";
 import { LiveStreams } from "@/components/explore/live-streams";
 import { ViralPosts } from "@/components/explore/viral-posts";
 import { Button } from "@/components/ui/button";
-import { Grid3x3, Loader2 } from "lucide-react";
+import { Grid3x3, Loader2, Sparkles } from "lucide-react";
 import type {
   ExploreResponse,
   ExploreData,
@@ -244,39 +243,91 @@ export default function ExplorePage() {
 
   return (
     <main className="relative min-h-[100dvh] overflow-hidden bg-background">
-      <div className="relative mx-auto w-full px-4 pb-24 pt-8 sm:px-6 lg:px-8">
-        <header className="hidden md:flex mb-6 items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-card/80 text-foreground transition hover:bg-card lg:hidden"
-              aria-label="Grid view">
-              <Grid3x3 className="h-5 w-5" />
-            </button>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-              Explore
-            </h1>
-          </div>
-        </header>
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(80%_120%_at_10%_0%,rgba(0,127,109,0.18),transparent_55%),radial-gradient(60%_90%_at_100%_10%,rgba(15,23,42,0.12),transparent_55%)]" />
+      <div className="relative mx-auto w-full max-w-7xl px-4 pb-24 pt-4 sm:px-6 lg:px-8 lg:pt-6">
+        <section className="mb-8 overflow-hidden rounded-[32px] border border-border/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(244,248,247,0.92))] shadow-[0_26px_90px_-56px_rgba(15,23,42,0.45)]">
+          <div className="flex flex-col gap-6 p-5 md:p-7">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+              <div className="space-y-3">
+                <div className="inline-flex w-fit items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-primary">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Discover
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <button
+                      className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-card/80 text-foreground transition hover:bg-card lg:hidden"
+                      aria-label="Grid view"
+                    >
+                      <Grid3x3 className="h-5 w-5" />
+                    </button>
+                    <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+                      Explore
+                    </h1>
+                  </div>
+                  <p className="max-w-2xl text-sm text-muted-foreground md:text-base">
+                    Tap into live conversations, rising creators, and communities shaping the Aeko feed.
+                  </p>
+                </div>
+              </div>
 
-        <div tabIndex={-1} onBlur={handleSearchBlur} className="relative mb-8">
-          <ExploreSearchBar
-            value={searchQuery}
-            onChange={setSearchQuery}
-            onFocus={handleSearchFocus}
-            onClear={handleSearchClear}
-            showCancel={showSearchOverlay}
-          />
-          {showSearchOverlay && (
-            <SearchResultsDropdown
-              users={searchUsers}
-              communities={searchCommunities}
-              posts={searchPosts}
-              isLoading={isSearching}
-              query={searchQuery}
-              className="absolute left-0 right-0 top-full z-30 mt-4"
-            />
-          )}
-        </div>
+              <div className="grid grid-cols-2 gap-3 sm:w-fit">
+                <div className="rounded-2xl border border-border/60 bg-background/80 px-4 py-3 shadow-sm">
+                  <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
+                    Filter
+                  </p>
+                  <p className="mt-2 text-lg font-semibold text-foreground">{activeFilter}</p>
+                </div>
+                <div className="rounded-2xl border border-border/60 bg-background/80 px-4 py-3 shadow-sm">
+                  <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
+                    Search
+                  </p>
+                  <p className="mt-2 text-lg font-semibold text-foreground">
+                    {searchQuery ? "Active" : "Ready"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div tabIndex={-1} onBlur={handleSearchBlur} className="relative">
+              <ExploreSearchBar
+                value={searchQuery}
+                onChange={setSearchQuery}
+                onFocus={handleSearchFocus}
+                onClear={handleSearchClear}
+                showCancel={showSearchOverlay}
+              />
+              {showSearchOverlay && (
+                <SearchResultsDropdown
+                  users={searchUsers}
+                  communities={searchCommunities}
+                  posts={searchPosts}
+                  isLoading={isSearching}
+                  query={searchQuery}
+                  className="absolute left-0 right-0 top-full z-30 mt-4"
+                />
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {discoverFilters.map((filter) => (
+                <button
+                  key={filter}
+                  type="button"
+                  onClick={() => setActiveFilter(filter)}
+                  className={cn(
+                    "rounded-full border px-4 py-2 text-sm font-medium transition-colors",
+                    activeFilter === filter
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border/60 bg-background/80 text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {filter}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
 
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
@@ -353,7 +404,7 @@ export default function ExplorePage() {
                   onClick={handleLoadMore}
                   disabled={isLoadingMore}
                   size="lg"
-                  className="min-w-[200px]">
+                  className="min-w-[200px] rounded-full">
                   {isLoadingMore ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />

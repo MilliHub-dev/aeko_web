@@ -69,7 +69,7 @@ export function ExploreTrendingPosts({
 				{posts.map((post) => (
 					<article
 						key={post.id}
-						className="group relative aspect-[3/4] overflow-hidden rounded-[32px] bg-black/5 shadow-lg transition hover:-translate-y-1 hover:shadow-2xl sm:aspect-[4/5]"
+						className="group relative aspect-[3/4] overflow-hidden rounded-[32px] border border-border/50 bg-black/5 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-primary/25 hover:shadow-2xl sm:aspect-[4/5]"
 					>
 						<Image
 							fill

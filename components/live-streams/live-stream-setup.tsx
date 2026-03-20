@@ -149,7 +149,7 @@ export function LiveStreamSetup({
   const microphones = camera.devices.filter((d) => d.kind === "audioinput");
 
   return (
-    <div className="relative h-[85vh] w-full overflow-hidden bg-black rounded-xl border border-white/10">
+    <div className="relative h-[85vh] w-full overflow-hidden rounded-[32px] border border-white/10 bg-black shadow-[0_26px_90px_-56px_rgba(15,23,42,0.55)]">
       {/* Camera Feed Background */}
       <div className="absolute inset-0">
         {camera.hasPermission ? (
@@ -178,7 +178,10 @@ export function LiveStreamSetup({
 
       {/* Top Header */}
       <header className="relative z-10 flex items-center justify-between px-4 py-4 safe-top">
-        <h2 className="text-xl font-semibold text-white">Setup Livestream</h2>
+        <div>
+          <h2 className="text-xl font-semibold text-white">Setup Livestream</h2>
+          <p className="text-sm text-white/70">Dial in the details before you go live.</p>
+        </div>
         <div className="flex items-center gap-2">
           <button
             onClick={camera.toggleMute}

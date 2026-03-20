@@ -202,7 +202,7 @@ export default function Home() {
               ) : (
                 <PostCard
                   {...(item as FeedPost)}
-                  isActive={activeTab === "reels" && idx === activeIndex}
+                  isActive={activeTab === "reels" ? idx === activeIndex : undefined}
                 />
               )}
             </div>

@@ -16,6 +16,10 @@ import { useOnClickOutside } from "@/hooks/use-on-click-outside";
 import { useRouter } from "next/navigation";
 import { useFollowUser } from "@/features/profile/hooks/use-follow-user";
 import { useUserRelationsStore } from "@/features/profile/stores/user-relations-store";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { toast } from "sonner";
+
+import { Coins, Gift, Rocket, ArrowRight } from "lucide-react";
 
 function RightSidebarSuggestedUserRow({ user }: { user: SuggestedUser }) {
   const { isFollowing, toggleFollow, isLoading } = useFollowUser(
@@ -97,6 +101,169 @@ function RightSidebarSuggestedUserRow({ user }: { user: SuggestedUser }) {
         {isFollowing ? "Following" : "Follow"}
       </Button>
     </div>
+  );
+}
+
+function AekoWaitlistCard() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const resetForm = () => {
+    setName("");
+    setEmail("");
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+
+    if (!trimmedName || !trimmedEmail) {
+      toast.error("Please enter both your name and email");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: trimmedName,
+          email: trimmedEmail,
+        }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        toast.error(payload.message || "Failed to join waitlist");
+        return;
+      }
+
+      toast.success("You’re on the Aeko Coin waitlist");
+      resetForm();
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Waitlist signup failed:", error);
+      toast.error("Failed to join waitlist");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <>
+      <section className="relative overflow-hidden rounded-3xl border border-primary/20 bg-[radial-gradient(120%_120%_at_0%_0%,rgba(0,127,109,0.22),transparent_52%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(245,251,249,0.96))] p-5 shadow-sm">
+        <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-primary/10 blur-2xl" />
+        <div className="relative space-y-4">
+          <div className="flex items-start gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/12 text-primary ring-1 ring-primary/15">
+              <Coins className="h-6 w-6" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-primary/80">
+                Join Waitlist
+              </p>
+              <h3 className="text-lg font-bold text-foreground">$AEKO Coin</h3>
+              <p className="text-sm text-muted-foreground">
+                Get in early for rewards and priority access before the wider launch.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-2">
+            <div className="flex items-center gap-2 rounded-2xl border border-border/60 bg-background/70 px-3 py-2 text-sm text-foreground">
+              <Rocket className="h-4 w-4 text-primary" />
+              <span>Early access to Aeko Coin drops</span>
+            </div>
+            <div className="flex items-center gap-2 rounded-2xl border border-border/60 bg-background/70 px-3 py-2 text-sm text-foreground">
+              <Gift className="h-4 w-4 text-primary" />
+              <span>Airdrop opportunity up to 3000 $AEKO</span>
+            </div>
+          </div>
+
+          <Button
+            className="w-full rounded-full bg-foreground font-semibold text-background hover:bg-foreground/90"
+            onClick={() => setIsOpen(true)}
+          >
+            Join Waitlist
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      </section>
+
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="sm:max-w-[460px] rounded-[28px] p-0 overflow-hidden">
+          <div className="bg-[radial-gradient(120%_120%_at_0%_0%,rgba(0,127,109,0.14),transparent_52%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,250,249,0.95))] p-6">
+            <DialogHeader className="space-y-3 text-left">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/12 text-primary ring-1 ring-primary/15">
+                <Coins className="h-6 w-6" />
+              </div>
+              <div>
+                <DialogTitle className="text-2xl font-semibold text-foreground">
+                  Join the $AEKO waitlist
+                </DialogTitle>
+                <DialogDescription className="pt-1">
+                  Enter your details to secure early access and an airdrop chance of up to 3000 $AEKO.
+                </DialogDescription>
+              </div>
+            </DialogHeader>
+
+            <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground" htmlFor="waitlist-name">
+                  Name
+                </label>
+                <Input
+                  id="waitlist-name"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  placeholder="Jane Doe"
+                  className="rounded-full border-border/70 bg-background"
+                  disabled={isSubmitting}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground" htmlFor="waitlist-email">
+                  Email
+                </label>
+                <Input
+                  id="waitlist-email"
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="jane@example.com"
+                  className="rounded-full border-border/70 bg-background"
+                  disabled={isSubmitting}
+                  required
+                />
+              </div>
+
+              <div className="rounded-2xl border border-border/60 bg-background/70 p-3 text-sm text-muted-foreground">
+                Rewards include early access and an airdrop opportunity of up to 3000 $AEKO.
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full rounded-full bg-foreground font-semibold text-background hover:bg-foreground/90"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Joining..." : "Secure My Spot"}
+              </Button>
+            </form>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
@@ -275,6 +442,8 @@ export function RightSidebar() {
               </div>
             </section>
           )}
+
+          <AekoWaitlistCard />
 
           {/* Premium Ads Card */}
           <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-primary/5 via-background to-background p-5 shadow-sm">

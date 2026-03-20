@@ -31,7 +31,7 @@ export function CommunityCard({
     <Link
       href={`/communities/${community.slug || community._id}`}
       className={cn(
-        "group relative block overflow-hidden rounded-[28px] border border-border/50 bg-background/80 shadow-sm transition-all duration-300",
+        "group relative block overflow-hidden rounded-[28px] border border-border/50 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(244,248,247,0.88))] shadow-sm transition-all duration-300",
         "hover:-translate-y-2 hover:shadow-xl hover:border-primary/30",
         variant === "compact" && "rounded-[20px]"
       )}>

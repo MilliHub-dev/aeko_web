@@ -504,14 +504,16 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, onSendMedia, onSend
 };
 
 const EmptyState: React.FC = () => (
-  <div className="hidden lg:flex flex-col items-center justify-center h-full bg-background">
-    <div className="text-6xl mb-4">💬</div>
-    <h2 className="text-2xl font-bold text-foreground mb-2">
+  <div className="hidden h-full flex-col items-center justify-center bg-transparent px-8 lg:flex">
+    <div className="rounded-[32px] border border-border/60 bg-background/78 px-10 py-12 text-center shadow-[0_26px_90px_-56px_rgba(15,23,42,0.45)] backdrop-blur-sm">
+      <div className="mb-4 text-6xl">💬</div>
+      <h2 className="mb-2 text-2xl font-bold text-foreground">
       Select a message
-    </h2>
-    <p className="text-muted-foreground">
-      Choose from your existing conversations or start a new one
-    </p>
+      </h2>
+      <p className="max-w-md text-muted-foreground">
+        Choose from your existing conversations or start a new one
+      </p>
+    </div>
   </div>
 );
 

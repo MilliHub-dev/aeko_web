@@ -43,7 +43,7 @@ function LiveStreamCard({ stream }: { stream: LiveStream }) {
   return (
     <Link
       href={`/live-streams/${stream._id}`}
-      className="group relative overflow-hidden rounded-[28px] border border-border/60 bg-background shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
+      className="group relative overflow-hidden rounded-[28px] border border-border/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(244,248,247,0.88))] shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/25 hover:shadow-xl">
       <div className="relative aspect-video">
         <Image
           fill
@@ -98,7 +98,7 @@ function LiveStreamCard({ stream }: { stream: LiveStream }) {
           {stream.title}
         </h3>
         {stream.category && (
-          <span className="inline-block rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+          <span className="inline-block rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
             {stream.category}
           </span>
         )}

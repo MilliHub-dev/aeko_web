@@ -83,21 +83,40 @@ export async function loginAction(
       body: JSON.stringify({ email, password }),
     });
 
-    const data: SignupResponse = await response.json();
+    const responseText = await response.text();
+    let data: Partial<SignupResponse> = {};
+
+    try {
+      data = responseText ? JSON.parse(responseText) : {};
+    } catch (error) {
+      console.error("Login returned non-JSON response:", responseText);
+    }
 
     if (!response.ok) {
       return {
-        message: data.message || data.error || "Login failed",
+        message:
+          data.message ||
+          data.error ||
+          responseText ||
+          "Login failed",
+        errors: {},
+        success: false,
+      };
+    }
+
+    if (!data.token) {
+      return {
+        message: responseText || "Login succeeded but no token was returned",
         errors: {},
         success: false,
       };
     }
 
     await createSessionToken(data.token);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Login error:", error);
     return {
-      message: "An unexpected error occurred",
+      message: error?.message || "An unexpected error occurred",
       errors: {},
       success: false,
     };

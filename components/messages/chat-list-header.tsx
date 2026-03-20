@@ -16,13 +16,18 @@ const ChatListHeader = () => {
   const [isGroupDialogOpen, setIsGroupDialogOpen] = useState(false);
 
   return (
-    <div className="border-b border-gray-200 p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-bold">{routeName || "Messages"}</h1>
+    <div className="border-b border-border/60 bg-background/80 p-4 backdrop-blur-sm">
+      <div className="mb-4 flex items-center justify-between">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+            Inbox
+          </p>
+          <h1 className="text-xl font-bold text-foreground">{routeName || "Messages"}</h1>
+        </div>
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <button className="rounded-full p-2 transition-colors hover:bg-secondary/80">
               <MoreHorizontal size={20} />
             </button>
           </DropdownMenuTrigger>
@@ -42,13 +47,13 @@ const ChatListHeader = () => {
       </div>
       <div className="relative">
         <Search
-          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
           size={20}
         />
         <input
           type="text"
           placeholder="Search Direct Messages"
-          className="w-full pl-10 pr-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full rounded-full border border-border/60 bg-muted/70 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
         />
       </div>
     </div>

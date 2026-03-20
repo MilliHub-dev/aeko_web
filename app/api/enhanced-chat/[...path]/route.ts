@@ -15,6 +15,7 @@ async function proxyRequest(
   const pathString = path.join("/");
   const queryString = request.nextUrl.search;
   const targetUrl = `${API_BASE_URL}/api/enhanced-chat/${pathString}${queryString}`;
+  const legacyConversationsUrl = `${API_BASE_URL}/api/chat/conversations${queryString}`;
 
   console.log(`[Proxy] ${request.method} ${targetUrl}`);
 
@@ -52,7 +53,23 @@ async function proxyRequest(
       }
     }
 
-    const res = await fetch(targetUrl, fetchOptions);
+    let res = await fetch(targetUrl, fetchOptions);
+
+    // The enhanced conversations endpoint appears to be unstable in this project.
+    // Fall back to the legacy conversations endpoint so the inbox can still load.
+    if (
+      pathString === "conversations" &&
+      request.method === "GET" &&
+      (res.status === 500 || res.status === 404)
+    ) {
+      console.warn(
+        `[Proxy] Falling back to legacy chat conversations endpoint after ${res.status} from ${targetUrl}`
+      );
+      res = await fetch(legacyConversationsUrl, {
+        method: "GET",
+        headers,
+      });
+    }
 
     // Handle non-JSON responses (like files)
     const resContentType = res.headers.get("content-type");

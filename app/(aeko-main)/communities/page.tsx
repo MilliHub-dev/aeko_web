@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { FocusEvent } from "react";
 import Link from "next/link";
-import { Grid3x3, ChevronRight, Loader2, Plus } from "lucide-react";
+import { Grid3x3, ChevronRight, Loader2, Plus, Sparkles } from "lucide-react";
 import { ExploreSearchBar } from "@/components/explore/explore-search-bar";
 import { SearchResultsDropdown } from "@/components/explore/search-results-dropdown";
 import { CommunityCard } from "@/components/communities/community-card";
@@ -186,68 +186,78 @@ export default function CommunitiesPage() {
         aria-hidden="true"
       />
 
-      <div className="relative z-10 mx-auto w-full px-4 pb-24 pt-8 sm:px-6 lg:px-8">
-        {/* Header */}
-        <header className="hidden md:flex mb-6 items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-card/80 text-foreground transition hover:bg-card lg:hidden"
-              aria-label="Grid view">
-              <Grid3x3 className="h-5 w-5" />
-            </button>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-              Communities
-            </h1>
-          </div>
-          {/* Mobile Create Button */}
-          <div className="lg:hidden">
-            <CreateCommunityDialog
-              trigger={
-                <Button size="sm" className="rounded-full">
-                  <Plus className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Create</span>
-                </Button>
-              }
-            />
-          </div>
-        </header>
+      <div className="relative z-10 mx-auto w-full px-4 pb-24 pt-4 sm:px-6 lg:px-8 lg:pt-6">
+        <section className="mb-8 overflow-hidden rounded-[32px] border border-border/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(244,248,247,0.92))] shadow-[0_26px_90px_-56px_rgba(15,23,42,0.45)]">
+          <div className="flex flex-col gap-6 p-5 md:p-7">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+              <div className="space-y-3">
+                <div className="inline-flex w-fit items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-primary">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Circles
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-4">
+                    <button
+                      className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-card/80 text-foreground transition hover:bg-card lg:hidden"
+                      aria-label="Grid view">
+                      <Grid3x3 className="h-5 w-5" />
+                    </button>
+                    <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+                      Communities
+                    </h1>
+                  </div>
+                  <p className="max-w-2xl text-sm text-muted-foreground md:text-base">
+                    Find your people, explore niche spaces, and build momentum around what matters to you.
+                  </p>
+                </div>
+              </div>
 
-        {/* Search bar - Same style as explore page */}
-        <div tabIndex={-1} onBlur={handleSearchBlur} className="relative mb-8">
-          <ExploreSearchBar
-            value={searchQuery}
-            onChange={setSearchQuery}
-            onFocus={handleSearchFocus}
-            onClear={handleSearchClear}
-            showCancel={showSearchOverlay}
-          />
-          {showSearchOverlay && (
-            <SearchResultsDropdown
-              users={[]} // Only show communities, not users
-              communities={searchCommunities}
-              isLoading={isSearching}
-              query={searchQuery}
-              className="absolute left-0 right-0 top-full z-30 mt-4"
-            />
-          )}
-        </div>
+              <CreateCommunityDialog
+                trigger={
+                  <Button className="rounded-full gap-2 self-start lg:self-auto">
+                    <Plus className="h-4 w-4" />
+                    Create Community
+                  </Button>
+                }
+              />
+            </div>
 
-        {/* Tab switcher */}
-        <div className="mx-auto mb-8 flex w-full max-w-md items-center rounded-full border border-border/60 bg-card/80 p-1 text-sm font-semibold">
-          {(["my", "explore"] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setPrimaryTab(tab)}
-              className={cn(
-                "flex-1 rounded-full px-4 py-2 transition-all",
-                primaryTab === tab
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-primary"
-              )}>
-              {tab === "my" ? "My Communities" : "Explore"}
-            </button>
-          ))}
-        </div>
+            <div tabIndex={-1} onBlur={handleSearchBlur} className="relative">
+              <ExploreSearchBar
+                value={searchQuery}
+                onChange={setSearchQuery}
+                onFocus={handleSearchFocus}
+                onClear={handleSearchClear}
+                showCancel={showSearchOverlay}
+              />
+              {showSearchOverlay && (
+                <SearchResultsDropdown
+                  users={[]}
+                  communities={searchCommunities}
+                  isLoading={isSearching}
+                  query={searchQuery}
+                  className="absolute left-0 right-0 top-full z-30 mt-4"
+                />
+              )}
+            </div>
+
+            <div className="mx-auto flex w-full max-w-md items-center rounded-full border border-border/60 bg-card/80 p-1 text-sm font-semibold">
+              {(["my", "explore"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setPrimaryTab(tab)}
+                  className={cn(
+                    "flex-1 rounded-full px-4 py-2 transition-all",
+                    primaryTab === tab
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-primary"
+                  )}>
+                  {tab === "my" ? "My Communities" : "Explore"}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
 
         {/* Loading state */}
         {isLoading ? (
@@ -290,7 +300,7 @@ export default function CommunitiesPage() {
                   {myCommunities.length > 0 ? (
                     <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
                       {myCommunities.map((community) => (
-                        <CommunityCard
+                      <CommunityCard
                           key={community._id}
                           community={community}
                           onFollowToggle={handleFollowToggle}

@@ -35,8 +35,9 @@ const ChatListItem = ({ chat }: { chat: Chat }) => {
   return (
     <div
       onClick={() => setSelectedChat(chat)}
-      className="flex items-start gap-3 p-4 hover:bg-secondary/50 cursor-pointer border-b border-border transition-colors">
-      <Avatar className="h-10 w-10 shrink-0">
+      className="mx-3 flex cursor-pointer items-start gap-3 rounded-[24px] border border-transparent p-4 transition-all duration-200 hover:border-border/60 hover:bg-background/80 hover:shadow-sm"
+    >
+      <Avatar className="h-11 w-11 shrink-0 border border-border/60 shadow-sm">
         <AvatarImage src={displayAvatar} alt={displayName} />
         <AvatarFallback>
           <Image
@@ -122,13 +123,15 @@ const ChatList = () => {
     <div
       className={`${
         showChatList ? "block" : "hidden"
-      } lg:block w-full lg:w-96 lg:border-r lg:border-border flex flex-col h-full bg-background`}>
+      } lg:block h-full w-full bg-background/65 backdrop-blur-sm lg:w-[25rem] lg:border-r lg:border-border/60`}>
       <ChatListHeader />
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 space-y-2 overflow-y-auto px-0 py-3">
         {isLoadingChats ? (
-           <div className="p-4 text-center text-muted-foreground">Loading chats...</div>
+           <div className="p-6 text-center text-muted-foreground">Loading chats...</div>
         ) : chats.length === 0 ? (
-           <div className="p-4 text-center text-muted-foreground">No conversations yet</div>
+           <div className="mx-3 rounded-[28px] border border-dashed border-border/70 bg-card/60 p-8 text-center text-muted-foreground">
+             No conversations yet
+           </div>
         ) : (
           chats.map((chat, index) => (
             <ChatListItem key={`${chat.id}-${index}`} chat={chat} />

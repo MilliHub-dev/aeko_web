@@ -25,6 +25,13 @@ export function BaseLayout({ children }: BaseLayoutProps) {
   const path = usePathname();
   const { variant, showMobileHeader } = getLayoutConfig(path);
   const isSimpleLayout = variant === "simple";
+  const isHomeRoute = path === "/home";
+  const isNotificationsRoute = path === "/notifications";
+  const isProfileRoute = path === "/profile";
+  const isPostDetailRoute =
+    /^\/[^/]+\/posts\/[^/]+$/.test(path) || /^\/home\/[^/]+\/posts\/[^/]+$/.test(path);
+  const shouldLockDesktopShell =
+    isHomeRoute || isPostDetailRoute || isNotificationsRoute || isProfileRoute;
 
   // Grid column configurations for better maintainability
   const gridColsClass = isSimpleLayout
@@ -35,12 +42,24 @@ export function BaseLayout({ children }: BaseLayoutProps) {
     <MobileMenuProvider>
       <UserProvider>
         <CallProvider>
-          <div className="relative w-full max-w-full overflow-x-hidden bg-background min-h-[100dvh]">
+          <div
+            className={`relative w-full max-w-full overflow-x-hidden bg-background min-h-[100dvh] ${
+              shouldLockDesktopShell ? "md:h-[100dvh] md:overflow-hidden" : ""
+            }`}
+          >
           {showMobileHeader && <MobileHeader />}
-          <div className={`xl:px-0 grid min-h-[100dvh] items-start ${gridColsClass}`}>
+          <div
+            className={`xl:px-0 grid min-h-[100dvh] items-start ${gridColsClass} ${
+              shouldLockDesktopShell ? "md:h-[100dvh]" : ""
+            }`}
+          >
             <MobileLeftSidebar />
             <LeftSidebar />
-            <main className={`relative ${showMobileHeader ? "pt-24 md:pt-0" : ""}`}>
+            <main
+              className={`relative ${
+                showMobileHeader ? "pt-24 md:pt-0" : ""
+              } ${shouldLockDesktopShell ? "md:h-[100dvh] md:overflow-y-auto" : ""}`}
+            >
               {children}
             </main>
             {!isSimpleLayout && <RightSidebar />}

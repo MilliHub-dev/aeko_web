@@ -43,8 +43,8 @@ export function LeftSidebar() {
   }, []);
 
   return (
-    <aside className="sticky top-0 hidden h-screen w-full shrink-0 xl:flex border-r">
-      <div className="relative flex h-full w-full flex-col overflow-hidden bg-card space-y-4 p-6">
+    <aside className="sticky top-0 hidden h-screen w-full shrink-0 overflow-y-auto border-r xl:flex">
+      <div className="relative flex min-h-full w-full flex-col bg-card space-y-4 p-6">
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <Avatar className="h-14 w-14 border border-border/60">
@@ -109,7 +109,7 @@ export function LeftSidebar() {
         </div>
 
         <div className="flex-1">
-          <div className="flex h-full flex-col justify-between gap-4 overflow-hidden pb-6">
+          <div className="flex h-full flex-col justify-between gap-4 pb-6">
             <div className="space-y-8">
               <section className="space-y-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">

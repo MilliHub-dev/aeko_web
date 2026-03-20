@@ -48,10 +48,10 @@ function SuggestedUserCard({ user }: { user: SuggestedUser }) {
   );
 
   return (
-    <article className="overflow-hidden rounded-[28px] border border-border/60 bg-background shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
+    <article className="overflow-hidden rounded-[28px] border border-border/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(244,248,247,0.88))] shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/25 hover:shadow-xl">
       <div className="space-y-4 p-5">
         <div className="flex items-start gap-3">
-          <Avatar className="h-14 w-14 border-2 border-border/60">
+          <Avatar className="h-14 w-14 border-2 border-border/60 shadow-sm">
             <AvatarImage src={user.profilePicture} alt={user.name} />
             <AvatarFallback>
               <Image
@@ -114,7 +114,7 @@ function SuggestedUserCard({ user }: { user: SuggestedUser }) {
           </p>
         )}
         <Button
-          className="w-full"
+          className="w-full rounded-full"
           variant={isFollowing ? "outline" : "secondary"}
           size="sm"
           onClick={toggleFollow}

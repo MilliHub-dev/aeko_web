@@ -86,28 +86,30 @@ export function PostDetailMedia({ post, className }: PostDetailMediaProps) {
   const hashtags: string[] = [];
 
   return (
-    <div className={cn("relative w-full min-h-[100dvh] bg-black", className)}>
+    <div className={cn("relative w-full bg-black", className)}>
       {/* Media Content */}
       {resolvedMedia && (
-        <div className="relative w-full h-full">
+        <div className="relative flex h-full w-full items-center justify-center bg-black">
           {isVideo ? (
             <video
               key={resolvedMedia}
               src={resolvedMedia}
-              className="w-full h-full object-cover"
+              className="h-full w-full object-contain"
               autoPlay
               loop
               muted
               playsInline
             />
           ) : (
-            <Image
-              src={resolvedMedia}
-              alt="Post media"
-              fill
-              className="object-cover"
-              priority
-            />
+            <div className="relative h-full w-full">
+              <Image
+                src={resolvedMedia}
+                alt="Post media"
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
           )}
 
           {/* Navigation Controls */}
@@ -145,13 +147,13 @@ export function PostDetailMedia({ post, className }: PostDetailMediaProps) {
       )}
 
       {/* Bottom Overlay with User Info and Content */}
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent px-6 pb-24 pt-32">
-        <div className="space-y-4">
+      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/55 to-transparent px-4 pb-24 pt-24 md:px-6 md:pt-32">
+        <div className="mx-auto max-w-3xl space-y-4">
           {/* User Info with Follow Button */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <Link 
               href={`/${displayHandle}`}
-              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+              className="flex min-w-0 items-center gap-3 transition-opacity hover:opacity-80"
             >
               <Avatar className="w-12 h-12 ring-2 ring-white/20">
                 <AvatarImage src={displayProfileImage} alt={displayName} />
@@ -164,8 +166,8 @@ export function PostDetailMedia({ post, className }: PostDetailMediaProps) {
                   />
                 </AvatarFallback>
               </Avatar>
-              <div className="flex flex-col">
-                <span className="font-semibold text-white text-base flex items-center gap-1">
+              <div className="min-w-0 flex flex-col">
+                <span className="flex items-center gap-1 truncate font-semibold text-base text-white">
                   {displayName}
                   {post.user?.blueTick && (
                     <Image
@@ -204,7 +206,7 @@ export function PostDetailMedia({ post, className }: PostDetailMediaProps) {
                     />
                   )}
                 </span>
-                <span className="text-sm text-white/70">@{displayHandle}</span>
+                <span className="truncate text-sm text-white/70">@{displayHandle}</span>
               </div>
             </Link>
 
@@ -222,7 +224,7 @@ export function PostDetailMedia({ post, className }: PostDetailMediaProps) {
           {/* Post Text */}
           {post.text && (
             <div className="space-y-2">
-              <p className="text-white text-base leading-relaxed whitespace-pre-wrap">
+              <p className="max-w-2xl text-base leading-relaxed whitespace-pre-wrap text-white">
                 {displayText}
               </p>
 

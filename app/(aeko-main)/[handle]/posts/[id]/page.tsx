@@ -29,7 +29,7 @@ export default async function PostDetailPage({
   const isMedia = post.type === "image" || post.type === "video";
 
   return (
-    <div className="relative bg-background min-h-[100dvh]">
+    <div className="relative min-h-[100dvh] bg-background">
       {/* Header */}
       <PostDetailHeader 
         postId={post._id}
@@ -40,9 +40,14 @@ export default async function PostDetailPage({
       {/* Content (conditional based on type) */}
       <div className="pt-0">
         {isMedia ? (
-          <PostDetailMedia post={post} className="h-[calc(100dvh-4rem)] min-h-0" />
+          <PostDetailMedia
+            post={post}
+            className="min-h-0 h-[calc(100dvh-4rem)]"
+          />
         ) : (
-          <PostDetailText post={post} />
+          <div className="mx-auto w-full max-w-3xl px-4 py-4 md:px-6">
+            <PostDetailText post={post} />
+          </div>
         )}
 
         {/* Actions Row */}
@@ -59,7 +64,7 @@ export default async function PostDetailPage({
         </div>
 
         {/* Comments Section */}
-        <div className="w-full max-w-screen-sm mx-auto px-6 py-6">
+        <div className="mx-auto w-full max-w-3xl px-4 py-6 md:px-6">
           <h2 className="text-xl font-semibold mb-4">Comments</h2>
           <CommentSection postId={post._id} />
         </div>
