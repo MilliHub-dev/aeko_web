@@ -22,6 +22,143 @@ import { logoutAction } from "@/app/(aeko-auth)/actions";
 
 import { useUser } from "./user-context";
 import { HomeIcon, RadioSolid, BellIcon, WalletOutline } from "@/lib/icons";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import { toast } from "sonner";
+
+function MobileWaitlistCard({ onJoined }: { onJoined?: () => void }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const resetForm = () => {
+    setName("");
+    setEmail("");
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+
+    if (!trimmedName || !trimmedEmail) {
+      toast.error("Please enter both your name and email");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: trimmedName,
+          email: trimmedEmail,
+        }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        toast.error(payload.message || "Failed to join waitlist");
+        return;
+      }
+
+      toast.success("You’re on the Aeko Coin waitlist");
+      resetForm();
+      setIsOpen(false);
+      onJoined?.();
+    } catch (error) {
+      console.error("Waitlist signup failed:", error);
+      toast.error("Failed to join waitlist");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="mt-auto rounded-[28px] border border-primary/20 bg-[radial-gradient(120%_120%_at_0%_0%,rgba(0,127,109,0.18),transparent_55%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,250,249,0.96))] p-4 shadow-sm">
+        <div className="space-y-3">
+          <div className="flex items-start gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/12 text-primary ring-1 ring-primary/15">
+              <Coins className="h-5 w-5" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-primary/80">
+                Aeko Coin
+              </p>
+              <h3 className="text-base font-bold text-foreground">Join the waitlist</h3>
+              <p className="text-sm text-muted-foreground">
+                Early access and airdrop chance up to 3000 $AEKO.
+              </p>
+            </div>
+          </div>
+
+          <Button
+            className="w-full rounded-full bg-foreground font-semibold text-background hover:bg-foreground/90"
+            onClick={() => setIsOpen(true)}
+          >
+            Join Waitlist
+          </Button>
+        </div>
+      </div>
+
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="max-w-[92vw] rounded-[28px] p-0 overflow-hidden">
+          <div className="bg-[radial-gradient(120%_120%_at_0%_0%,rgba(0,127,109,0.14),transparent_52%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,250,249,0.95))] p-6">
+            <DialogHeader className="space-y-3 text-left">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/12 text-primary ring-1 ring-primary/15">
+                <Coins className="h-6 w-6" />
+              </div>
+              <div>
+                <DialogTitle className="text-xl font-semibold text-foreground">
+                  Join the $AEKO waitlist
+                </DialogTitle>
+                <DialogDescription className="pt-1">
+                  Enter your details for early access and an airdrop opportunity of up to 3000 $AEKO.
+                </DialogDescription>
+              </div>
+            </DialogHeader>
+
+            <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+              <Input
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                placeholder="Your name"
+                className="rounded-full border-border/70 bg-background"
+                disabled={isSubmitting}
+                required
+              />
+              <Input
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="your@email.com"
+                className="rounded-full border-border/70 bg-background"
+                disabled={isSubmitting}
+                required
+              />
+              <Button
+                type="submit"
+                className="w-full rounded-full bg-foreground font-semibold text-background hover:bg-foreground/90"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Joining..." : "Secure My Spot"}
+              </Button>
+            </form>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
 
 export function MobileMenuDrawer() {
   const { open, closeMenu } = useMobileMenu();
@@ -196,6 +333,8 @@ export function MobileMenuDrawer() {
                   );
                 })}
               </nav>
+
+              <MobileWaitlistCard onJoined={closeMenu} />
             </div>
             <div className="p-5 border-t">
               <div className="w-28 mx-auto">
