@@ -327,7 +327,7 @@ export function LiveStreamRoleManager({ streamId }: LiveStreamRoleManagerProps) 
                     <AvatarFallback>{user.username.slice(0, 2).toUpperCase()}</AvatarFallback>
                   </Avatar>
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">{user.name}</p>
+                    <p className="truncate text-sm font-medium">{user.name || user.username || "Unknown"}</p>
                     <p className="truncate text-xs text-muted-foreground">@{user.username}</p>
                   </div>
                 </button>
@@ -386,15 +386,15 @@ export function LiveStreamRoleManager({ streamId }: LiveStreamRoleManagerProps) 
                 </div>
                 {selectedCoHost && (
                   <div className="flex items-center gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-3 py-2">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={selectedCoHost.profilePicture} alt={selectedCoHost.username} />
-                      <AvatarFallback>{selectedCoHost.username.slice(0, 2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">{selectedCoHost.name}</p>
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={selectedCoHost.profilePicture} alt={selectedCoHost.username} />
+                    <AvatarFallback>{selectedCoHost.username.slice(0, 2).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{selectedCoHost.name || selectedCoHost.username || "Unknown"}</p>
                       <p className="truncate text-xs text-muted-foreground">@{selectedCoHost.username}</p>
-                    </div>
                   </div>
+                </div>
                 )}
                 {renderSuggestions(coHostSuggestions, isSearchingCoHost, coHostQuery, (user) => {
                   setSelectedCoHost(user);
@@ -424,7 +424,7 @@ export function LiveStreamRoleManager({ streamId }: LiveStreamRoleManagerProps) 
                         <AvatarFallback>{user.username.slice(0, 2).toUpperCase()}</AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="text-sm font-medium">{user.username}</p>
+                        <p className="text-sm font-medium">{user.name || user.username || "Unknown"}</p>
                         <p className="text-xs text-muted-foreground">Co-host</p>
                       </div>
                     </div>
@@ -451,15 +451,15 @@ export function LiveStreamRoleManager({ streamId }: LiveStreamRoleManagerProps) 
                 </div>
                 {selectedGuest && (
                   <div className="flex items-center gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-3 py-2">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={selectedGuest.profilePicture} alt={selectedGuest.username} />
-                      <AvatarFallback>{selectedGuest.username.slice(0, 2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">{selectedGuest.name}</p>
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={selectedGuest.profilePicture} alt={selectedGuest.username} />
+                    <AvatarFallback>{selectedGuest.username.slice(0, 2).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{selectedGuest.name || selectedGuest.username || "Unknown"}</p>
                       <p className="truncate text-xs text-muted-foreground">@{selectedGuest.username}</p>
-                    </div>
                   </div>
+                </div>
                 )}
                 {renderSuggestions(guestSuggestions, isSearchingGuest, guestQuery, (user) => {
                   setSelectedGuest(user);
@@ -489,7 +489,7 @@ export function LiveStreamRoleManager({ streamId }: LiveStreamRoleManagerProps) 
                         <AvatarFallback>{user.username.slice(0, 2).toUpperCase()}</AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="text-sm font-medium">{user.username}</p>
+                        <p className="text-sm font-medium">{user.name || user.username || "Unknown"}</p>
                         <p className="text-xs text-muted-foreground">Guest</p>
                       </div>
                     </div>

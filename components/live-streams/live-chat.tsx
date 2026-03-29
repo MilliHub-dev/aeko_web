@@ -31,28 +31,36 @@ export function LiveChat({ streamId }: LiveChatProps) {
         {isLoading && messages.length === 0 ? (
           <div className="text-center text-muted-foreground">Loading chat...</div>
         ) : (
-          messages.map((msg) => (
-            <div key={msg.id} className="flex gap-3 rounded-[22px] border border-black/5 bg-black/[0.02] p-3">
-              <div className="h-8 w-8 rounded-full bg-secondary flex-shrink-0 overflow-hidden">
-                <img
-                  src={msg.user?.avatar || "/placeholder.svg"}
-                  alt={msg.user?.name || "User"}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-sm text-foreground">
-                    {msg.user?.name || "Unknown"}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {msg.timestamp}
-                  </span>
+          messages.map((msg) => {
+            const sender = msg?.user || {
+              name: "Unknown",
+              username: "unknown",
+              avatar: "/placeholder.svg",
+            };
+
+            return (
+              <div key={msg.id} className="flex gap-3 rounded-[22px] border border-black/5 bg-black/[0.02] p-3">
+                <div className="h-8 w-8 rounded-full bg-secondary flex-shrink-0 overflow-hidden">
+                  <img
+                    src={sender.avatar || "/placeholder.svg"}
+                    alt={sender.name || sender.username || "User"}
+                    className="h-full w-full object-cover"
+                  />
                 </div>
-                <p className="text-sm text-foreground/90">{msg.message}</p>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-sm text-foreground">
+                      {sender.name || sender.username || "Unknown"}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {msg.timestamp}
+                    </span>
+                  </div>
+                  <p className="text-sm text-foreground/90">{msg.message}</p>
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
