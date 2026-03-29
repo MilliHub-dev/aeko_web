@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { LiveStream } from "@/components/live-streams/live-card";
 
+const STREAM_CACHE_TTL_MS = 15000;
+const streamCache = new Map<string, { timestamp: number; streams: LiveStream[] }>();
+
 interface UpstreamLivestream {
   _id?: string;
   id?: string;
@@ -81,6 +84,8 @@ export function useLiveStreams(activeCategory = "All", searchQuery = "") {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchStreams = async () => {
       setLoading(true);
       setError(null);
@@ -106,7 +111,14 @@ export function useLiveStreams(activeCategory = "All", searchQuery = "") {
           )}?page=1&limit=20`;
         }
 
-        const res = await fetch(endpoint);
+        const cached = streamCache.get(endpoint);
+        if (cached && Date.now() - cached.timestamp < STREAM_CACHE_TTL_MS) {
+          setStreams(cached.streams);
+          setLoading(false);
+          return;
+        }
+
+        const res = await fetch(endpoint, { signal: controller.signal });
 
         if (!res.ok) {
           throw new Error(`Failed to fetch live streams: ${res.status} ${res.statusText}`);
@@ -114,17 +126,36 @@ export function useLiveStreams(activeCategory = "All", searchQuery = "") {
 
         const data: LiveStreamFeedResponse = await res.json();
         const rawStreams = getStreamArray(data);
-        setStreams(rawStreams.map(mapStream));
+        const nextStreams = rawStreams.map(mapStream);
+        streamCache.set(endpoint, { timestamp: Date.now(), streams: nextStreams });
+        setStreams(nextStreams);
       } catch (err) {
+        if (controller.signal.aborted) {
+          return;
+        }
         console.error("Error fetching live streams:", err);
-        setError(err instanceof Error ? err.message : "Unknown error");
+
+        const message = err instanceof Error ? err.message : "Unknown error";
+        if (message.includes("429")) {
+          setError("Live streams are refreshing too quickly. Showing the last available results.");
+          return;
+        }
+
+        setError(message);
         setStreams([]);
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
-    fetchStreams();
+    const timer = window.setTimeout(fetchStreams, searchQuery.trim() ? 350 : 0);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
   }, [activeCategory, searchQuery]);
 
   return { streams, loading, error };

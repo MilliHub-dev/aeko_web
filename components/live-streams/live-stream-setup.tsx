@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,16 +17,13 @@ import {
   Camera,
   Mic,
   MicOff,
-  X,
   Loader2,
   Settings,
-  ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import { createLivestream } from "@/lib/livestream-service";
+import { createLivestream, uploadThumbnail } from "@/lib/livestream-service";
 import type { LivestreamCreateData } from "@/types/livestream";
 import type { useCamera } from "@/hooks/use-camera";
-import { cn } from "@/lib/utils";
 
 interface LiveStreamSetupProps {
   camera: ReturnType<typeof useCamera>;
@@ -51,7 +47,6 @@ export function LiveStreamSetup({
   camera,
   onStreamCreated,
 }: LiveStreamSetupProps) {
-  const router = useRouter();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
@@ -61,6 +56,16 @@ export function LiveStreamSetup({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string>("");
+
+  useEffect(() => {
+    return () => {
+      if (thumbnailPreview) {
+        URL.revokeObjectURL(thumbnailPreview);
+      }
+    };
+  }, [thumbnailPreview]);
 
   const handleAddTag = () => {
     if (currentTag.trim() && tags.length < 5) {
@@ -71,6 +76,15 @@ export function LiveStreamSetup({
 
   const handleRemoveTag = (index: number) => {
     setTags(tags.filter((_, i) => i !== index));
+  };
+
+  const handleThumbnailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] || null;
+    if (thumbnailPreview) {
+      URL.revokeObjectURL(thumbnailPreview);
+    }
+    setThumbnailFile(file);
+    setThumbnailPreview(file ? URL.createObjectURL(file) : "");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -122,6 +136,16 @@ export function LiveStreamSetup({
       }
 
       const streamMeta = response.data?.stream;
+      let uploadedThumbnailUrl: string | undefined;
+
+      if (thumbnailFile) {
+        try {
+          await uploadThumbnail(streamId, thumbnailFile);
+          uploadedThumbnailUrl = thumbnailPreview || streamMeta?.thumbnailUrl;
+        } catch (uploadError) {
+          console.error("Failed to upload livestream thumbnail:", uploadError);
+        }
+      }
 
       onStreamCreated(streamId, {
         ...data,
@@ -131,6 +155,8 @@ export function LiveStreamSetup({
           undefined,
         hostName: streamMeta?.hostName,
         hostProfilePicture: streamMeta?.hostProfilePicture,
+        thumbnailUrl: uploadedThumbnailUrl || streamMeta?.thumbnailUrl,
+        thumbnailPreview: thumbnailPreview || undefined,
       });
     } catch (err) {
       setError(
@@ -288,6 +314,39 @@ export function LiveStreamSetup({
             <p className="mt-1 text-right text-xs text-white/60">
               {description.length}/500
             </p>
+          </div>
+
+          <div className="rounded-2xl border border-white/20 bg-black/40 p-4 backdrop-blur-xl">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <Label className="block text-xs text-white/80">Thumbnail</Label>
+                <p className="mt-1 text-xs text-white/60">
+                  Add a cover image for the preview screen before the camera is live.
+                </p>
+              </div>
+              <label className="inline-flex cursor-pointer items-center rounded-full border border-white/20 bg-white/10 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-white/15">
+                Choose image
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleThumbnailChange}
+                  className="hidden"
+                />
+              </label>
+            </div>
+            {thumbnailPreview ? (
+              <div className="mt-4 overflow-hidden rounded-2xl border border-white/15">
+                <img
+                  src={thumbnailPreview}
+                  alt="Livestream thumbnail preview"
+                  className="h-40 w-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="mt-4 rounded-2xl border border-dashed border-white/15 bg-white/[0.03] px-4 py-8 text-center text-sm text-white/55">
+                No thumbnail selected yet.
+              </div>
+            )}
           </div>
 
           {/* Category & Stream Type */}

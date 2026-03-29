@@ -28,10 +28,15 @@ export function BaseLayout({ children }: BaseLayoutProps) {
   const isHomeRoute = path === "/home";
   const isNotificationsRoute = path === "/notifications";
   const isProfileRoute = path === "/profile";
+  const isLiveStreamViewerRoute = /^\/live-streams\/[^/]+$/.test(path);
   const isPostDetailRoute =
     /^\/[^/]+\/posts\/[^/]+$/.test(path) || /^\/home\/[^/]+\/posts\/[^/]+$/.test(path);
   const shouldLockDesktopShell =
-    isHomeRoute || isPostDetailRoute || isNotificationsRoute || isProfileRoute;
+    isHomeRoute ||
+    isPostDetailRoute ||
+    isNotificationsRoute ||
+    isProfileRoute ||
+    isLiveStreamViewerRoute;
 
   // Grid column configurations for better maintainability
   const gridColsClass = isSimpleLayout

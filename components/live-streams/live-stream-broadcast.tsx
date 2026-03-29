@@ -22,6 +22,7 @@ import type { useCamera } from "@/hooks/use-camera";
 import { cn } from "@/lib/utils";
 import { useLiveChat } from "@/features/livestream/hooks/use-live-chat";
 import { useUser } from "@/components/shared/user-context";
+import { LiveStreamRoleManager } from "@/components/live-streams/live-stream-role-manager";
 
 interface LiveStreamBroadcastProps {
   streamId: string;
@@ -48,8 +49,11 @@ export function LiveStreamBroadcast({
   const [isStarting, setIsStarting] = useState(false);
   const [isEnding, setIsEnding] = useState(false);
   const [showEndConfirm, setShowEndConfirm] = useState(false);
+  const [shareLabel, setShareLabel] = useState("Share");
   const hasActiveVideo = Boolean(camera.mediaStream && camera.mediaStream.getVideoTracks().length > 0);
   const fallbackVisual =
+    streamData?.thumbnailUrl ||
+    streamData?.thumbnailPreview ||
     streamData?.hostProfilePicture ||
     user?.profilePicture ||
     user?.avatar ||
@@ -71,6 +75,7 @@ export function LiveStreamBroadcast({
 
     return Number.isFinite(rawCount) ? rawCount : 0;
   }, [streamData]);
+  const hostInitials = (hostName || "ST").slice(0, 2).toUpperCase();
 
   const handleGoLive = async () => {
     try {
@@ -106,6 +111,40 @@ export function LiveStreamBroadcast({
     }
   };
 
+  const handleShare = async () => {
+    const shareUrl =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/live-streams/${streamId}`
+        : `/live-streams/${streamId}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: streamData?.title || "Aeko livestream",
+          text: `Watch ${hostName} live on Aeko`,
+          url: shareUrl,
+        });
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        setShareLabel("Copied");
+        window.setTimeout(() => setShareLabel("Share"), 1600);
+      }
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        setShareLabel("Copied");
+        window.setTimeout(() => setShareLabel("Share"), 1600);
+      } catch {
+        setShareLabel("Failed");
+        window.setTimeout(() => setShareLabel("Share"), 1600);
+      }
+    }
+  };
+
   return (
     <div className="relative h-screen w-full overflow-hidden bg-black">
       {/* Camera Feed Background */}
@@ -130,7 +169,7 @@ export function LiveStreamBroadcast({
               <Avatar className="mx-auto mb-4 h-24 w-24 border-2 border-white/40 shadow-2xl">
                 <AvatarImage src={fallbackVisual} alt={hostName} />
                 <AvatarFallback className="bg-primary text-primary-foreground">
-                  {hostName.substring(0, 2).toUpperCase()}
+                  {hostInitials}
                 </AvatarFallback>
               </Avatar>
               <p className="text-lg font-semibold">{streamData?.title || "Livestream preview"}</p>
@@ -163,7 +202,7 @@ export function LiveStreamBroadcast({
             <Avatar className="h-10 w-10 shrink-0 border-2 border-white/30">
               <AvatarImage src={fallbackVisual} alt={hostName} />
               <AvatarFallback className="bg-primary text-primary-foreground">
-                {hostName.substring(0, 2).toUpperCase()}
+                {hostInitials}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0 leading-tight">
@@ -176,6 +215,7 @@ export function LiveStreamBroadcast({
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
+          <LiveStreamRoleManager streamId={streamId} />
           <button
             onClick={camera.toggleMute}
             className="flex h-10 w-10 items-center justify-center rounded-full bg-black/20 backdrop-blur-md transition-colors hover:bg-black/30">
@@ -221,7 +261,7 @@ export function LiveStreamBroadcast({
                 }}>
                 <div className="flex items-baseline gap-2">
                   <span className="text-sm font-bold text-white drop-shadow-md">
-                    {chat.user.name}
+                    {chat.user?.name || chat.user?.username || "Unknown"}
                   </span>
                   <span className="text-sm text-white/90 drop-shadow-md">
                     {chat.message}
@@ -280,7 +320,11 @@ export function LiveStreamBroadcast({
             </div>
 
             {/* Share Button */}
-            <button className="flex h-12 w-12 items-center justify-center rounded-full bg-black/30 backdrop-blur-md transition-all hover:scale-110 active:scale-95">
+            <button
+              onClick={handleShare}
+              aria-label="Share livestream"
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-black/30 backdrop-blur-md transition-all hover:scale-110 active:scale-95"
+            >
               <Share2 className="h-5 w-5 text-white" />
             </button>
 
@@ -300,7 +344,7 @@ export function LiveStreamBroadcast({
                 ? `${viewerCount.toLocaleString()} views`
                 : "No views yet"}
             </span>
-            <span className="text-xs text-white/80 drop-shadow-md">Share</span>
+            <span className="text-xs text-white/80 drop-shadow-md">{shareLabel}</span>
           </div>
         </div>
       )}

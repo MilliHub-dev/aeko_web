@@ -12,6 +12,8 @@ export interface LivestreamCreateData {
   chatId?: string;
   hostName?: string;
   hostProfilePicture?: string;
+  thumbnailUrl?: string;
+  thumbnailPreview?: string;
 }
 
 export interface LivestreamResponse {

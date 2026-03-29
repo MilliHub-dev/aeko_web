@@ -1,7 +1,5 @@
 "use client";
-import { ScrollArea } from "@base-ui-components/react/scroll-area";
 import { Button } from "../ui/button";
-// import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "../ui/input";
 import { useState } from "react";
 import { useLiveChat } from "@/features/livestream/hooks/use-live-chat";
@@ -28,17 +26,13 @@ export function LiveChat({ streamId }: LiveChatProps) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-background border-l border-border">
-      <div className="p-4 border-b border-border">
-        <h3 className="font-semibold text-lg">Live Chat</h3>
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+    <div className="flex h-full flex-col bg-transparent">
+      <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4">
         {isLoading && messages.length === 0 ? (
           <div className="text-center text-muted-foreground">Loading chat...</div>
         ) : (
           messages.map((msg) => (
-            <div key={msg.id} className="flex gap-3">
+            <div key={msg.id} className="flex gap-3 rounded-[22px] border border-black/5 bg-black/[0.02] p-3">
               <div className="h-8 w-8 rounded-full bg-secondary flex-shrink-0 overflow-hidden">
                 <img
                   src={msg.user?.avatar || "/placeholder.svg"}
@@ -62,16 +56,16 @@ export function LiveChat({ streamId }: LiveChatProps) {
         )}
       </div>
 
-      <div className="p-4 border-t border-border">
+      <div className="border-t border-black/6 px-5 py-4">
         <div className="flex gap-2">
           <Input
             placeholder="Say something..."
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="bg-secondary/50 border-0 focus-visible:ring-1 focus-visible:ring-primary"
+            className="rounded-full border-black/8 bg-black/[0.03] px-4 focus-visible:ring-1 focus-visible:ring-primary"
           />
-          <Button size="sm" onClick={handleSend}>
+          <Button size="sm" onClick={handleSend} className="rounded-full px-5">
             Send
           </Button>
         </div>

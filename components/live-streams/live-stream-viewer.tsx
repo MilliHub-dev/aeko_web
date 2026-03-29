@@ -32,6 +32,10 @@ interface LiveStreamViewerProps {
   playbackUrl?: string | null;
   category: string;
   isFollowing?: boolean;
+  inviteRole?: "co_host" | "guest" | null;
+  isAcceptingInvite?: boolean;
+  onAcceptInvite?: () => void;
+  currentRole?: "host" | "co_host" | "guest" | "viewer";
 }
 
 export function LiveStreamViewer({
@@ -44,12 +48,22 @@ export function LiveStreamViewer({
   playbackUrl,
   category,
   isFollowing = false,
+  inviteRole = null,
+  isAcceptingInvite = false,
+  onAcceptInvite,
+  currentRole = "viewer",
 }: LiveStreamViewerProps) {
   const [inputText, setInputText] = useState("");
   const { messages, sendMessage } = useLiveChat(streamId);
   const [currentLikes, setCurrentLikes] = useState(likes);
   const [hasLiked, setHasLiked] = useState(false);
   const [following, setFollowing] = useState(isFollowing);
+  const [floatingHearts, setFloatingHearts] = useState<number[]>([]);
+  const [shareLabel, setShareLabel] = useState("Share");
+  const streamerName = streamer?.name || "Unknown streamer";
+  const streamerUsername = streamer?.username || "@unknown";
+  const streamerAvatar = streamer?.avatar || thumbnail || "/placeholder.svg";
+  const streamerInitials = streamerName.slice(0, 2).toUpperCase();
 
   const handleSend = () => {
     if (inputText.trim()) {
@@ -65,11 +79,46 @@ export function LiveStreamViewer({
     } else {
       setCurrentLikes((prev) => prev + 1);
       setHasLiked(true);
+      const heartId = Date.now();
+      setFloatingHearts((prev) => [...prev, heartId]);
+      window.setTimeout(() => {
+        setFloatingHearts((prev) => prev.filter((id) => id !== heartId));
+      }, 1600);
     }
   };
 
   const handleFollow = () => {
     setFollowing(!following);
+  };
+
+  const handleShare = async () => {
+    const shareUrl = typeof window !== "undefined" ? window.location.href : `/live-streams/${streamId}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title,
+          text: `Watch ${streamerName} live on Aeko`,
+          url: shareUrl,
+        });
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        setShareLabel("Copied");
+        window.setTimeout(() => setShareLabel("Share"), 1600);
+      }
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        setShareLabel("Copied");
+        window.setTimeout(() => setShareLabel("Share"), 1600);
+      } catch {
+        setShareLabel("Failed");
+        window.setTimeout(() => setShareLabel("Share"), 1600);
+      }
+    }
   };
 
   return (
@@ -108,17 +157,17 @@ export function LiveStreamViewer({
 
           <div className="flex min-w-0 items-center gap-3">
             <Avatar className="h-10 w-10 shrink-0 border-2 border-white/30">
-              <AvatarImage src={streamer.avatar} alt={streamer.name} />
+              <AvatarImage src={streamerAvatar} alt={streamerName} />
               <AvatarFallback className="bg-primary text-primary-foreground">
-                {streamer.name.substring(0, 2)}
+                {streamerInitials}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0 leading-tight">
               <p className="truncate text-sm font-semibold text-white drop-shadow-md">
-                {streamer.name}
+                {streamerName}
               </p>
               <p className="truncate text-xs text-white/80 drop-shadow-md">
-                {streamer.username}
+                {streamerUsername}
               </p>
             </div>
           </div>
@@ -150,14 +199,43 @@ export function LiveStreamViewer({
         <Badge className="max-w-full rounded-full border border-white/20 bg-black/30 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-md shadow-lg">
           <span className="truncate">{category}</span>
         </Badge>
+        {currentRole !== "viewer" && (
+          <Badge className="rounded-full border border-emerald-300/25 bg-emerald-500/20 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-white backdrop-blur-md shadow-lg">
+            {currentRole === "co_host"
+              ? "Co-host"
+              : currentRole === "guest"
+                ? "Guest"
+                : "Host"}
+          </Badge>
+        )}
       </div>
 
       {/* Stream meta */}
       <div className="absolute inset-x-0 bottom-44 z-10 mx-auto w-full max-w-screen-sm px-3 sm:px-4">
-        <div className="max-w-[min(100%,28rem)] rounded-3xl bg-black/20 p-3 backdrop-blur-sm">
+        <div className="max-w-[min(100%,28rem)] space-y-3">
+          {inviteRole && (
+            <div className="rounded-3xl border border-emerald-400/30 bg-emerald-500/15 p-3 backdrop-blur-md">
+              <p className="text-sm font-semibold text-white">
+                You&apos;ve been invited as a {inviteRole === "co_host" ? "co-host" : "guest"}
+              </p>
+              <p className="mt-1 text-xs text-white/80">
+                Accept to join the stream chat and get ready for your live role.
+              </p>
+              <Button
+                onClick={onAcceptInvite}
+                disabled={isAcceptingInvite}
+                className="mt-3 rounded-full bg-white text-black hover:bg-white/90"
+                size="sm"
+              >
+                {isAcceptingInvite ? "Joining..." : `Accept ${inviteRole === "co_host" ? "Co-host" : "Guest"} Invite`}
+              </Button>
+            </div>
+          )}
+          <div className="rounded-3xl bg-black/20 p-3 backdrop-blur-sm">
           <h1 className="line-clamp-2 text-base font-semibold text-white drop-shadow-md sm:text-lg">
             {title}
           </h1>
+          </div>
         </div>
       </div>
 
@@ -173,7 +251,7 @@ export function LiveStreamViewer({
               }}>
               <div className="flex items-baseline gap-2">
                 <span className="shrink-0 text-sm font-bold text-white drop-shadow-md">
-                  {chat.user.name}
+                  {chat.user?.name || chat.user?.username || "Unknown"}
                 </span>
                 <span className="break-words text-sm text-white/90 drop-shadow-md">
                   {chat.message}
@@ -183,6 +261,15 @@ export function LiveStreamViewer({
           ))}
         </div>
       </div>
+
+      {floatingHearts.map((heartId, index) => (
+        <div
+          key={heartId}
+          className="pointer-events-none absolute bottom-28 right-6 z-20 animate-[ping_1.6s_ease-out_forwards]"
+          style={{ transform: `translateY(-${index * 18}px)` }}>
+          <Heart className="h-6 w-6 fill-red-500 text-red-500 drop-shadow-lg" />
+        </div>
+      ))}
 
       {/* Bottom Action Bar */}
       <div className="absolute bottom-0 left-0 right-0 z-20 bg-linear-to-t from-black/85 via-black/45 to-transparent pb-[max(env(safe-area-inset-bottom),0.75rem)]">
@@ -218,7 +305,10 @@ export function LiveStreamViewer({
           </button>
 
           {/* Share Button */}
-          <button className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-black/30 backdrop-blur-md transition-all hover:scale-110 active:scale-95 sm:h-12 sm:w-12">
+          <button
+            onClick={handleShare}
+            aria-label="Share livestream"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-black/30 backdrop-blur-md transition-all hover:scale-110 active:scale-95 sm:h-12 sm:w-12">
             <Share2 className="h-5 w-5 text-white" />
           </button>
           </div>
@@ -229,7 +319,7 @@ export function LiveStreamViewer({
           <span className="text-xs text-white/80 drop-shadow-md">
             {viewers > 0 ? `${viewers.toLocaleString()} views` : "No views yet"}
           </span>
-          <span className="text-xs text-white/80 drop-shadow-md">Share</span>
+          <span className="text-xs text-white/80 drop-shadow-md">{shareLabel}</span>
         </div>
       </div>
     </div>

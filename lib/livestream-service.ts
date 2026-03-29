@@ -2,8 +2,6 @@ import type {
   LivestreamCreateData,
   LivestreamResponse,
 } from "@/types/livestream";
-import { API_BASE_URL } from "./config";
-
 // Use local API proxy instead of direct backend URL to avoid CORS
 const API_BASE = "/api";
 
@@ -110,4 +108,94 @@ export async function endLivestream(streamId: string): Promise<LivestreamRespons
   }
 
   return response.json();
+}
+
+export async function inviteCoHost(streamId: string, userId: string) {
+  const token = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("token="))
+    ?.split("=")[1];
+
+  const response = await fetch(`${API_BASE}/livestream/${streamId}/co-hosts/invite`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ userId }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error((data as { message?: string }).message || "Failed to invite co-host");
+  }
+
+  return data;
+}
+
+export async function inviteGuest(streamId: string, userId: string) {
+  const token = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("token="))
+    ?.split("=")[1];
+
+  const response = await fetch(`${API_BASE}/livestream/${streamId}/guests/invite`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ userId }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error((data as { message?: string }).message || "Failed to invite guest");
+  }
+
+  return data;
+}
+
+export async function acceptCoHostInvite(streamId: string) {
+  const token = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("token="))
+    ?.split("=")[1];
+
+  const response = await fetch(`${API_BASE}/livestream/${streamId}/co-hosts/accept`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error((data as { message?: string }).message || "Failed to accept co-host invite");
+  }
+
+  return data;
+}
+
+export async function acceptGuestInvite(streamId: string) {
+  const token = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("token="))
+    ?.split("=")[1];
+
+  const response = await fetch(`${API_BASE}/livestream/${streamId}/guests/accept`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error((data as { message?: string }).message || "Failed to accept guest invite");
+  }
+
+  return data;
 }

@@ -26,6 +26,10 @@ export interface LiveStream {
 }
 
 const LiveStreamCard = ({ stream }: { stream: LiveStream }) => {
+  const streamerName = stream.streamer?.name || "Unknown streamer";
+  const streamerUsername = stream.streamer?.username || "@unknown";
+  const streamerAvatar = stream.streamer?.avatar || stream.thumbnail || "/placeholder.svg";
+  const streamerInitials = streamerName.slice(0, 2).toUpperCase();
   return (
     <Link
       href={`/live-streams/${stream.id}`}
@@ -68,19 +72,19 @@ const LiveStreamCard = ({ stream }: { stream: LiveStream }) => {
           <div className="flex items-center gap-2">
             <Avatar className="h-8 w-8 border-2 border-white/30">
               <AvatarImage
-                src={stream.streamer.avatar}
-                alt={stream.streamer.name}
+                src={streamerAvatar}
+                alt={streamerName}
               />
               <AvatarFallback className="text-xs">
-                {stream.streamer.name.substring(0, 2)}
+                {streamerInitials}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
               <p className="line-clamp-1 text-sm font-semibold leading-tight drop-shadow-md">
-                {stream.streamer.name}
+                {streamerName}
               </p>
               <p className="line-clamp-1 text-xs leading-tight text-white/80 drop-shadow-md">
-                {stream.streamer.username}
+                {streamerUsername}
               </p>
             </div>
           </div>
@@ -111,6 +115,10 @@ const LiveStreamCard = ({ stream }: { stream: LiveStream }) => {
 };
 
 const UpcomingStreamCard = ({ stream }: { stream: LiveStream }) => {
+  const streamerName = stream.streamer?.name || "Unknown streamer";
+  const streamerUsername = stream.streamer?.username || "@unknown";
+  const streamerAvatar = stream.streamer?.avatar || stream.thumbnail || "/placeholder.svg";
+  const streamerInitials = streamerName.slice(0, 2).toUpperCase();
   return (
     <Link
       href={`/live-streams/${stream.id}`}
@@ -160,19 +168,19 @@ const UpcomingStreamCard = ({ stream }: { stream: LiveStream }) => {
           <div className="flex items-center gap-2">
             <Avatar className="h-8 w-8 border-2 border-white/30">
               <AvatarImage
-                src={stream.streamer.avatar}
-                alt={stream.streamer.name}
+                src={streamerAvatar}
+                alt={streamerName}
               />
               <AvatarFallback className="text-xs">
-                {stream.streamer.name.substring(0, 2)}
+                {streamerInitials}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
               <p className="line-clamp-1 text-sm font-semibold leading-tight drop-shadow-md">
-                {stream.streamer.name}
+                {streamerName}
               </p>
               <p className="line-clamp-1 text-xs leading-tight text-white/80 drop-shadow-md">
-                {stream.streamer.username}
+                {streamerUsername}
               </p>
             </div>
           </div>
