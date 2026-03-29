@@ -26,6 +26,7 @@ function RightSidebarSuggestedUserRow({ user }: { user: SuggestedUser }) {
     user._id,
     user.isFollowing
   );
+  const displayName = user?.name || user?.username || "Unknown";
 
   return (
     <div className="flex items-center justify-between">
@@ -34,7 +35,7 @@ function RightSidebarSuggestedUserRow({ user }: { user: SuggestedUser }) {
         className="flex items-center gap-3 overflow-hidden flex-1 min-w-0"
       >
         <Avatar className="h-10 w-10 border border-border/50">
-          <AvatarImage src={user.profilePicture} alt={user.name} />
+          <AvatarImage src={user.profilePicture} alt={displayName} />
           <AvatarFallback>
             <Image
               src="/profile_icon.jpg"
@@ -47,7 +48,7 @@ function RightSidebarSuggestedUserRow({ user }: { user: SuggestedUser }) {
         <div className="flex flex-col overflow-hidden">
           <div className="flex items-center gap-1">
             <span className="truncate text-sm font-semibold text-foreground">
-              {user.name}
+              {displayName}
             </span>
             {user.blueTick && (
               <Image
@@ -535,7 +536,7 @@ export function RightSidebar() {
                         {stream.title}
                       </span>
                       <span className="text-xs text-muted-foreground">
-                        {stream.streamer.name}
+                        {stream.streamer?.name || stream.streamer?.username || "Unknown streamer"}
                       </span>
                     </div>
                     <Link

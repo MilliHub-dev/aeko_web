@@ -135,7 +135,7 @@ export function LiveStreamViewer({
           />
         ) : (
           <Image
-            src={thumbnail || streamer.avatar || "/placeholder.svg"}
+            src={thumbnail || streamerAvatar || "/placeholder.svg"}
             alt={title}
             fill
             className="object-cover"
