@@ -76,10 +76,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(data, { status: res.status });
     }
 
-    // Validate response data
-    if (!data || (!data.livestream && !data._id)) {
-      console.error("Invalid response structure (missing livestream or _id):", data);
-       return NextResponse.json(
+    const streamId =
+      data?.data?.stream?._id ||
+      data?.data?.stream?.id ||
+      data?.data?._id ||
+      data?.data?.streamId ||
+      data?.livestream?._id ||
+      data?._id;
+
+    if (!data || !streamId) {
+      console.error("Invalid response structure (missing stream identifier):", data);
+      return NextResponse.json(
         { success: false, message: "Server returned empty or invalid data" },
         { status: 502 }
       );

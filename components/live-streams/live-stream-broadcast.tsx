@@ -1,19 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Menu,
-  UserPlus,
   MoreVertical,
   Users,
-  Heart,
   Share2,
-  Send,
   Mic,
   MicOff,
   Camera as CameraIcon,
@@ -25,6 +21,7 @@ import type { LivestreamCreateData } from "@/types/livestream";
 import type { useCamera } from "@/hooks/use-camera";
 import { cn } from "@/lib/utils";
 import { useLiveChat } from "@/features/livestream/hooks/use-live-chat";
+import { useUser } from "@/components/shared/user-context";
 
 interface LiveStreamBroadcastProps {
   streamId: string;
@@ -45,24 +42,35 @@ export function LiveStreamBroadcast({
   onEndStream,
   onBack,
 }: LiveStreamBroadcastProps) {
-  const router = useRouter();
+  const { user } = useUser();
   const [inputText, setInputText] = useState("");
-  const [viewerCount, setViewerCount] = useState(0);
-  const { messages, sendMessage } = useLiveChat(streamId);
+  const { messages, sendMessage } = useLiveChat(streamId, streamData?.chatId);
   const [isStarting, setIsStarting] = useState(false);
   const [isEnding, setIsEnding] = useState(false);
   const [showEndConfirm, setShowEndConfirm] = useState(false);
+  const hasActiveVideo = Boolean(camera.mediaStream && camera.mediaStream.getVideoTracks().length > 0);
+  const fallbackVisual =
+    streamData?.hostProfilePicture ||
+    user?.profilePicture ||
+    user?.avatar ||
+    "/placeholder.svg";
+  const hostName =
+    streamData?.hostName ||
+    user?.name ||
+    user?.username ||
+    "Streamer";
+  const hostHandle = user?.username
+    ? `@${user.username}`
+    : hostName.startsWith("@")
+      ? hostName
+      : `@${hostName}`;
+  const viewerCount = useMemo(() => {
+    const rawCount = (streamData as { currentViewers?: number; viewerCount?: number } | null)?.currentViewers
+      ?? (streamData as { currentViewers?: number; viewerCount?: number } | null)?.viewerCount
+      ?? 0;
 
-  // Simulate viewer count increase when live
-  useEffect(() => {
-    if (isLive) {
-      const interval = setInterval(() => {
-        setViewerCount((prev) => prev + Math.floor(Math.random() * 5));
-      }, 5000);
-
-      return () => clearInterval(interval);
-    }
-  }, [isLive]);
+    return Number.isFinite(rawCount) ? rawCount : 0;
+  }, [streamData]);
 
   const handleGoLive = async () => {
     try {
@@ -102,7 +110,7 @@ export function LiveStreamBroadcast({
     <div className="relative h-screen w-full overflow-hidden bg-black">
       {/* Camera Feed Background */}
       <div className="absolute inset-0">
-        {camera.hasPermission ? (
+        {camera.hasPermission && hasActiveVideo ? (
           <video
             ref={camera.videoRef}
             autoPlay
@@ -110,6 +118,25 @@ export function LiveStreamBroadcast({
             muted
             className="h-full w-full object-cover"
           />
+        ) : camera.hasPermission ? (
+          <div className="relative flex h-full items-center justify-center overflow-hidden">
+            <img
+              src={fallbackVisual}
+              alt={hostName}
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/15 backdrop-blur-[2px]" />
+            <div className="relative z-10 text-center text-white">
+              <Avatar className="mx-auto mb-4 h-24 w-24 border-2 border-white/40 shadow-2xl">
+                <AvatarImage src={fallbackVisual} alt={hostName} />
+                <AvatarFallback className="bg-primary text-primary-foreground">
+                  {hostName.substring(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <p className="text-lg font-semibold">{streamData?.title || "Livestream preview"}</p>
+              <p className="mt-1 text-sm text-white/75">Camera preview is getting ready</p>
+            </div>
+          </div>
         ) : (
           <div className="flex h-full items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
             <div className="text-center text-white">
@@ -120,35 +147,35 @@ export function LiveStreamBroadcast({
         )}
 
         {/* Dark gradient overlay for readability */}
-        <div className="absolute inset-0 bg-linear-to-b from-black/60 via-transparent to-black/90" />
+        <div className="absolute inset-0 bg-linear-to-b from-black/35 via-transparent to-black/75" />
       </div>
 
       {/* Top Header */}
-      <header className="relative z-20 flex items-center justify-between px-4 py-4 safe-top">
-        <div className="flex items-center gap-4">
+      <header className="relative z-20 flex items-start justify-between gap-3 px-3 py-4 safe-top sm:px-4">
+        <div className="flex min-w-0 items-center gap-3 sm:gap-4">
           <button
             onClick={() => (isLive ? setShowEndConfirm(true) : onBack?.())}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-black/20 backdrop-blur-md transition-colors hover:bg-black/30">
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-black/20 backdrop-blur-md transition-colors hover:bg-black/30">
             <Menu className="h-5 w-5 text-white" />
           </button>
 
-          <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10 border-2 border-white/30">
-              <AvatarImage src="/placeholder.svg" alt="Streamer" />
+          <div className="flex min-w-0 items-center gap-3">
+            <Avatar className="h-10 w-10 shrink-0 border-2 border-white/30">
+              <AvatarImage src={fallbackVisual} alt={hostName} />
               <AvatarFallback className="bg-primary text-primary-foreground">
-                DM
+                {hostName.substring(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <div className="leading-tight">
-              <p className="text-sm font-semibold text-white drop-shadow-md">
+            <div className="min-w-0 leading-tight">
+              <p className="truncate text-sm font-semibold text-white drop-shadow-md">
                 {streamData?.title || "Livestream"}
               </p>
-              <p className="text-xs text-white/80 drop-shadow-md">@username</p>
+              <p className="truncate text-xs text-white/80 drop-shadow-md">{hostHandle}</p>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <button
             onClick={camera.toggleMute}
             className="flex h-10 w-10 items-center justify-center rounded-full bg-black/20 backdrop-blur-md transition-colors hover:bg-black/30">
@@ -271,7 +298,7 @@ export function LiveStreamBroadcast({
             <span className="text-xs text-white/80 drop-shadow-md">
               {viewerCount > 0
                 ? `${viewerCount.toLocaleString()} views`
-                : "Starting..."}
+                : "No views yet"}
             </span>
             <span className="text-xs text-white/80 drop-shadow-md">Share</span>
           </div>

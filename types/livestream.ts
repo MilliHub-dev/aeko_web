@@ -9,12 +9,34 @@ export interface LivestreamCreateData {
   tags: string[];
   scheduledFor: string; // ISO date string
   monetization: Record<string, unknown>;
+  chatId?: string;
+  hostName?: string;
+  hostProfilePicture?: string;
 }
 
 export interface LivestreamResponse {
   success: boolean;
-  livestream: {
-    _id: string;
+  message?: string;
+  data?: {
+    streamId?: string;
+    _id?: string;
+    stream?: {
+      id?: string;
+      _id?: string;
+      title: string;
+      description: string;
+      category: string;
+      streamType: string;
+      status: "scheduled" | "created" | "live" | "ended";
+      viewerCount?: number;
+      thumbnailUrl?: string;
+      streamUrl?: string;
+      createdAt: string;
+    };
+  };
+  livestream?: {
+    _id?: string;
+    id?: string;
     title: string;
     description: string;
     category: string;
@@ -25,7 +47,6 @@ export interface LivestreamResponse {
     streamUrl?: string;
     createdAt: string;
   };
-  message?: string;
 }
 
 export interface MediaDeviceOption {

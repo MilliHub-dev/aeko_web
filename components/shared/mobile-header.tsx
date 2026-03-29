@@ -9,6 +9,7 @@ import {
   UserPlus,
   ChevronDown,
 } from "lucide-react";
+import { useEffect, useMemo } from "react";
 import { Button } from "../ui/button";
 import { Logo } from "../logo";
 import Image from "next/image";
@@ -19,12 +20,23 @@ import { ChatIcon } from "@/lib/icons";
 import { useMobileMenu } from "./mobile-menu-context";
 import { getLayoutConfig } from "@/lib/layout-config";
 import { CreateCommunityDialog } from "@/components/communities/create-community-dialog";
+import { useChatStore } from "@/features/chat/stores/chat-store";
 
 const MobileHeader = () => {
   const routeName = useRouteName();
   const path = usePathname();
   const { isUserPostsRoute } = getLayoutConfig(path);
   const { toggleMenu } = useMobileMenu();
+  const chats = useChatStore((state) => state.chats);
+  const fetchChats = useChatStore((state) => state.fetchChats);
+  const hasUnreadMessages = useMemo(
+    () => chats.some((chat) => (chat.unreadCount || 0) > 0),
+    [chats]
+  );
+
+  useEffect(() => {
+    fetchChats();
+  }, [fetchChats]);
 
   const isWallet = path.startsWith("/wallet");
   const isCommunities = path.startsWith("/communities");
@@ -103,8 +115,11 @@ const MobileHeader = () => {
       return (
         <Link
           href="/messages"
-          className="rounded-full bg-secondary hover:bg-primary hover:text-secondary h-15 w-15 md:h-13 md:w-13 flex justify-center items-center">
+          className="relative rounded-full bg-secondary hover:bg-primary hover:text-secondary h-15 w-15 md:h-13 md:w-13 flex justify-center items-center">
           <ChatIcon className="size-6" />
+          {hasUnreadMessages && (
+            <span className="absolute right-3 top-3 h-2.5 w-2.5 rounded-full bg-primary" />
+          )}
         </Link>
       );
     }
@@ -135,8 +150,11 @@ const MobileHeader = () => {
         {path !== "/messages" && (
           <Link
             href="/messages"
-            className="rounded-full bg-secondary hover:bg-primary hover:text-secondary h-15 w-15 md:h-13 md:w-13 flex justify-center items-center">
+            className="relative rounded-full bg-secondary hover:bg-primary hover:text-secondary h-15 w-15 md:h-13 md:w-13 flex justify-center items-center">
             <ChatIcon className="size-6" />
+            {hasUnreadMessages && (
+              <span className="absolute right-3 top-3 h-2.5 w-2.5 rounded-full bg-primary" />
+            )}
           </Link>
         )}
       </div>

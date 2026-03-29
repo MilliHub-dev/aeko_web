@@ -2,28 +2,28 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useMemo } from "react";
 
 import { sidebarRoutes } from "@/lib/routes";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { LogOut } from "lucide-react";
 import { logoutAction } from "@/app/(aeko-auth)/actions";
 import { useUser } from "./user-context";
-
-const contactList = [
-  { name: "Erik Gunsel", avatar: "/users/mike-chen.jpg" },
-  {
-    name: "Emily Smith",
-    avatar: "/users/sarah-johnson.jpeg",
-  },
-  {
-    name: "Arthur Adelak",
-    avatar: "/users/alex-rivera.jpg",
-  },
-];
+import { useChatStore } from "@/features/chat/stores/chat-store";
 
 export function MobileLeftSidebar() {
   const pathname = usePathname();
   const { user } = useUser();
+  const chats = useChatStore((state) => state.chats);
+  const fetchChats = useChatStore((state) => state.fetchChats);
+  const hasUnreadMessages = useMemo(
+    () => chats.some((chat) => (chat.unreadCount || 0) > 0),
+    [chats]
+  );
+
+  useEffect(() => {
+    fetchChats();
+  }, [fetchChats]);
 
   return (
     <aside className="sticky top-0 hidden h-screen w-full shrink-0 md:flex xl:hidden border-r">
@@ -68,6 +68,9 @@ export function MobileLeftSidebar() {
                     : "hover:bg-muted/60 hover:text-foreground"
                 }`}>
                 <Icon className="h-6 w-6" />
+                {route.path === "/messages" && hasUnreadMessages && (
+                  <span className="absolute right-2.5 top-2.5 h-2.5 w-2.5 rounded-full bg-primary" />
+                )}
               </Link>
             );
           })}

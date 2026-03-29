@@ -7,7 +7,7 @@ import { CallType } from "@/features/chat/stores/call-store";
 import { getSocket } from "@/lib/socket";
 
 interface CallContextType {
-  startCall: (receiverId: string, type: CallType) => void;
+  startCall: (receiverId: string, type: CallType, receiverUserId?: string | null) => void;
 }
 
 const CallContext = createContext<CallContextType | null>(null);
@@ -43,8 +43,8 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
 
   const { initiateCall } = useWebRTC();
 
-  const startCall = useCallback((receiverId: string, type: CallType) => {
-    initiateCall(receiverId, type);
+  const startCall = useCallback((receiverId: string, type: CallType, receiverUserId?: string | null) => {
+    initiateCall(receiverId, type, receiverUserId);
   }, [initiateCall]);
 
   return (

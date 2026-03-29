@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCamera } from "@/hooks/use-camera";
 import { LiveStreamSetup } from "@/components/live-streams/live-stream-setup";
@@ -17,24 +17,22 @@ export default function CreateLiveStreamPage() {
     },
   });
 
-  const [step, setStep] = useState<"setup" | "broadcast">("setup");
+  const [step, setStep] = useState<"setup" | "ready" | "live">("setup");
   const [streamId, setStreamId] = useState<string | null>(null);
   const [streamData, setStreamData] = useState<LivestreamCreateData | null>(null);
-
-  // Request camera access on mount
-  useEffect(() => {
-    camera.requestMediaAccess();
-    // Cleanup handled by hook
-  }, []);
 
   const handleStreamCreated = (id: string, data: LivestreamCreateData) => {
     setStreamId(id);
     setStreamData(data);
-    setStep("broadcast");
+    setStep("ready");
   };
 
   const handleEndStream = () => {
     router.push("/live-streams");
+  };
+
+  const handleGoLive = () => {
+    setStep("live");
   };
 
   if (camera.isLoading) {
@@ -69,9 +67,9 @@ export default function CreateLiveStreamPage() {
   }
 
   return (
-    <div className="relative h-full w-full p-4">
+    <div className="relative h-full w-full overflow-x-hidden p-3 sm:p-4">
       {step === "setup" && (
-        <div className="mx-auto mb-4 flex w-full max-w-6xl items-center justify-between rounded-[28px] border border-border/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(244,248,247,0.92))] px-5 py-4 shadow-sm">
+        <div className="mx-auto mb-4 flex w-full max-w-6xl flex-col items-start gap-3 rounded-[28px] border border-border/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(244,248,247,0.92))] px-4 py-4 shadow-sm sm:px-5 md:flex-row md:items-center md:justify-between">
           <div className="space-y-1">
             <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-primary">
               <Sparkles className="h-3.5 w-3.5" />
@@ -88,15 +86,25 @@ export default function CreateLiveStreamPage() {
           camera={camera} 
           onStreamCreated={handleStreamCreated} 
         />
+      ) : step === "ready" ? (
+        streamId && (
+          <LiveStreamBroadcast
+            streamId={streamId}
+            camera={camera}
+            streamData={streamData}
+            isLive={false}
+            onGoLive={handleGoLive}
+            onBack={() => setStep("setup")}
+          />
+        )
       ) : (
         streamId && (
           <LiveStreamBroadcast
             streamId={streamId}
             camera={camera}
             streamData={streamData}
-            isLive={true} // In a real app, this might start as false until "Go Live" is clicked inside broadcast
+            isLive={true}
             onEndStream={handleEndStream}
-            onBack={() => setStep("setup")}
           />
         )
       )}

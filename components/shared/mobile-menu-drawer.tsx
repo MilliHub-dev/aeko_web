@@ -1,16 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
 import Image from "next/image";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import {
-  Bookmark,
-  Wallet2,
   Users,
-  LifeBuoy,
   LogOut,
   Coins,
   User,
@@ -21,11 +18,12 @@ import { useMobileMenu } from "./mobile-menu-context";
 import { logoutAction } from "@/app/(aeko-auth)/actions";
 
 import { useUser } from "./user-context";
-import { HomeIcon, RadioSolid, BellIcon, WalletOutline } from "@/lib/icons";
+import { HomeIcon, RadioSolid, BellIcon, WalletOutline, ChatIcon } from "@/lib/icons";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
+import { useChatStore } from "@/features/chat/stores/chat-store";
 
 function MobileWaitlistCard({
   onOpen,
@@ -176,10 +174,20 @@ function MobileWaitlistDialog({
 export function MobileMenuDrawer() {
   const { open, closeMenu } = useMobileMenu();
   const { user } = useUser();
+  const chats = useChatStore((state) => state.chats);
+  const fetchChats = useChatStore((state) => state.fetchChats);
   const [mounted, setMounted] = useState(false);
   const [waitlistOpen, setWaitlistOpen] = useState(false);
+  const hasUnreadMessages = useMemo(
+    () => chats.some((chat) => (chat.unreadCount || 0) > 0),
+    [chats]
+  );
 
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    fetchChats();
+  }, [fetchChats]);
 
   useEffect(() => {
     if (!open) return;
@@ -210,6 +218,7 @@ export function MobileMenuDrawer() {
       icon: RadioSolid,
     },
     { label: "Notifications", href: "/notifications", icon: BellIcon },
+    { label: "Messages", href: "/messages", icon: ChatIcon },
     { 
       label: "Aeko Wallet", 
       href: "/wallet", 
@@ -325,6 +334,9 @@ export function MobileMenuDrawer() {
                       onClick={closeMenu}>
                       <Icon className="shrink-0" size={22} />
                       <span>{label}</span>
+                      {href === "/messages" && hasUnreadMessages && (
+                        <span className="ml-auto h-2.5 w-2.5 rounded-full bg-primary" />
+                      )}
                       {badge && (
                         <span className="ml-auto rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
                           {badge}

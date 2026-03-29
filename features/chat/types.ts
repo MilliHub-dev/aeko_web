@@ -4,6 +4,8 @@ export interface ChatUser {
   username: string;
   profilePicture?: string;
   avatar?: string; // Fallback
+  socketId?: string;
+  socket_id?: string;
   blueTick?: boolean;
   goldenTick?: boolean;
    prideTick?: boolean;
@@ -43,6 +45,19 @@ export interface Message {
   content: string;
   createdAt: string;
   readAt?: string;
+  replyToId?: string;
+  replyTo?: {
+    id?: string;
+    _id?: string;
+    content?: string;
+    senderId?: string;
+    sender?: {
+      id?: string;
+      _id?: string;
+      name?: string;
+      username?: string;
+    };
+  };
   // Media support
   messageType?: 'text' | 'image' | 'video' | 'file' | 'emoji' | 'voice' | 'call';
   mediaUrl?: string; // Legacy/Fallback

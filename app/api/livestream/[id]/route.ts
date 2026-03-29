@@ -2,6 +2,29 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { API_BASE_URL } from "@/lib/config";
 
+async function parseUpstreamResponse(res: Response) {
+  const contentType = res.headers.get("content-type") || "";
+  const text = await res.text();
+
+  if (!text) {
+    return null;
+  }
+
+  if (contentType.includes("application/json")) {
+    return JSON.parse(text);
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return {
+      success: false,
+      message: "Upstream returned a non-JSON response",
+      raw: text.slice(0, 200),
+    };
+  }
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -17,9 +40,10 @@ export async function GET(
       },
     });
 
-    const data = await res.json();
+    const data = await parseUpstreamResponse(res);
 
     if (!res.ok) {
+      console.error("Get Livestream upstream error:", res.status, data);
       return NextResponse.json(data, { status: res.status });
     }
 
@@ -52,9 +76,10 @@ export async function PUT(
       body: JSON.stringify(body),
     });
 
-    const data = await res.json();
+    const data = await parseUpstreamResponse(res);
 
     if (!res.ok) {
+      console.error("Update Livestream upstream error:", res.status, data);
       return NextResponse.json(data, { status: res.status });
     }
 

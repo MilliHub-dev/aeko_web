@@ -405,11 +405,11 @@ const StoryViewer = ({ userStories, storyId, prevUser, nextUser }: StoryViewerPr
         }}
       >
         <BaseDialog.Portal>
-          <BaseDialog.Backdrop className="isolate relative">
-            <div className="fixed inset-0 bg-[radial-gradient(120%_120%_at_0%_0%,rgba(0,127,109,0.2),transparent_40%),radial-gradient(100%_120%_at_100%_0%,rgba(255,255,255,0.08),transparent_35%),rgba(3,7,18,0.92)] backdrop-blur-md" />
+          <BaseDialog.Backdrop className="isolate relative z-[120]">
+            <div className="fixed inset-0 z-[120] bg-[radial-gradient(120%_120%_at_0%_0%,rgba(0,127,109,0.2),transparent_40%),radial-gradient(100%_120%_at_100%_0%,rgba(255,255,255,0.08),transparent_35%),rgba(3,7,18,0.92)] backdrop-blur-md" />
           </BaseDialog.Backdrop>
           <BaseDialog.Popup
-            className="fixed inset-0 m-0 flex items-center justify-center gap-2 px-2 py-3 outline-none sm:gap-4 sm:px-4 sm:py-6 lg:gap-6"
+            className="fixed inset-0 z-[130] m-0 flex items-center justify-center gap-2 px-2 py-3 outline-none sm:gap-4 sm:px-4 sm:py-6 lg:gap-6"
             ref={focusTrapRef}
             role="dialog"
             aria-modal="true"

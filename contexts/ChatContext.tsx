@@ -6,6 +6,7 @@ import {
   useState,
   useEffect,
   useRef,
+  useMemo,
   type ReactNode,
 } from "react";
 import { useRouter, usePathname } from "next/navigation";
@@ -33,10 +34,13 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [showChatList, setShowChatList] = useState<boolean>(true);
   const [isInitializing, setIsInitializing] = useState<boolean>(false);
   const attemptedRef = useRef<string | null>(null);
+  const socketRef = useRef<ReturnType<typeof getSocket> | null>(null);
+  const markedMessageIdsRef = useRef<Set<string>>(new Set());
   const { user } = useUser();
   
   const { 
     chats,  
+    messages,
     fetchChats, 
     selectChat, 
     selectedChatId,
@@ -47,6 +51,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   // Derived state for selected chat
   const selectedChat = chats.find(c => String(c.id) === String(selectedChatId)) || null;
+  const selectedMessages = useMemo(
+    () => (selectedChatId ? messages[selectedChatId] || [] : []),
+    [messages, selectedChatId]
+  );
 
   const retryRef = useRef<number>(0);
   const prevSelectedIdRef = useRef<string | null>(null);
@@ -102,6 +110,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           const { token } = await res.json();
           if (token) {
             const socket = getSocket(token);
+            socketRef.current = socket;
 
             socket.on("message_read", (data: { messageId: string, chatId?: string, conversationId?: string }) => {
               // Find chat ID if not provided
@@ -134,9 +143,42 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     initSocket();
 
     return () => {
+      socketRef.current = null;
       disconnectSocket();
     };
   }, [updateMessage]);
+
+  useEffect(() => {
+    if (!selectedChatId || !user) {
+      return;
+    }
+
+    const socket = socketRef.current;
+    if (!socket) {
+      return;
+    }
+
+    const myId = String(user.id || user._id || "");
+    if (!myId) {
+      return;
+    }
+
+    selectedMessages.forEach((message) => {
+      const messageId = String(message.id || "");
+      const senderId = String(message.senderId || "");
+      const isIncomingUnread =
+        !!messageId &&
+        senderId !== myId &&
+        !message.readAt;
+
+      if (!isIncomingUnread || markedMessageIdsRef.current.has(messageId)) {
+        return;
+      }
+
+      socket.emit("mark_message_read", { messageId });
+      markedMessageIdsRef.current.add(messageId);
+    });
+  }, [selectedChatId, selectedMessages, user]);
 
   // Sync state with URL pathname changes
   useEffect(() => {

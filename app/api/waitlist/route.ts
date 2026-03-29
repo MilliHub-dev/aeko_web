@@ -1,39 +1,9 @@
-import { promises as fs } from "fs";
-import path from "path";
 import { NextRequest, NextResponse } from "next/server";
+import { API_BASE_URL } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
-interface WaitlistEntry {
-  name: string;
-  email: string;
-  createdAt: string;
-}
-
-const WAITLIST_FILE = path.join(process.cwd(), "data", "waitlist.json");
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-async function ensureWaitlistFile() {
-  await fs.mkdir(path.dirname(WAITLIST_FILE), { recursive: true });
-
-  try {
-    await fs.access(WAITLIST_FILE);
-  } catch {
-    await fs.writeFile(WAITLIST_FILE, "[]", "utf8");
-  }
-}
-
-async function readWaitlist(): Promise<WaitlistEntry[]> {
-  await ensureWaitlistFile();
-
-  try {
-    const raw = await fs.readFile(WAITLIST_FILE, "utf8");
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -45,47 +15,68 @@ export async function POST(request: NextRequest) {
     if (!name || !email) {
       return NextResponse.json(
         { success: false, message: "Name and email are required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     if (!EMAIL_REGEX.test(email)) {
       return NextResponse.json(
         { success: false, message: "Please enter a valid email address" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
-    const waitlist = await readWaitlist();
-    const alreadyExists = waitlist.some((entry) => entry.email === email);
+    const upstreamResponse = await fetch(`${API_BASE_URL}/api/waitlist`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name, email }),
+      cache: "no-store",
+    });
 
-    if (alreadyExists) {
+    const text = await upstreamResponse.text();
+    let data: unknown = null;
+
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch {
+      data = null;
+    }
+
+    if (!upstreamResponse.ok) {
+      const fallbackMessage =
+        upstreamResponse.status === 409
+          ? "This email is already on the waitlist"
+          : upstreamResponse.status === 503
+            ? "Waitlist service is currently unavailable"
+            : "Failed to join waitlist";
+
       return NextResponse.json(
-        { success: false, message: "This email is already on the waitlist" },
-        { status: 409 },
+        typeof data === "object" && data !== null
+          ? data
+          : { success: false, message: fallbackMessage },
+        { status: upstreamResponse.status }
       );
     }
-
-    const nextEntry: WaitlistEntry = {
-      name,
-      email,
-      createdAt: new Date().toISOString(),
-    };
-
-    waitlist.push(nextEntry);
-
-    await ensureWaitlistFile();
-    await fs.writeFile(WAITLIST_FILE, JSON.stringify(waitlist, null, 2), "utf8");
 
     return NextResponse.json(
-      { success: true, message: "Joined waitlist successfully", data: nextEntry },
-      { status: 201 },
+      typeof data === "object" && data !== null
+        ? data
+        : {
+            success: true,
+            message: "Joined waitlist successfully",
+          },
+      { status: upstreamResponse.status || 201 }
     );
   } catch (error) {
     console.error("Waitlist API error:", error);
     return NextResponse.json(
-      { success: false, message: "Internal Server Error" },
-      { status: 500 },
+      {
+        success: false,
+        message: "Waitlist service is currently unavailable",
+      },
+      { status: 503 }
     );
   }
 }

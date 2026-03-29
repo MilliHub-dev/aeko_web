@@ -19,7 +19,18 @@ export async function POST(
       },
     });
 
-    const data = await res.json();
+    const responseText = await res.text();
+    let data: unknown;
+
+    try {
+      data = responseText ? JSON.parse(responseText) : {};
+    } catch {
+      data = {
+        success: false,
+        message: "Upstream returned a non-JSON response",
+        raw: responseText,
+      };
+    }
 
     if (!res.ok) {
       return NextResponse.json(data, { status: res.status });

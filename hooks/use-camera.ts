@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { MediaDeviceOption } from "@/types/livestream";
 
 interface UseCameraOptions {
@@ -10,6 +10,7 @@ interface UseCameraOptions {
 export function useCamera({ onError }: UseCameraOptions = {}) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const playRequestIdRef = useRef(0);
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
   const [devices, setDevices] = useState<MediaDeviceOption[]>([]);
   const [selectedCamera, setSelectedCamera] = useState<string>("");
@@ -17,6 +18,50 @@ export function useCamera({ onError }: UseCameraOptions = {}) {
   const [isMuted, setIsMuted] = useState(false);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const attachStreamToVideo = useCallback(async (stream: MediaStream | null) => {
+    if (!videoRef.current || !stream) {
+      return;
+    }
+
+    const requestId = ++playRequestIdRef.current;
+
+    if (videoRef.current.srcObject !== stream) {
+      videoRef.current.srcObject = stream;
+    }
+
+    try {
+      await new Promise<void>((resolve) => {
+        if (!videoRef.current) {
+          resolve();
+          return;
+        }
+
+        if (videoRef.current.readyState >= 1) {
+          resolve();
+          return;
+        }
+
+        const handleLoadedMetadata = () => {
+          videoRef.current?.removeEventListener("loadedmetadata", handleLoadedMetadata);
+          resolve();
+        };
+
+        videoRef.current.addEventListener("loadedmetadata", handleLoadedMetadata, { once: true });
+      });
+
+      if (requestId !== playRequestIdRef.current || !videoRef.current) {
+        return;
+      }
+
+      await videoRef.current.play();
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return;
+      }
+      console.warn("Unable to autoplay camera preview yet:", error);
+    }
+  }, []);
 
   // Get available media devices
   const enumerateDevices = async () => {
@@ -82,9 +127,7 @@ export function useCamera({ onError }: UseCameraOptions = {}) {
       setHasPermission(true);
 
       // Attach stream to video element
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
+      await attachStreamToVideo(stream);
 
       // Enumerate devices after permission granted
       await enumerateDevices();
@@ -130,6 +173,10 @@ export function useCamera({ onError }: UseCameraOptions = {}) {
       }
     };
   }, []);
+
+  useEffect(() => {
+    attachStreamToVideo(mediaStream);
+  }, [attachStreamToVideo, mediaStream]);
 
   return {
     videoRef,

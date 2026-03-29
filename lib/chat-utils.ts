@@ -34,8 +34,16 @@ export const getOtherParticipant = (chat: Chat, currentUserId?: string): ChatUse
     Object.assign(resolved, (other as any).user);
   }
 
+  const nestedUser = (other as any).user || {};
+
   // Map common field variations
   resolved.id = resolved.id || resolved._id || resolved.userId;
+  resolved.socketId =
+    resolved.socketId ||
+    resolved.socket_id ||
+    resolved.userSocketId ||
+    nestedUser?.socketId ||
+    nestedUser?.socket_id;
   
   if (resolved.name) {
     // Keep existing name
@@ -55,7 +63,6 @@ export const getOtherParticipant = (chat: Chat, currentUserId?: string): ChatUse
   if (other.goldenTick !== undefined) resolved.goldenTick = other.goldenTick;
 
   // Aggressive check for verification status (handle nested user or aliases)
-  const nestedUser = (other as any).user || {};
   resolved.blueTick = resolved.blueTick || nestedUser.blueTick || resolved.isVerified || nestedUser.isVerified || false;
   resolved.goldenTick = resolved.goldenTick || nestedUser.goldenTick || false;
 

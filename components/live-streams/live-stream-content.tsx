@@ -10,7 +10,7 @@ export function LiveStreamContent({
 }: {
   activeCategory: string;
 }) {
-  const { streams, loading, error } = useLiveStreams();
+  const { streams, loading, error } = useLiveStreams(activeCategory);
 
   if (loading) {
     return (
@@ -22,23 +22,18 @@ export function LiveStreamContent({
 
   if (error) {
     return (
-      <div className="mt-12 rounded-[28px] border border-red-200 bg-red-50 px-8 py-12 text-center text-red-600 shadow-sm dark:border-red-900/50 dark:bg-red-900/10">
+      <div className="mt-10 rounded-[24px] border border-red-200 bg-red-50 px-5 py-10 text-center text-red-600 shadow-sm sm:mt-12 sm:rounded-[28px] sm:px-8 sm:py-12 dark:border-red-900/50 dark:bg-red-900/10">
         <h3 className="text-lg font-semibold">Failed to load streams</h3>
         <p className="mt-3 text-sm opacity-90">{error}</p>
       </div>
     );
   }
 
-  const filteredStreams =
-    activeCategory === "All"
-      ? streams
-      : streams.filter((stream) => stream.category === activeCategory);
-
-  const liveNow = filteredStreams.filter((stream) => stream.isLive);
-  const upcoming = filteredStreams.filter((stream) => !stream.isLive);
+  const liveNow = streams.filter((stream) => stream.isLive);
+  const upcoming = streams.filter((stream) => !stream.isLive);
 
   return (
-    <div className="mt-8 space-y-8 text-foreground sm:mt-10 sm:space-y-10 lg:mt-12 lg:space-y-12">
+    <div className="mt-6 space-y-8 text-foreground sm:mt-10 sm:space-y-10 lg:mt-12 lg:space-y-12">
       {liveNow.length > 0 && (
         <section className="space-y-6">
           <header className="flex flex-col justify-between gap-4 border-b border-border/60 pb-4 sm:flex-row sm:items-end">
@@ -87,8 +82,8 @@ export function LiveStreamContent({
         </section>
       )}
 
-      {filteredStreams.length === 0 && (
-        <div className="rounded-[28px] border border-border/60 bg-card/70 px-8 py-12 text-center shadow-sm">
+      {streams.length === 0 && (
+        <div className="rounded-[24px] border border-border/60 bg-card/70 px-5 py-10 text-center shadow-sm sm:rounded-[28px] sm:px-8 sm:py-12">
           <h3 className="text-lg font-semibold">No streams found</h3>
           <p className="mt-3 text-sm text-muted-foreground">
             {activeCategory === "All"

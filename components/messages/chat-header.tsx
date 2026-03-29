@@ -74,6 +74,8 @@ const ChatHeader = ({ onToggleGroupInfo }: { onToggleGroupInfo?: () => void }) =
   const displayAvatar = getChatDisplayImage(selectedChat, myId);
   const otherParticipant = getOtherParticipant(selectedChat, myId);
   const otherId = otherParticipant?.id || (otherParticipant as any)?._id || (otherParticipant as any)?.userId;
+  const otherSocketId = otherParticipant?.socketId || (otherParticipant as any)?.socket_id;
+  const callTarget = otherSocketId || otherId;
 
   return (
     <>
@@ -138,14 +140,14 @@ const ChatHeader = ({ onToggleGroupInfo }: { onToggleGroupInfo?: () => void }) =
         {otherId && !isGroup && (
           <>
             <button 
-              onClick={() => startCall(otherId, "voice")}
+              onClick={() => callTarget && startCall(callTarget, "voice", otherId)}
               className="p-2 hover:bg-secondary/80 rounded-full transition-colors" 
               aria-label="Voice Call"
             >
               <Phone size={20} />
             </button>
             <button 
-              onClick={() => startCall(otherId, "video")}
+              onClick={() => callTarget && startCall(callTarget, "video", otherId)}
               className="p-2 hover:bg-secondary/80 rounded-full transition-colors" 
               aria-label="Video Call"
             >

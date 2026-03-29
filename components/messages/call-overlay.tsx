@@ -17,12 +17,29 @@ import {
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+async function safelyPlayMedia(element: HTMLMediaElement | null) {
+  if (!element) {
+    return;
+  }
+
+  try {
+    await element.play();
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      return;
+    }
+    console.error("Error playing media element:", error);
+  }
+}
+
 export function CallOverlay() {
   const { 
     status, 
     type, 
     callerId, 
     receiverId, 
+    callerUserId,
+    receiverUserId,
     localStream, 
     remoteStream, 
     isMuted, 
@@ -50,7 +67,7 @@ export function CallOverlay() {
   }, [isSpeakerOn]);
 
   useEffect(() => {
-    const targetId = callerId || receiverId;
+    const targetId = callerUserId || receiverUserId;
     if (!targetId) return;
 
     const fetchUser = async () => {
@@ -87,11 +104,11 @@ export function CallOverlay() {
   useEffect(() => {
     if (remoteVideoRef.current && remoteStream) {
       remoteVideoRef.current.srcObject = remoteStream;
-      remoteVideoRef.current.play().catch(e => console.error("Error playing remote video:", e));
+      safelyPlayMedia(remoteVideoRef.current);
     }
     if (remoteAudioRef.current && remoteStream) {
       remoteAudioRef.current.srcObject = remoteStream;
-      remoteAudioRef.current.play().catch(e => console.error("Error playing remote audio:", e));
+      safelyPlayMedia(remoteAudioRef.current);
     }
   }, [remoteStream, isConnected, isVideoCall]);
 

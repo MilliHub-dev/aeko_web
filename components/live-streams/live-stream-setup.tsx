@@ -18,14 +18,13 @@ import {
   Camera,
   Mic,
   MicOff,
-  Upload,
   X,
   Loader2,
   Settings,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import { createLivestream, uploadThumbnail } from "@/lib/livestream-service";
+import { createLivestream } from "@/lib/livestream-service";
 import type { LivestreamCreateData } from "@/types/livestream";
 import type { useCamera } from "@/hooks/use-camera";
 import { cn } from "@/lib/utils";
@@ -59,8 +58,6 @@ export function LiveStreamSetup({
   const [streamType, setStreamType] = useState("Public");
   const [tags, setTags] = useState<string[]>([]);
   const [currentTag, setCurrentTag] = useState("");
-  const [thumbnail, setThumbnail] = useState<File | null>(null);
-  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
@@ -74,18 +71,6 @@ export function LiveStreamSetup({
 
   const handleRemoveTag = (index: number) => {
     setTags(tags.filter((_, i) => i !== index));
-  };
-
-  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setThumbnail(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setThumbnailPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -123,19 +108,30 @@ export function LiveStreamSetup({
       const response = await createLivestream(data);
       console.log("Create livestream response:", response);
 
-      const streamId = response.livestream?._id;
+      const streamId =
+        response.data?.stream?._id ||
+        response.data?.stream?.id ||
+        response.data?._id ||
+        response.data?.streamId ||
+        response.livestream?._id ||
+        response.livestream?.id;
 
       if (!streamId) {
         console.error("Missing stream ID in response:", response);
         throw new Error("Failed to get stream ID from server");
       }
 
-      // Upload thumbnail if provided
-      if (thumbnail) {
-        await uploadThumbnail(streamId, thumbnail);
-      }
+      const streamMeta = response.data?.stream;
 
-      onStreamCreated(streamId, data);
+      onStreamCreated(streamId, {
+        ...data,
+        chatId:
+          streamMeta?.chatId ||
+          response.data?.chatId ||
+          undefined,
+        hostName: streamMeta?.hostName,
+        hostProfilePicture: streamMeta?.hostProfilePicture,
+      });
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to create livestream"
@@ -149,7 +145,7 @@ export function LiveStreamSetup({
   const microphones = camera.devices.filter((d) => d.kind === "audioinput");
 
   return (
-    <div className="relative h-[85vh] w-full overflow-hidden rounded-[32px] border border-white/10 bg-black shadow-[0_26px_90px_-56px_rgba(15,23,42,0.55)]">
+    <div className="relative h-[85vh] w-full overflow-y-auto rounded-[32px] border border-white/10 bg-black shadow-[0_26px_90px_-56px_rgba(15,23,42,0.55)]">
       {/* Camera Feed Background */}
       <div className="absolute inset-0">
         {camera.hasPermission ? (
@@ -177,12 +173,13 @@ export function LiveStreamSetup({
       </div>
 
       {/* Top Header */}
-      <header className="relative z-10 flex items-center justify-between px-4 py-4 safe-top">
+      <header className="sticky top-0 z-20 flex items-center justify-between px-4 py-4 safe-top">
+        <div className="absolute inset-0 bg-linear-to-b from-black/75 to-black/30 backdrop-blur-md" />
         <div>
-          <h2 className="text-xl font-semibold text-white">Setup Livestream</h2>
-          <p className="text-sm text-white/70">Dial in the details before you go live.</p>
+          <h2 className="relative text-xl font-semibold text-white">Setup Livestream</h2>
+          <p className="relative text-sm text-white/70">Dial in the details before you go live.</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="relative flex items-center gap-2">
           <button
             onClick={camera.toggleMute}
             className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 backdrop-blur-md transition-colors hover:bg-black/60">
@@ -253,7 +250,7 @@ export function LiveStreamSetup({
       )}
 
       {/* Main Form - Centered Overlay */}
-      <div className="absolute inset-x-0 bottom-0 z-20 px-4 pb-10 md:pb-safe-bottom md:safe-bottom">
+      <div className="relative z-10 px-4 pb-10 pt-28 md:pb-safe-bottom md:safe-bottom">
         <form
           onSubmit={handleSubmit}
           className="mx-auto max-w-lg space-y-3 pb-8">
@@ -373,49 +370,6 @@ export function LiveStreamSetup({
                   </Badge>
                 ))}
               </div>
-            )}
-          </div>
-
-          {/* Thumbnail Upload */}
-          <div className="rounded-2xl border border-white/20 bg-black/40 p-4 backdrop-blur-xl">
-            <Label className="mb-2 block text-xs text-white/80">
-              Thumbnail (Optional)
-            </Label>
-            {thumbnailPreview ? (
-              <div className="relative">
-                <img
-                  src={thumbnailPreview}
-                  alt="Thumbnail preview"
-                  className="h-24 w-full rounded-lg object-cover"
-                />
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="sm"
-                  className="absolute right-2 top-2 h-8 w-8 rounded-full p-0"
-                  onClick={() => {
-                    setThumbnail(null);
-                    setThumbnailPreview(null);
-                  }}>
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            ) : (
-              <label
-                htmlFor="thumbnail"
-                className="flex h-24 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-white/30 hover:border-white/50">
-                <div className="text-center">
-                  <Upload className="mx-auto h-6 w-6 text-white/60" />
-                  <p className="mt-1 text-xs text-white/60">Upload image</p>
-                </div>
-                <input
-                  id="thumbnail"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleThumbnailChange}
-                />
-              </label>
             )}
           </div>
 

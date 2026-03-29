@@ -16,7 +16,7 @@ interface ChatState {
   fetchChats: () => Promise<void>;
   selectChat: (chatId: string | null) => void;
   fetchMessages: (chatId: string) => Promise<void>;
-  sendMessage: (content: string, receiverId?: string) => Promise<void>;
+  sendMessage: (content: string, receiverId?: string, replyToId?: string) => Promise<void>;
   sendMediaMessage: (file: File, receiverId?: string) => Promise<void>;
   sendVoiceMessage: (voice: Blob, duration: number, waveform: number[], receiverId?: string) => Promise<void>;
   addMessage: (message: Message) => void;
@@ -153,7 +153,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
   },
 
-  sendMessage: async (content, receiverId) => {
+  sendMessage: async (content, receiverId, replyToId) => {
     const { selectedChatId } = get();
     if (!selectedChatId) return;
 
@@ -165,7 +165,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
         chatId: selectedChatId,
         content,
         messageType: 'text',
-        receiverId
+        receiverId,
+        replyToId
       };
 
       // Use /send-message as per documentation

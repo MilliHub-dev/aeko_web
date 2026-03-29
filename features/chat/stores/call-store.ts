@@ -8,6 +8,8 @@ interface CallState {
   type: CallType | null;
   callerId: string | null;
   receiverId: string | null;
+  callerUserId: string | null;
+  receiverUserId: string | null;
   remoteStream: MediaStream | null;
   localStream: MediaStream | null;
   isMuted: boolean;
@@ -15,8 +17,8 @@ interface CallState {
   startTime: number | null;
   
   // Actions
-  startCall: (receiverId: string, type: CallType) => void;
-  setIncomingCall: (callerId: string, type: CallType) => void;
+  startCall: (receiverId: string, type: CallType, receiverUserId?: string | null) => void;
+  setIncomingCall: (callerId: string, type: CallType, callerUserId?: string | null) => void;
   acceptCall: () => void;
   endCall: () => void;
   setLocalStream: (stream: MediaStream | null) => void;
@@ -24,6 +26,7 @@ interface CallState {
   toggleMute: () => void;
   toggleVideo: () => void;
   setStatus: (status: CallStatus) => void;
+  setType: (type: CallType | null) => void;
 }
 
 export const useCallStore = create<CallState>((set) => ({
@@ -31,26 +34,32 @@ export const useCallStore = create<CallState>((set) => ({
   type: null,
   callerId: null,
   receiverId: null,
+  callerUserId: null,
+  receiverUserId: null,
   remoteStream: null,
   localStream: null,
   isMuted: false,
   isVideoEnabled: true,
   startTime: null,
 
-  startCall: (receiverId, type) => set({ 
+  startCall: (receiverId, type, receiverUserId) => set({ 
     status: "calling", 
     type, 
     receiverId, 
+    receiverUserId: receiverUserId || null,
     callerId: null, // I am the caller
+    callerUserId: null,
     isMuted: false,
     isVideoEnabled: type === "video"
   }),
 
-  setIncomingCall: (callerId, type) => set({ 
+  setIncomingCall: (callerId, type, callerUserId) => set({ 
     status: "incoming", 
     type, 
     callerId,
+    callerUserId: callerUserId || null,
     receiverId: null, // I am the receiver
+    receiverUserId: null,
     isMuted: false,
     isVideoEnabled: type === "video"
   }),
@@ -68,6 +77,8 @@ export const useCallStore = create<CallState>((set) => ({
         type: null, 
         callerId: null, 
         receiverId: null, 
+        callerUserId: null,
+        receiverUserId: null,
         remoteStream: null, 
         localStream: null,
         startTime: null
@@ -100,5 +111,7 @@ export const useCallStore = create<CallState>((set) => ({
   setStatus: (status) => set((state) => ({ 
     status,
     startTime: status === "connected" && !state.startTime ? Date.now() : state.startTime
-  }))
+  })),
+
+  setType: (type) => set({ type })
 }));

@@ -13,9 +13,7 @@ import {
   MoreVertical,
   Users,
   Heart,
-  MessageCircle,
   Share2,
-  Send,
 } from "lucide-react";
 import { useLiveChat } from "@/features/livestream/hooks/use-live-chat";
 
@@ -31,6 +29,7 @@ interface LiveStreamViewerProps {
   viewers: number;
   likes: number;
   thumbnail?: string;
+  playbackUrl?: string | null;
   category: string;
   isFollowing?: boolean;
 }
@@ -42,6 +41,7 @@ export function LiveStreamViewer({
   viewers,
   likes,
   thumbnail = "/placeholder.svg",
+  playbackUrl,
   category,
   isFollowing = false,
 }: LiveStreamViewerProps) {
@@ -76,13 +76,23 @@ export function LiveStreamViewer({
     <div className="relative h-dvh w-full overflow-hidden bg-black">
       {/* Background Video/Image */}
       <div className="absolute inset-0">
-        <Image
-          src={thumbnail}
-          alt={title}
-          fill
-          className="object-cover"
-          priority
-        />
+        {playbackUrl ? (
+          <video
+            src={playbackUrl}
+            autoPlay
+            playsInline
+            controls
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <Image
+            src={thumbnail || streamer.avatar || "/placeholder.svg"}
+            alt={title}
+            fill
+            className="object-cover"
+            priority
+          />
+        )}
         {/* Dark gradient overlay for readability */}
         <div className="absolute inset-0 bg-linear-to-b from-black/40 via-transparent to-black/60" />
       </div>
@@ -217,7 +227,7 @@ export function LiveStreamViewer({
         {/* Share Stats */}
         <div className="mx-auto flex w-full max-w-screen-sm items-center justify-between px-3 pb-2 pt-3 sm:px-4 sm:pb-4">
           <span className="text-xs text-white/80 drop-shadow-md">
-            2.68K views
+            {viewers > 0 ? `${viewers.toLocaleString()} views` : "No views yet"}
           </span>
           <span className="text-xs text-white/80 drop-shadow-md">Share</span>
         </div>

@@ -90,7 +90,7 @@ export async function startLivestream(streamId: string): Promise<void> {
 /**
  * End a livestream
  */
-export async function endLivestream(streamId: string): Promise<void> {
+export async function endLivestream(streamId: string): Promise<LivestreamResponse> {
   const token = document.cookie
     .split("; ")
     .find((row) => row.startsWith("token="))
@@ -108,4 +108,6 @@ export async function endLivestream(streamId: string): Promise<void> {
     const error = await response.json();
     throw new Error(error.message || "Failed to end livestream");
   }
+
+  return response.json();
 }

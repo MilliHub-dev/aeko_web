@@ -1,6 +1,6 @@
 "use client";
 
-import { Send, Image, Smile, Mic, X, Play, Pause, CheckCheck, Video, Phone, Trash2, MoreVertical } from "lucide-react";
+import { Send, Image, Smile, Mic, X, Play, Pause, CheckCheck, Video, Phone, Trash2, MoreVertical, Reply } from "lucide-react";
 import { useChat } from "@/contexts/ChatContext";
 import { useState, useEffect, useRef } from "react";
 import { ChatHeader } from "./chat-header";
@@ -19,15 +19,42 @@ import { getOtherParticipant } from "@/lib/chat-utils";
 import { MediaViewerModal } from "./media-viewer-modal";
 import { GroupInfoSidebar } from "./group-info-sidebar";
 
+function resolveSenderName(
+  selectedChat: NonNullable<ReturnType<typeof useChat>["selectedChat"]>,
+  senderId?: string,
+  currentUserId?: string
+) {
+  if (!senderId) {
+    return "Unknown";
+  }
+
+  if (String(senderId) === String(currentUserId || "")) {
+    return "You";
+  }
+
+  const participant = selectedChat.participants?.find((item) => {
+    const participantId = item.id || (item as { _id?: string; userId?: string })._id || (item as { _id?: string; userId?: string }).userId;
+    return String(participantId) === String(senderId);
+  });
+
+  return participant?.name || participant?.username || "Unknown";
+}
+
 interface DisplayMessage {
   id: string;
   text: string;
   sent: boolean;
   time: string;
+  senderName?: string;
   readAt?: string;
   type?: 'text' | 'image' | 'video' | 'file' | 'emoji' | 'voice' | 'call';
   mediaUrl?: string;
   attachments?: { url: string; mimeType: string }[];
+  replyTo?: {
+    id: string;
+    text: string;
+    senderName: string;
+  };
   voiceMessage?: {
     url: string;
     duration: number;
@@ -41,10 +68,40 @@ interface DisplayMessage {
   deleted?: boolean;
 }
 
+function normalizeMessageType(message: any): DisplayMessage["type"] {
+  return (
+    message.messageType ||
+    message.type ||
+    message.kind ||
+    (message.call ? "call" : undefined)
+  );
+}
+
+function normalizeCallData(message: any): DisplayMessage["call"] | undefined {
+  const rawCall = message.call || message.callLog || message.callData || message.metadata?.call;
+  if (!rawCall && normalizeMessageType(message) !== "call") {
+    return undefined;
+  }
+
+  const content = String(message.content || message.message || "").toLowerCase();
+  const inferredTypeFromContent = content.includes("video call")
+    ? "video"
+    : content.includes("voice call")
+      ? "voice"
+      : undefined;
+
+  return {
+    type: rawCall?.type || rawCall?.callType || message.callType || inferredTypeFromContent || "voice",
+    duration: rawCall?.duration,
+    status: rawCall?.status || message.callStatus || "ended",
+  };
+}
+
 interface MessageBubbleProps {
   message: DisplayMessage;
   onViewMedia: (url: string, type: 'image' | 'video') => void;
   onDelete: (messageId: string) => void;
+  onReply: (message: DisplayMessage) => void;
 }
 
 const VoiceMessageBubble: React.FC<{ message: DisplayMessage }> = ({ message }) => {
@@ -117,6 +174,11 @@ const CallMessageBubble: React.FC<{ message: DisplayMessage }> = ({ message }) =
   const { type, duration, status } = message.call;
   const isMissed = status === 'missed';
   const isDeclined = status === 'declined';
+  const statusLabel = isMissed
+    ? "No answer"
+    : isDeclined
+      ? "Declined"
+      : "Completed";
   
   const formatDuration = (ms?: number) => {
     if (!ms) return '';
@@ -139,14 +201,14 @@ const CallMessageBubble: React.FC<{ message: DisplayMessage }> = ({ message }) =
         {duration ? (
           <span className="text-xs opacity-70">{formatDuration(duration)}</span>
         ) : (
-          <span className="text-xs opacity-70">{status}</span>
+          <span className="text-xs opacity-70">{statusLabel}</span>
         )}
       </div>
     </div>
   );
 };
 
-const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onViewMedia, onDelete }) => {
+const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onViewMedia, onDelete, onReply }) => {
   if (message.deleted) {
     return (
       <div className={`flex ${message.sent ? "justify-end" : "justify-start"}`}>
@@ -179,6 +241,16 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onViewMedia, onD
 
   return (
   <div className={`flex group ${message.sent ? "justify-end" : "justify-start"}`}>
+    {!message.sent && (
+      <div className="order-1 flex items-center px-2 opacity-0 transition-opacity group-hover:opacity-100">
+        <button
+          onClick={() => onReply(message)}
+          className="rounded-full p-1 text-muted-foreground hover:bg-secondary"
+          aria-label="Reply to message">
+          <Reply size={16} />
+        </button>
+      </div>
+    )}
     {message.sent && (
       <div className="order-1 flex items-center px-2 opacity-0 group-hover:opacity-100 transition-opacity">
         <DropdownMenu>
@@ -188,6 +260,10 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onViewMedia, onD
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onReply(message)}>
+              <Reply className="w-4 h-4 mr-2" />
+              Reply
+            </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => onDelete(message.id)}
               className="text-destructive focus:text-destructive"
@@ -209,6 +285,21 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onViewMedia, onD
             ? "bg-primary text-primary-foreground rounded-br-sm"
             : "bg-secondary text-foreground rounded-bl-sm"
         }`}>
+        {message.replyTo && (
+          <div
+            className={`mb-2 rounded-xl border-l-2 px-3 py-2 text-xs ${
+              message.sent
+                ? "border-white/50 bg-white/15 text-white/90"
+                : "border-primary/40 bg-background/60 text-muted-foreground"
+            }`}>
+            <p className="font-medium">
+              {message.replyTo.senderName}
+            </p>
+            <p className="mt-0.5 line-clamp-2 break-words">
+              {message.replyTo.text || "Media message"}
+            </p>
+          </div>
+        )}
         {mediaItem && isImage ? (
            <img 
              src={mediaItem.url} 
@@ -242,7 +333,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onViewMedia, onD
         <p className="text-xs text-muted-foreground">{message.time}</p>
         {message.sent && (
           message.readAt ? (
-            <CheckCheck className="w-4 h-4 text-blue-500" />
+            <CheckCheck className="w-4 h-4 text-lime-400" />
           ) : (
             <CheckCheck className="w-4 h-4 text-muted-foreground" />
           )
@@ -258,9 +349,10 @@ interface MessageListProps {
   isLoading: boolean;
   onViewMedia: (url: string, type: 'image' | 'video') => void;
   onDelete: (messageId: string) => void;
+  onReply: (message: DisplayMessage) => void;
 }
 
-const MessageList: React.FC<MessageListProps> = ({ messages, isLoading, onViewMedia, onDelete }) => {
+const MessageList: React.FC<MessageListProps> = ({ messages, isLoading, onViewMedia, onDelete, onReply }) => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -291,7 +383,13 @@ const MessageList: React.FC<MessageListProps> = ({ messages, isLoading, onViewMe
         </div>
       ) : (
         messages.map((msg) => (
-          <MessageBubble key={msg.id} message={msg} onViewMedia={onViewMedia} onDelete={onDelete} />
+          <MessageBubble
+            key={msg.id}
+            message={msg}
+            onViewMedia={onViewMedia}
+            onDelete={onDelete}
+            onReply={onReply}
+          />
         ))
       )}
       <div ref={bottomRef} />
@@ -304,9 +402,18 @@ interface MessageInputProps {
   onSendMedia: (file: File) => void;
   onSendVoice: (voice: Blob, duration: number, waveform: number[]) => void;
   isSending: boolean;
+  replyingTo: DisplayMessage | null;
+  onCancelReply: () => void;
 }
 
-const MessageInput: React.FC<MessageInputProps> = ({ onSend, onSendMedia, onSendVoice, isSending }) => {
+const MessageInput: React.FC<MessageInputProps> = ({
+  onSend,
+  onSendMedia,
+  onSendVoice,
+  isSending,
+  replyingTo,
+  onCancelReply,
+}) => {
   const [message, setMessage] = useState("");
   const [showEmoji, setShowEmoji] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -445,6 +552,24 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, onSendMedia, onSend
 
   return (
     <div className="border-t border-border px-4 py-1">
+      {replyingTo && (
+        <div className="mb-2 flex items-start justify-between rounded-2xl border border-border bg-secondary/60 px-4 py-3">
+          <div className="min-w-0">
+            <p className="text-xs font-medium text-primary">
+              Replying to {replyingTo.senderName || "message"}
+            </p>
+            <p className="mt-1 line-clamp-2 break-words text-sm text-muted-foreground">
+              {replyingTo.text || "Media message"}
+            </p>
+          </div>
+          <button
+            onClick={onCancelReply}
+            className="ml-3 rounded-full p-1 text-muted-foreground transition-colors hover:bg-background"
+            aria-label="Cancel reply">
+            <X size={16} />
+          </button>
+        </div>
+      )}
       <div className="flex items-center gap-2 bg-secondary rounded-full px-4 py-2">
         <input 
             type="file" 
@@ -522,6 +647,7 @@ const ChatMessages = () => {
   const { messages, fetchMessages, sendMessage, sendMediaMessage, sendVoiceMessage, deleteMessage, isSendingMessage, isLoadingMessages } = useChatStore();
    const { user } = useUser();
    const [showGroupInfo, setShowGroupInfo] = useState(false);
+   const [replyingTo, setReplyingTo] = useState<DisplayMessage | null>(null);
    const [mediaViewer, setMediaViewer] = useState<{ url: string; type: 'image' | 'video'; isOpen: boolean }>({
      url: '',
      type: 'image',
@@ -533,15 +659,20 @@ const ChatMessages = () => {
        fetchMessages(selectedChat.id);
      }
    }, [selectedChat?.id, fetchMessages]);
+
+   useEffect(() => {
+     setReplyingTo(null);
+   }, [selectedChat?.id]);
  
-   const handleSend = (text: string) => {
+  const handleSend = (text: string) => {
     if (!selectedChat) return;
     const myId = user?._id || user?.id;
     const receiver = getOtherParticipant(selectedChat, myId);
     // Safe check for receiver ID
     const receiverId = receiver?.id || (receiver as any)?._id || (receiver as any)?.userId;
     
-    sendMessage(text, receiverId);
+    sendMessage(text, receiverId, replyingTo?.id);
+    setReplyingTo(null);
   };
 
   const handleSendMedia = (file: File) => {
@@ -588,19 +719,46 @@ const ChatMessages = () => {
   const chatMessages = messages[chatId] || [];
   const isLoading = isLoadingMessages[chatId];
 
-  const displayMessages: DisplayMessage[] = chatMessages.map(m => ({
-    id: m.id,
-    text: m.content,
-    sent: m.senderId === (user?._id || user?.id),
-    time: new Date(m.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-    readAt: m.readAt,
-    type: m.messageType,
-    mediaUrl: m.mediaUrl,
-    attachments: m.attachments,
-    voiceMessage: m.voiceMessage,
-    call: m.call,
-    deleted: m.deleted
-  }));
+  const displayMessages: DisplayMessage[] = chatMessages.map((m) => {
+    const currentUserId = user?._id || user?.id;
+    const repliedMessageId =
+      m.replyToId ||
+      m.replyTo?.id ||
+      m.replyTo?._id;
+    const repliedMessage = repliedMessageId
+      ? chatMessages.find((candidate) => String(candidate.id) === String(repliedMessageId))
+      : null;
+    const replySenderName =
+      m.replyTo?.sender?.name ||
+      m.replyTo?.sender?.username ||
+      resolveSenderName(selectedChat, repliedMessage?.senderId, currentUserId) ||
+      "Unknown";
+
+    const normalizedType = normalizeMessageType(m);
+    const normalizedCall = normalizeCallData(m);
+
+    return {
+      id: m.id,
+      text: m.content,
+      sent: m.senderId === currentUserId,
+      senderName: resolveSenderName(selectedChat, m.senderId, currentUserId),
+      time: new Date(m.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+      readAt: m.readAt,
+      type: normalizedType,
+      mediaUrl: m.mediaUrl,
+      attachments: m.attachments,
+      replyTo: repliedMessageId
+        ? {
+            id: String(repliedMessageId),
+            text: repliedMessage?.content || m.replyTo?.content || "",
+            senderName: replySenderName,
+          }
+        : undefined,
+      voiceMessage: m.voiceMessage,
+      call: normalizedCall,
+      deleted: m.deleted
+    };
+  });
 
   return (
     <div className={`flex h-full ${showChatList ? 'hidden lg:flex' : 'flex'}`}>
@@ -612,6 +770,7 @@ const ChatMessages = () => {
           isLoading={isLoading} 
           onViewMedia={handleViewMedia}
           onDelete={handleDeleteMessage}
+          onReply={setReplyingTo}
         />
 
         <MessageInput 
@@ -619,6 +778,8 @@ const ChatMessages = () => {
           onSendMedia={handleSendMedia}
           onSendVoice={handleSendVoice}
           isSending={isSendingMessage} 
+          replyingTo={replyingTo}
+          onCancelReply={() => setReplyingTo(null)}
         />
       </div>
 

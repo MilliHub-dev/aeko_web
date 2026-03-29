@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { cva } from "class-variance-authority";
 
 import { sidebarRoutes } from "@/lib/routes";
@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { LogOut } from "lucide-react";
 import { logoutAction } from "@/app/(aeko-auth)/actions";
 import { CreatePost } from "../home/create-post";
+import { useChatStore } from "@/features/chat/stores/chat-store";
 
 const navItem = cva(
   "group relative flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition",
@@ -34,6 +35,9 @@ import { useUser } from "./user-context";
 export function LeftSidebar() {
   const pathname = usePathname();
   const { user } = useUser();
+  const chats = useChatStore((state) => state.chats);
+  const fetchChats = useChatStore((state) => state.fetchChats);
+  const hasUnreadMessages = chats.some((chat) => (chat.unreadCount || 0) > 0);
 
   const { mainLinks, secondaryLinks } = useMemo(() => {
     return {
@@ -41,6 +45,10 @@ export function LeftSidebar() {
       secondaryLinks: sidebarRoutes.slice(MAIN_LINK_COUNT),
     };
   }, []);
+
+  useEffect(() => {
+    fetchChats();
+  }, [fetchChats]);
 
   return (
     <aside className="sticky top-0 hidden h-screen w-full shrink-0 overflow-y-auto border-r xl:flex">
@@ -156,6 +164,9 @@ export function LeftSidebar() {
                         <div className="flex min-w-0 flex-col">
                           <span className="truncate text-lg">{route.name}</span>
                         </div>
+                        {route.path === "/messages" && hasUnreadMessages && (
+                          <span className="ml-auto h-2.5 w-2.5 rounded-full bg-primary" />
+                        )}
                         {(route as any).badge && (
                           <span className="ml-auto rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
                             {(route as any).badge}
@@ -208,6 +219,9 @@ export function LeftSidebar() {
                           <Icon className="h-4 w-4" />
                         </span>
                         <span className="truncate text-lg">{route.name}</span>
+                        {route.path === "/messages" && hasUnreadMessages && (
+                          <span className="ml-auto h-2.5 w-2.5 rounded-full bg-primary" />
+                        )}
                         {(route as any).badge && (
                           <span className="ml-auto rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
                             {(route as any).badge}

@@ -1,7 +1,8 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { useCallStore, CallType } from "@/features/chat/stores/call-store";
 import { getSocket } from "@/lib/socket";
 import { useUser } from "@/components/shared/user-context";
+import type { Socket } from "socket.io-client";
 
 const ICE_SERVERS = {
   iceServers: [
@@ -10,6 +11,18 @@ const ICE_SERVERS = {
   ],
 };
 
+function inferCallType(
+  explicitType?: CallType | null,
+  sessionDescription?: RTCSessionDescriptionInit | null
+): CallType {
+  if (explicitType === "video" || explicitType === "voice") {
+    return explicitType;
+  }
+
+  const sdp = sessionDescription?.sdp || "";
+  return sdp.includes("m=video") ? "video" : "voice";
+}
+
 export function useWebRTC() {
   const { user } = useUser();
   const { 
@@ -17,10 +30,13 @@ export function useWebRTC() {
     type, 
     receiverId, 
     callerId,
+    receiverUserId,
+    callerUserId,
     setIncomingCall, 
     setRemoteStream, 
     endCall, 
     setStatus,
+    setType,
     setLocalStream,
     startCall,
     acceptCall
@@ -29,12 +45,54 @@ export function useWebRTC() {
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const iceCandidatesQueue = useRef<RTCIceCandidateInit[]>([]);
+  const activeCallTypeRef = useRef<CallType | null>(null);
+  const [socket, setSocket] = useState<Socket | null>(null);
 
-  // Helper to get socket
-  const socket = getSocket();
+  useEffect(() => {
+    let cancelled = false;
+
+    const initSocket = async () => {
+      try {
+        const existingSocket = getSocket();
+        if (existingSocket?.connected) {
+          if (!cancelled) {
+            setSocket(existingSocket);
+          }
+          return;
+        }
+
+        const res = await fetch("/api/auth/token");
+        if (!res.ok) {
+          return;
+        }
+
+        const { token } = await res.json();
+        if (!token) {
+          return;
+        }
+
+        const nextSocket = getSocket(token);
+        if (!cancelled) {
+          setSocket(nextSocket);
+        }
+      } catch (error) {
+        console.error("Failed to initialize WebRTC socket", error);
+      }
+    };
+
+    initSocket();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Initialize Peer Connection
   const createPeerConnection = useCallback(() => {
+    if (!socket) {
+      throw new Error("Socket is not connected yet");
+    }
+
     if (peerConnectionRef.current) return peerConnectionRef.current;
 
     const pc = new RTCPeerConnection(ICE_SERVERS);
@@ -82,9 +140,15 @@ export function useWebRTC() {
   }, []);
 
   // Start Call (Caller)
-  const initiateCall = useCallback(async (targetId: string, callType: CallType) => {
+  const initiateCall = useCallback(async (targetId: string, callType: CallType, targetUserId?: string | null) => {
+    if (!socket) {
+      console.error("Cannot start call without a socket connection");
+      return;
+    }
+
     try {
-      startCall(targetId, callType);
+      startCall(targetId, callType, targetUserId);
+      activeCallTypeRef.current = callType;
       
       const stream = await navigator.mediaDevices.getUserMedia({
         video: callType === "video",
@@ -103,14 +167,15 @@ export function useWebRTC() {
       socket.emit("call-offer", {
         target: targetId,
         offer,
-        type: callType
+        type: callType,
+        callerId: user?._id || user?.id,
       });
 
     } catch (err) {
       console.error("Error starting call:", err);
       endCall();
     }
-  }, [createPeerConnection, setLocalStream, socket, endCall, startCall]);
+  }, [createPeerConnection, setLocalStream, socket, endCall, startCall, user]);
 
   // Answer Call (Receiver)
   // This function seems unused or redundant if we use acceptIncomingCall?
@@ -149,7 +214,7 @@ export function useWebRTC() {
   useEffect(() => {
     if (!socket) return;
 
-    const handleCallOffer = async (data: { target: string; offer: RTCSessionDescriptionInit; type: CallType; callerId: string }) => {
+    const handleCallOffer = async (data: { target: string; offer: RTCSessionDescriptionInit; type?: CallType; callerId?: string; from?: string; sender?: string }) => {
       // data.callerId should be the ID of the person calling me
       // If the server sends 'sender' or similar, we use that.
       // The user prompt said: Payload : { target: 'RECEIVER_SOCKET_ID', offer: ... }
@@ -170,11 +235,17 @@ export function useWebRTC() {
       
       // Let's assume the incoming data structure matches what I need.
       // I will try to extract `from` or `callerId` from the data.
-      const caller = (data as any).from || (data as any).sender || (data as any).callerId;
+      const caller = data.from || data.sender || data.callerId;
       
       if (caller) {
+        const incomingType = inferCallType(data.type, data.offer);
         pendingOfferRef.current = data.offer;
-        setIncomingCall(caller, data.type || "voice"); // Default to voice if type missing
+        activeCallTypeRef.current = incomingType;
+        setIncomingCall(
+          caller,
+          incomingType,
+          data.callerId || null
+        );
       }
     };
 
@@ -222,8 +293,17 @@ export function useWebRTC() {
   // Complete Answer Call logic
   const acceptIncomingCall = useCallback(async () => {
     if (!pendingOfferRef.current || !callerId) return;
+    if (!socket) {
+      console.error("Cannot accept call without a socket connection");
+      return;
+    }
 
     try {
+      const incomingCallType =
+        activeCallTypeRef.current ||
+        inferCallType(type, pendingOfferRef.current);
+      setType(incomingCallType);
+      activeCallTypeRef.current = incomingCallType;
       acceptCall();
       const pc = createPeerConnection();
       
@@ -232,7 +312,7 @@ export function useWebRTC() {
       processIceQueue();
       
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: type === "video",
+        video: incomingCallType === "video",
         audio: true,
       });
 
@@ -256,19 +336,27 @@ export function useWebRTC() {
       console.error("Error accepting call:", err);
       endCall();
     }
-  }, [callerId, type, createPeerConnection, setLocalStream, setStatus, socket, endCall]);
+  }, [callerId, type, createPeerConnection, setLocalStream, setStatus, setType, socket, endCall]);
 
   const terminateCall = useCallback(async () => {
     const currentState = useCallStore.getState();
-    const { status, callerId, receiverId, type, startTime } = currentState;
+    const { status, callerId, receiverId, callerUserId, receiverUserId, type, startTime } = currentState;
+    const { selectedChatId, addMessage } = (await import("@/features/chat/stores/chat-store")).useChatStore.getState();
     
     const target = callerId || receiverId;
+    const targetUserId = callerUserId || receiverUserId;
     if (target) {
-      socket.emit("call-ended", { target });
-      
+      if (socket) {
+        socket.emit("call-ended", { target });
+      }
+
       try {
         let callStatus: 'missed' | 'ended' | 'declined' = 'ended';
         let duration = 0;
+        const resolvedCallType = inferCallType(
+          activeCallTypeRef.current || type,
+          peerConnectionRef.current?.localDescription || pendingOfferRef.current
+        );
 
         if (status === 'connected' && startTime) {
           duration = Date.now() - startTime;
@@ -279,15 +367,16 @@ export function useWebRTC() {
           callStatus = 'missed';
         }
 
-        const res = await fetch("/api/chat/send", {
+        const res = await fetch("/api/enhanced-chat/send-message", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            receiverId: target,
-            content: `Call ${callStatus}`,
+            chatId: selectedChatId || undefined,
+            receiverId: targetUserId || undefined,
+            content: `${resolvedCallType === "video" ? "Video" : "Voice"} call ${callStatus}`,
             messageType: 'call',
             call: {
-              type: type || 'voice',
+              type: resolvedCallType,
               duration,
               status: callStatus
             }
@@ -297,8 +386,22 @@ export function useWebRTC() {
           const raw = await res.json();
           const message = raw?.message || raw?.data || raw;
           if (message?.chatId) {
-            const { addMessage } = (await import("@/features/chat/stores/chat-store")).useChatStore.getState();
-            addMessage(message);
+            addMessage({
+              ...message,
+              messageType: message.messageType || "call",
+              call: {
+                type:
+                  message.call?.type ||
+                  message.call?.callType ||
+                  resolvedCallType,
+                duration:
+                  message.call?.duration ??
+                  duration,
+                status:
+                  message.call?.status ||
+                  callStatus,
+              },
+            });
           }
         } catch (_) {
           // Ignore parse/add failures; server/socket will sync later
@@ -309,6 +412,7 @@ export function useWebRTC() {
     }
 
     endCall();
+    activeCallTypeRef.current = null;
   }, [socket, endCall]);
 
   // Cleanup
@@ -320,6 +424,7 @@ export function useWebRTC() {
       if (peerConnectionRef.current) {
         peerConnectionRef.current.close();
       }
+      activeCallTypeRef.current = null;
     };
   }, []);
 
