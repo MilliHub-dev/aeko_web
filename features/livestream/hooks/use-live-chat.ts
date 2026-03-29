@@ -13,13 +13,14 @@ export interface LiveChatMessage {
 
 function normalizeLiveChatMessage(message: any): LiveChatMessage {
   const sender = message.sender || message.user || message.author || {};
+  const senderName = sender?.name || sender?.username || "Unknown";
 
   return {
     id: String(message.id || message._id || crypto.randomUUID()),
     user: {
-      name: sender.name || sender.username || "Unknown",
-      username: sender.username || sender.handle || "unknown",
-      avatar: sender.avatar || sender.profilePicture || "/placeholder.svg",
+      name: senderName,
+      username: sender?.username || sender?.handle || "unknown",
+      avatar: sender?.avatar || sender?.profilePicture || "/placeholder.svg",
     },
     message: message.content || message.message || "",
     timestamp: message.createdAt || message.timestamp || new Date().toISOString(),

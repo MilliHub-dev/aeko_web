@@ -41,15 +41,15 @@ export function LiveChat({ streamId }: LiveChatProps) {
             <div key={msg.id} className="flex gap-3">
               <div className="h-8 w-8 rounded-full bg-secondary flex-shrink-0 overflow-hidden">
                 <img
-                  src={msg.user.avatar || "/placeholder.svg"}
-                  alt={msg.user.name}
+                  src={msg.user?.avatar || "/placeholder.svg"}
+                  alt={msg.user?.name || "User"}
                   className="h-full w-full object-cover"
                 />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-sm text-foreground">
-                    {msg.user.name}
+                    {msg.user?.name || "Unknown"}
                   </span>
                   <span className="text-xs text-muted-foreground">
                     {msg.timestamp}

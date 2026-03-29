@@ -178,8 +178,17 @@ export function useCamera({ onError }: UseCameraOptions = {}) {
     attachStreamToVideo(mediaStream);
   }, [attachStreamToVideo, mediaStream]);
 
+  const setVideoRef = useCallback((node: HTMLVideoElement | null) => {
+    videoRef.current = node;
+
+    if (node && streamRef.current) {
+      attachStreamToVideo(streamRef.current);
+    }
+  }, [attachStreamToVideo]);
+
   return {
     videoRef,
+    setVideoRef,
     mediaStream,
     devices,
     selectedCamera,

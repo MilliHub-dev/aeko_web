@@ -112,7 +112,7 @@ export function LiveStreamBroadcast({
       <div className="absolute inset-0">
         {camera.hasPermission && hasActiveVideo ? (
           <video
-            ref={camera.videoRef}
+            ref={camera.setVideoRef}
             autoPlay
             playsInline
             muted
