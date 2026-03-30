@@ -3,10 +3,19 @@
 import { use } from "react";
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { LiveChat } from "@/components/live-streams/live-chat";
 import { LiveStreamViewer } from "@/components/live-streams/live-stream-viewer";
 import { LiveStreamCard } from "@/components/live-streams/live-card";
@@ -14,6 +23,7 @@ import { useLiveStreams } from "@/features/livestream/hooks/use-live-streams";
 import {
   CalendarClock,
   Clock3,
+  CircleStop,
   Flame,
   Gift,
   Heart,
@@ -25,7 +35,7 @@ import {
   Users,
 } from "lucide-react";
 import { useUser } from "@/components/shared/user-context";
-import { acceptCoHostInvite, acceptGuestInvite } from "@/lib/livestream-service";
+import { acceptCoHostInvite, acceptGuestInvite, endLivestream } from "@/lib/livestream-service";
 import { getSocket } from "@/lib/socket";
 
 interface LiveStreamPageProps {
@@ -59,12 +69,15 @@ const formatCompactNumber = (value: number) =>
   value >= 1000 ? `${(value / 1000).toFixed(value >= 10000 ? 0 : 1)}k` : `${value}`;
 
 export default function LiveStreamPage({ params }: LiveStreamPageProps) {
+  const router = useRouter();
   const { id: streamId } = use(params);
   const [streamData, setStreamData] = useState<any | null>(null);
   const [hasLiked, setHasLiked] = useState(false);
   const [floatingHearts, setFloatingHearts] = useState<number[]>([]);
   const [shareLabel, setShareLabel] = useState("Share");
   const [isAcceptingInvite, setIsAcceptingInvite] = useState(false);
+  const [isEndingStream, setIsEndingStream] = useState(false);
+  const [showEndConfirm, setShowEndConfirm] = useState(false);
   const { streams } = useLiveStreams();
   const { user } = useUser();
 
@@ -599,6 +612,28 @@ export default function LiveStreamPage({ params }: LiveStreamPageProps) {
     }
   };
 
+  const handleEndStream = async () => {
+    if (activeRole !== "host" || isEndingStream) {
+      return;
+    }
+
+    try {
+      setIsEndingStream(true);
+      await endLivestream(streamId);
+      setStreamData((prev: any) => ({
+        ...(prev || {}),
+        status: "ended",
+      }));
+      setShowEndConfirm(false);
+      toast.success("Stream ended successfully");
+      router.push("/live-streams");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to end stream");
+    } finally {
+      setIsEndingStream(false);
+    }
+  };
+
   const recommended = useMemo(
     () => streams.filter((item) => String(item.id) !== String(streamId)).slice(0, 3),
     [streams, streamId]
@@ -804,6 +839,17 @@ export default function LiveStreamPage({ params }: LiveStreamPageProps) {
                             <Heart className={`h-4 w-4 ${hasLiked ? "fill-red-500 text-red-500" : ""}`} />
                           </Button>
                         </div>
+                        {activeRole === "host" && streamStatus === "live" && (
+                          <Button
+                            variant="destructive"
+                            onClick={() => setShowEndConfirm(true)}
+                            disabled={isEndingStream}
+                            className="mt-3 w-full rounded-full"
+                          >
+                            <CircleStop className="mr-2 h-4 w-4" />
+                            {isEndingStream ? "Ending stream..." : "End stream"}
+                          </Button>
+                        )}
                       </div>
 
                       <div className="grid gap-3">
@@ -854,7 +900,7 @@ export default function LiveStreamPage({ params }: LiveStreamPageProps) {
                       </Button>
                     </div>
                   </div>
-                  <div className="grid gap-0 xl:grid-cols-[minmax(0,1fr)_300px]">
+                  <div className="grid gap-0 2xl:grid-cols-[minmax(0,1fr)_320px]">
                     <div className="grid gap-0 sm:grid-cols-2">
                       <div className="border-b border-r border-black/6 px-6 py-6 sm:border-b-0">
                         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
@@ -913,38 +959,98 @@ export default function LiveStreamPage({ params }: LiveStreamPageProps) {
                         </p>
                       </div>
                     </div>
-                    <div className="border-t border-black/6 bg-black/[0.02] px-6 py-6 xl:border-l xl:border-t-0">
-                      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+                    <div className="border-t border-black/6 bg-[linear-gradient(180deg,rgba(15,23,42,0.02),rgba(15,23,42,0.05))] px-6 py-6 2xl:border-l 2xl:border-t-0">
+                      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
                         Momentum lane
                       </p>
-                      <div className="mt-6 space-y-4">
-                        <div className="rounded-[22px] border border-black/6 bg-white/75 px-4 py-4">
-                          <div className="flex items-center justify-between gap-3">
-                            <span className="text-sm font-medium text-foreground">Viewers</span>
-                            <span className="text-sm font-semibold text-foreground">
-                              {stream.viewers.toLocaleString()}
-                            </span>
+                      <h3 className="mt-3 text-xl font-semibold text-foreground">
+                        Room pulse
+                      </h3>
+                      <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                        A quick read on how alive the stage feels right now.
+                      </p>
+
+                      <div className="mt-6 space-y-3">
+                        <div className="rounded-[24px] border border-emerald-500/12 bg-white/80 p-4 shadow-sm">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+                                Crowd depth
+                              </p>
+                              <p className="mt-3 text-3xl font-semibold text-foreground">
+                                {formatCompactNumber(stream.viewers)}
+                              </p>
+                            </div>
+                            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-700">
+                              <Users className="h-5 w-5" />
+                            </div>
                           </div>
-                          <div className="mt-3 h-2 rounded-full bg-black/[0.06]">
-                            <div
-                              className="h-2 rounded-full bg-emerald-500"
-                              style={{ width: `${Math.min(100, Math.max(12, stream.viewers / 2))}%` }}
-                            />
+                          <p className="mt-3 text-sm text-muted-foreground">
+                            Active viewers currently holding the room.
+                          </p>
+                        </div>
+
+                        <div className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-1">
+                          <div className="rounded-[22px] border border-black/6 bg-white/70 p-4">
+                            <div className="flex items-center justify-between gap-3">
+                              <div>
+                                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+                                  On stage
+                                </p>
+                                <p className="mt-2 text-2xl font-semibold text-foreground">
+                                  {participantCount}
+                                </p>
+                              </div>
+                              <Radio className="h-5 w-5 text-emerald-600" />
+                            </div>
+                            <p className="mt-3 text-sm text-muted-foreground">
+                              Hosts, co-hosts, and guests live in the room.
+                            </p>
+                          </div>
+
+                          <div className="rounded-[22px] border border-black/6 bg-white/70 p-4">
+                            <div className="flex items-center justify-between gap-3">
+                              <div>
+                                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+                                  Reaction pace
+                                </p>
+                                <p className="mt-2 text-2xl font-semibold text-foreground">
+                                  {formatCompactNumber(currentLikes)}
+                                </p>
+                              </div>
+                              <Heart className="h-5 w-5 text-emerald-600" />
+                            </div>
+                            <p className="mt-3 text-sm text-muted-foreground">
+                              Hearts and quick signals from the audience.
+                            </p>
                           </div>
                         </div>
-                        <div className="rounded-[22px] border border-black/6 bg-white/75 px-4 py-4">
+
+                        <div className="rounded-[24px] border border-black/6 bg-zinc-950 px-4 py-4 text-white">
                           <div className="flex items-center justify-between gap-3">
-                            <span className="text-sm font-medium text-foreground">On stage</span>
-                            <span className="text-sm font-semibold text-foreground">
-                              {participantCount}
-                            </span>
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/55">
+                                Session mode
+                              </p>
+                              <p className="mt-2 text-lg font-semibold">
+                                {streamStatus === "live"
+                                  ? "High attention"
+                                  : streamStatus === "scheduled"
+                                    ? "Pre-live warmup"
+                                    : "Off air"}
+                              </p>
+                            </div>
+                            <div className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/80">
+                              {stream.duration}
+                            </div>
                           </div>
-                          <div className="mt-3 h-2 rounded-full bg-black/[0.06]">
-                            <div
-                              className="h-2 rounded-full bg-emerald-400"
-                              style={{ width: `${Math.min(100, Math.max(12, participantCount * 18))}%` }}
-                            />
-                          </div>
+                          <p className="mt-3 text-sm leading-6 text-white/70">
+                            {streamStatus === "live"
+                              ? "The room is active and ready for interaction."
+                              : streamStatus === "scheduled"
+                                ? "Audience energy is still building before kickoff."
+                                : "This session has wrapped, but the recap remains available."}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -1023,6 +1129,55 @@ export default function LiveStreamPage({ params }: LiveStreamPageProps) {
           </div>
         </div>
       </div>
+
+      <Dialog open={showEndConfirm} onOpenChange={setShowEndConfirm}>
+        <DialogContent
+          showCloseButton={false}
+          className="max-w-[440px] overflow-hidden rounded-[32px] border-0 bg-transparent p-0 shadow-none"
+        >
+          <div className="overflow-hidden rounded-[32px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(245,250,248,0.96))] shadow-[0_28px_90px_rgba(15,23,42,0.18)]">
+            <div className="bg-[radial-gradient(circle_at_top_left,rgba(239,68,68,0.16),transparent_40%),linear-gradient(180deg,rgba(15,23,42,0.02),rgba(15,23,42,0.06))] px-6 py-6">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-500/10 text-red-600">
+                <CircleStop className="h-6 w-6" />
+              </div>
+              <DialogHeader className="mt-4 text-left">
+                <DialogTitle className="text-2xl font-semibold text-foreground">
+                  End livestream?
+                </DialogTitle>
+                <DialogDescription className="pt-1 text-sm leading-6 text-muted-foreground">
+                  This will stop the broadcast for everyone watching right now. You can&apos;t undo it after ending.
+                </DialogDescription>
+              </DialogHeader>
+            </div>
+
+            <div className="px-6 pb-6 pt-5">
+              <div className="rounded-[24px] border border-black/6 bg-white/80 px-4 py-4 text-sm text-muted-foreground">
+                Stream: <span className="font-medium text-foreground">{stream.title}</span>
+              </div>
+
+              <DialogFooter className="mt-5 flex gap-3 sm:flex-row sm:justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowEndConfirm(false)}
+                  disabled={isEndingStream}
+                  className="rounded-full border-border/70 bg-white"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleEndStream}
+                  disabled={isEndingStream}
+                  className="rounded-full"
+                >
+                  <CircleStop className="mr-2 h-4 w-4" />
+                  {isEndingStream ? "Ending stream..." : "Yes, end stream"}
+                </Button>
+              </DialogFooter>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
