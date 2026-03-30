@@ -35,7 +35,7 @@ function RightSidebarSuggestedUserRow({ user }: { user: SuggestedUser }) {
         className="flex items-center gap-3 overflow-hidden flex-1 min-w-0"
       >
         <Avatar className="h-10 w-10 border border-border/50">
-          <AvatarImage src={user.profilePicture} alt={displayName} />
+          <AvatarImage src={user?.profilePicture || user?.avatar || "/placeholder.svg"} alt={displayName} />
           <AvatarFallback>
             <Image
               src="/profile_icon.jpg"

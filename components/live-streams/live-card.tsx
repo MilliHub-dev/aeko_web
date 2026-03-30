@@ -20,6 +20,7 @@ export interface LiveStream {
   viewers: number;
   thumbnail?: string;
   isLive: boolean;
+  status?: string;
   scheduledFor?: string;
   description: string;
   tags?: string[];

@@ -61,6 +61,7 @@ function mapStream(stream: UpstreamLivestream): LiveStream {
       stream.user?.profilePicture ||
       "/placeholder.svg",
     isLive: stream.status === "live",
+    status: stream.status,
     description: stream.description,
     tags: stream.tags || [],
     scheduledFor: stream.scheduledFor || stream.createdAt,

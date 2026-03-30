@@ -74,7 +74,7 @@ function UserItem({ user }: { user: SuggestedUser }) {
         className="flex items-center gap-4 flex-1 min-w-0"
       >
         <Avatar className="h-10 w-10 aspect-square outline-2 outline-offset-2 outline-normal-active">
-          <AvatarImage src={user.profilePicture || "/placeholder.svg"} />
+          <AvatarImage src={user?.profilePicture || user?.avatar || "/placeholder.svg"} />
           <AvatarFallback className="bg-gray-300 text-gray-600">
             <Image
               src="/profile_icon.jpg"
@@ -86,8 +86,8 @@ function UserItem({ user }: { user: SuggestedUser }) {
         </Avatar>
 
         <div className="flex-2 w-[80px]">
-          <div className="font-semibold text-sm truncate">{user.name}</div>
-          <div className="text-primary text-sm truncate">@{user.username}</div>
+          <div className="font-semibold text-sm truncate">{user?.name || user?.username || "Unknown"}</div>
+          <div className="text-primary text-sm truncate">@{user?.username || "unknown"}</div>
         </div>
       </Link>
       <Button

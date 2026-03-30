@@ -29,8 +29,13 @@ export function LiveStreamContent({
     );
   }
 
-  const liveNow = streams.filter((stream) => stream.isLive);
-  const upcoming = streams.filter((stream) => !stream.isLive);
+  const liveNow = streams.filter(
+    (stream) => stream.isLive && String(stream.status || "").toLowerCase() === "live"
+  );
+  const upcoming = streams.filter((stream) => {
+    const status = String(stream.status || "").toLowerCase();
+    return status === "scheduled" || status === "created" || status === "upcoming";
+  });
 
   return (
     <div className="mt-6 space-y-8 text-foreground sm:mt-10 sm:space-y-10 lg:mt-12 lg:space-y-12">
@@ -43,7 +48,6 @@ export function LiveStreamContent({
               </Badge>
               <h2 className="text-xl font-semibold sm:text-2xl">Rooms heating up right now</h2>
               <p className="text-sm text-muted-foreground">
-                TikTok-inspired vertical energy, responsive overlays, and community shoutouts in real time.
               </p>
             </div>
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
