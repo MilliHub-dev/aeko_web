@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -13,7 +13,7 @@ import { SearchResultsDropdown } from "@/components/explore/search-results-dropd
 import type { SuggestedUser, ExploreCommunity } from "@/types/explore";
 import type { FeedPost } from "@/types/post";
 import { useOnClickOutside } from "@/hooks/use-on-click-outside";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useFollowUser } from "@/features/profile/hooks/use-follow-user";
 import { useUserRelationsStore } from "@/features/profile/stores/user-relations-store";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -273,6 +273,8 @@ export function RightSidebar() {
   const { users: rawSuggestedUsers } = useSuggestedUsers();
   const following = useUserRelationsStore((state) => state.following);
   const router = useRouter();
+  const pathname = usePathname();
+  const lockSidebarScroll = pathname === "/home";
   
   // Search state
   const [searchQuery, setSearchQuery] = useState("");
@@ -286,6 +288,25 @@ export function RightSidebar() {
   useOnClickOutside(searchContainerRef as React.RefObject<HTMLElement>, () => {
     setShowResults(false);
   });
+
+  const suggestedUsers = useMemo(() => {
+    const seen = new Set<string>();
+
+    return (rawSuggestedUsers ?? []).filter((user) => {
+      const normalizedId = user._id ? String(user._id) : "";
+      const key = normalizedId || user.username?.toLowerCase();
+      if (!key || (normalizedId && following.has(normalizedId))) {
+        return false;
+      }
+
+      if (seen.has(key)) {
+        return false;
+      }
+
+      seen.add(key);
+      return true;
+    });
+  }, [rawSuggestedUsers, following]);
 
   const performSearch = useCallback(async (query: string) => {
     if (!query.trim()) {
@@ -380,16 +401,24 @@ export function RightSidebar() {
 
   if (isLoading) {
     return (
-      <aside className="sticky top-0 hidden h-screen w-full shrink-0 xl:flex border-l items-center justify-center">
+      <aside className="sticky top-0 hidden h-screen w-full shrink-0 xl:flex border-l items-center justify-center overflow-hidden">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </aside>
     );
   }
 
   return (
-    <aside className="sticky top-0 hidden h-screen w-full shrink-0 xl:flex border-l">
+    <aside
+      className={`sticky top-0 hidden h-screen w-full shrink-0 border-l xl:flex ${
+        lockSidebarScroll ? "overflow-hidden" : ""
+      }`}
+    >
       <div className="flex h-full w-full flex-col gap-6 overflow-hidden border-none">
-        <div className="flex-1 space-y-6 overflow-y-auto px-6 py-6">
+        <div
+          className={`flex-1 space-y-6 px-6 py-6 ${
+            lockSidebarScroll ? "overflow-hidden" : "overflow-y-auto"
+          }`}
+        >
           {/* Search Bar */}
           <div className="relative" ref={searchContainerRef}>
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -418,21 +447,20 @@ export function RightSidebar() {
           </div>
 
           {/* Who to Follow Section */}
-          {rawSuggestedUsers && rawSuggestedUsers.length > 0 && (
+          {suggestedUsers.length > 0 && (
             <section className="space-y-4 rounded-3xl border border-border/60 bg-card/50 p-4 shadow-sm backdrop-blur-sm">
               <div className="flex items-center justify-between px-1">
                 <p className="text-sm font-bold text-foreground">
                   Who to follow
                 </p>
                 <Link
-                  href="/communities"
+                  href="/explore"
                   className="text-xs font-medium text-primary hover:text-primary/80">
                   See all
                 </Link>
               </div>
               <div className="space-y-4">
-                {rawSuggestedUsers
-                  .filter((user) => !following.has(user._id))
+                {suggestedUsers
                   .slice(0, 5)
                   .map((user, index) => (
                   <RightSidebarSuggestedUserRow

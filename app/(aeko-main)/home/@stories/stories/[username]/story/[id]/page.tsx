@@ -9,7 +9,8 @@ export default async function StoriesPage({
 }: {
 	params: Promise<{ username: string; id: string }>;
 }) {
-	const { username, id } = await params;
+	const { username: rawUsername, id } = await params;
+	const username = decodeURIComponent(rawUsername);
 	const cookieStore = await cookies();
 	const token = cookieStore.get("token");
 
@@ -39,8 +40,12 @@ export default async function StoriesPage({
 		return null;
 	}
 
-	// Group by user
+	// Group by user ID so route matching doesn't break when usernames are missing,
+	// duplicated, or derived differently across endpoints.
 	const storiesByUser = new Map<string, UserStoryGroup>();
+
+	const normalizeUsername = (value: string | undefined | null) =>
+		(value ?? "").trim().toLowerCase();
 
 	const cleanUrl = (url: string | undefined | null) => {
 		if (!url) return "";
@@ -119,8 +124,8 @@ export default async function StoriesPage({
 			}
 		}
 
-		if (!storiesByUser.has(uName)) {
-			storiesByUser.set(uName, {
+		if (!storiesByUser.has(userId)) {
+			storiesByUser.set(userId, {
 				userId: userId,
 				username: uName,
 				avatarUrl: avatarUrl || "/placeholder-avatar.png",
@@ -128,7 +133,7 @@ export default async function StoriesPage({
 			});
 		}
 		
-		const group = storiesByUser.get(uName)!;
+		const group = storiesByUser.get(userId)!;
 
 		group.stories.push({
 			id: status._id || status.id,
@@ -147,9 +152,18 @@ export default async function StoriesPage({
 
 	const allStories = Array.from(storiesByUser.values());
 
-	const currentUserIndex = allStories.findIndex(
-		(u) => u.username === username
+	// Resolve by story ID first. The route already contains the exact story ID,
+	// which is more reliable than matching on username text.
+	let currentUserIndex = allStories.findIndex((group) =>
+		group.stories.some((story) => story.id === id)
 	);
+
+	// Fallback to username matching if needed.
+	if (currentUserIndex === -1) {
+		currentUserIndex = allStories.findIndex(
+			(u) => normalizeUsername(u.username) === normalizeUsername(username)
+		);
+	}
 
 	if (currentUserIndex === -1) return null;
 

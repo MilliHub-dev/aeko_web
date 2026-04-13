@@ -11,21 +11,43 @@ import Image from "next/image";
 import { Loader2, Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useUserRelationsStore } from "@/features/profile/stores/user-relations-store";
 
 export function MobileWhoToFollow() {
   const { users, isLoading } = useSuggestedUsers();
+  const following = useUserRelationsStore((state) => state.following);
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
 
+  const availableUsers = useMemo(() => {
+    const seen = new Set<string>();
+
+    return users.filter((user) => {
+      const normalizedId = user._id ? String(user._id) : "";
+      const dedupeKey = normalizedId || user.username.toLowerCase();
+
+      if (!dedupeKey || (normalizedId && following.has(normalizedId))) {
+        return false;
+      }
+
+      if (seen.has(dedupeKey)) {
+        return false;
+      }
+
+      seen.add(dedupeKey);
+      return true;
+    });
+  }, [users, following]);
+
   const filteredUsers = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return users;
-    return users.filter((u) =>
+    if (!q) return availableUsers;
+    return availableUsers.filter((u) =>
       [u.name, u.username]
         .filter(Boolean)
         .some((field) => field!.toLowerCase().includes(q))
     );
-  }, [users, query]);
+  }, [availableUsers, query]);
 
   if (isLoading) {
     return (
@@ -46,9 +68,9 @@ export function MobileWhoToFollow() {
     );
   }
 
-  if (users.length === 0) return null;
+  if (availableUsers.length === 0) return null;
 
-  const topUsers = users.slice(0, 2);
+  const topUsers = availableUsers.slice(0, 2);
 
   return (
     <>

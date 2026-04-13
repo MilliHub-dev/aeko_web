@@ -1,17 +1,41 @@
 "use client";
 
+import { useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import type { SuggestedUser } from "@/types/explore";
 import { useFollowUser } from "@/features/profile/hooks/use-follow-user";
+import { useUserRelationsStore } from "@/features/profile/stores/user-relations-store";
 
 interface SuggestedUsersProps {
   users: SuggestedUser[];
 }
 
 export function SuggestedUsers({ users }: SuggestedUsersProps) {
-  if (!users || users.length === 0) {
+  const following = useUserRelationsStore((state) => state.following);
+
+  const visibleUsers = useMemo(() => {
+    const seen = new Set<string>();
+
+    return (users ?? []).filter((user) => {
+      const normalizedId = user._id ? String(user._id) : "";
+      const dedupeKey = normalizedId || user.username.toLowerCase();
+
+      if (!dedupeKey || (normalizedId && following.has(normalizedId))) {
+        return false;
+      }
+
+      if (seen.has(dedupeKey)) {
+        return false;
+      }
+
+      seen.add(dedupeKey);
+      return true;
+    });
+  }, [users, following]);
+
+  if (!visibleUsers.length) {
     return null;
   }
 
@@ -33,7 +57,7 @@ export function SuggestedUsers({ users }: SuggestedUsersProps) {
         </button>
       </header>
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-        {users.map((user, index) => (
+        {visibleUsers.map((user, index) => (
           <SuggestedUserCard key={`${user._id}-${index}`} user={user} />
         ))}
       </div>

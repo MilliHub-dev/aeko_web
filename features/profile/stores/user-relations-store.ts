@@ -12,6 +12,8 @@ interface UserRelationsState {
   isFollowing: (userId: string) => boolean;
 }
 
+const normalizeRelationId = (userId: string) => String(userId);
+
 export const useUserRelationsStore = create<UserRelationsState>()(
   persist(
     (set, get) => ({
@@ -21,21 +23,21 @@ export const useUserRelationsStore = create<UserRelationsState>()(
       followUser: (userId) =>
         set((state) => {
             const newFollowing = new Set(state.following);
-            newFollowing.add(userId);
+            newFollowing.add(normalizeRelationId(userId));
             return { following: newFollowing };
         }),
 
       unfollowUser: (userId) =>
         set((state) => {
             const newFollowing = new Set(state.following);
-            newFollowing.delete(userId);
+            newFollowing.delete(normalizeRelationId(userId));
             return { following: newFollowing };
         }),
         
       setFollowing: (userIds) => 
-        set({ following: new Set(userIds) }),
+        set({ following: new Set(userIds.map(normalizeRelationId)) }),
 
-      isFollowing: (userId) => get().following.has(userId),
+      isFollowing: (userId) => get().following.has(normalizeRelationId(userId)),
     }),
     {
       name: "user-relations-storage",

@@ -378,7 +378,7 @@ export function Stories() {
 
   // Navigate to story viewer
   const openStory = (username: string, id: string) => {
-    router.push(`/home/stories/${username}/story/${id}`);
+    router.push(`/home/stories/${encodeURIComponent(username)}/story/${id}`);
   };
 
   const AddStoryButton = () => (
@@ -433,7 +433,7 @@ export function Stories() {
 
             return (
               <button
-                key={group.username}
+                key={group.userId}
                 onClick={() => openStory(group.username, group.stories[0].id)}
                 className="group flex flex-col items-center gap-2"
               >

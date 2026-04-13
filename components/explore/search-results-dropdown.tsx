@@ -55,7 +55,7 @@ export function SearchResultsDropdown({
                 {posts.slice(0, 5).map((post, index) => (
                   <Link
                     key={`${post._id}-${index}`}
-                    href={`/home/${post.user.username}/posts/${post._id}`}
+                    href={`/${encodeURIComponent(post.user.username)}/posts/${post._id}`}
                     className="flex items-start gap-3 px-4 py-3 transition hover:bg-muted/50">
                     <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                       <FileText className="h-4 w-4" />
@@ -86,7 +86,7 @@ export function SearchResultsDropdown({
                 {users.map((user, index) => (
                   <Link
                     key={`${user._id}-${index}`}
-                    href={`/home/@${user.username}`}
+                    href={`/${encodeURIComponent(user.username)}`}
                     className="flex items-center gap-3 px-4 py-3 transition hover:bg-muted/50">
                     <Avatar className="h-12 w-12 border border-border/60">
                       <AvatarImage

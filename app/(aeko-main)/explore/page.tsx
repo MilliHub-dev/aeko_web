@@ -33,6 +33,30 @@ const discoverFilters = [
   "Communities",
 ];
 
+function mergeUniqueByKey<T>(
+  currentItems: T[],
+  nextItems: T[],
+  getKey: (item: T) => string | undefined
+) {
+  const merged = [...currentItems, ...nextItems];
+  const seen = new Set<string>();
+
+  return merged.filter((item, index) => {
+    const key = getKey(item);
+
+    if (!key) {
+      return index >= currentItems.length;
+    }
+
+    if (seen.has(key)) {
+      return false;
+    }
+
+    seen.add(key);
+    return true;
+  });
+}
+
 export default function ExplorePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -160,15 +184,36 @@ export default function ExplorePage() {
         if (append && exploreData) {
           // Append new data to existing data
           setExploreData({
-            trending: [...exploreData.trending, ...data.data.trending],
-            suggestedUsers: [
-              ...exploreData.suggestedUsers,
-              ...data.data.suggestedUsers,
-            ],
-            communities: [...exploreData.communities, ...data.data.communities],
-            liveStreams: [...exploreData.liveStreams, ...data.data.liveStreams],
-            viral: [...exploreData.viral, ...data.data.viral],
-            forYou: [...exploreData.forYou, ...data.data.forYou],
+            trending: mergeUniqueByKey(
+              exploreData.trending,
+              data.data.trending,
+              (post) => post._id
+            ),
+            suggestedUsers: mergeUniqueByKey(
+              exploreData.suggestedUsers,
+              data.data.suggestedUsers,
+              (user) => user._id || user.username
+            ),
+            communities: mergeUniqueByKey(
+              exploreData.communities,
+              data.data.communities,
+              (community) => community._id || community.slug
+            ),
+            liveStreams: mergeUniqueByKey(
+              exploreData.liveStreams,
+              data.data.liveStreams,
+              (stream) => stream._id
+            ),
+            viral: mergeUniqueByKey(
+              exploreData.viral,
+              data.data.viral,
+              (post) => post._id
+            ),
+            forYou: mergeUniqueByKey(
+              exploreData.forYou,
+              data.data.forYou,
+              (post) => post._id
+            ),
           });
         } else {
           setExploreData(data.data);
@@ -245,7 +290,7 @@ export default function ExplorePage() {
     <main className="relative min-h-[100dvh] overflow-hidden bg-background">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(80%_120%_at_10%_0%,rgba(0,127,109,0.18),transparent_55%),radial-gradient(60%_90%_at_100%_10%,rgba(15,23,42,0.12),transparent_55%)]" />
       <div className="relative mx-auto w-full max-w-7xl px-4 pb-24 pt-4 sm:px-6 lg:px-8 lg:pt-6">
-        <section className="mb-8 overflow-hidden rounded-[32px] border border-border/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(244,248,247,0.92))] shadow-[0_26px_90px_-56px_rgba(15,23,42,0.45)]">
+        <section className="mb-8 overflow-visible rounded-[32px] border border-border/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(244,248,247,0.92))] shadow-[0_26px_90px_-56px_rgba(15,23,42,0.45)]">
           <div className="flex flex-col gap-6 p-5 md:p-7">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
               <div className="space-y-3">
@@ -289,7 +334,7 @@ export default function ExplorePage() {
               </div>
             </div>
 
-            <div tabIndex={-1} onBlur={handleSearchBlur} className="relative">
+            <div tabIndex={-1} onBlur={handleSearchBlur} className="relative z-40">
               <ExploreSearchBar
                 value={searchQuery}
                 onChange={setSearchQuery}
@@ -304,7 +349,7 @@ export default function ExplorePage() {
                   posts={searchPosts}
                   isLoading={isSearching}
                   query={searchQuery}
-                  className="absolute left-0 right-0 top-full z-30 mt-4"
+                  className="absolute left-0 right-0 top-full z-50 mt-4"
                 />
               )}
             </div>

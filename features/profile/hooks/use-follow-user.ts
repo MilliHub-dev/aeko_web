@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useUserRelationsStore } from "../stores/user-relations-store";
 
 export const useFollowUser = (userId: string, initialIsFollowing?: boolean) => {
-  const isFollowing = useUserRelationsStore((state) => state.following.has(userId));
+  const normalizedUserId = String(userId);
+  const isFollowing = useUserRelationsStore((state) => state.following.has(normalizedUserId));
   const { followUser, unfollowUser } = useUserRelationsStore();
   const [isLoading, setIsLoading] = useState(false);
   const syncedRef = useRef(false);
@@ -17,11 +18,11 @@ export const useFollowUser = (userId: string, initialIsFollowing?: boolean) => {
       // But we should probably check if we conflict? 
       // For simplicity, we just ensure "true" is reflected.
       if (!isFollowing) {
-         followUser(userId);
+         followUser(normalizedUserId);
       }
     }
     syncedRef.current = true;
-  }, [initialIsFollowing, userId, followUser, isFollowing]);
+  }, [initialIsFollowing, normalizedUserId, followUser, isFollowing]);
 
   const toggleFollow = async (e?: React.MouseEvent) => {
     if (e) {
@@ -37,9 +38,9 @@ export const useFollowUser = (userId: string, initialIsFollowing?: boolean) => {
 
     // Optimistic update
     if (willFollow) {
-      followUser(userId);
+      followUser(normalizedUserId);
     } else {
-      unfollowUser(userId);
+      unfollowUser(normalizedUserId);
     }
 
     try {
@@ -67,9 +68,9 @@ export const useFollowUser = (userId: string, initialIsFollowing?: boolean) => {
       console.error(error);
       // Revert optimistic update
       if (willFollow) {
-        unfollowUser(userId);
+        unfollowUser(normalizedUserId);
       } else {
-        followUser(userId);
+        followUser(normalizedUserId);
       }
     } finally {
       setIsLoading(false);
