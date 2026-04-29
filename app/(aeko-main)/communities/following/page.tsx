@@ -5,11 +5,42 @@ import Link from "next/link";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { CommunityCard } from "@/components/communities/community-card";
 import type { ExploreCommunity, CommunitiesApiResponse } from "@/types/explore";
+import { useUser } from "@/components/shared/user-context";
+
+function toId(value: unknown): string | null {
+  if (typeof value === "string" && value.trim()) return value;
+  if (typeof value === "number") return String(value);
+  return null;
+}
+
+function extractCommunityId(raw: any): string | null {
+  return (
+    toId(raw?._id) ||
+    toId(raw?.id) ||
+    toId(raw?.communityId) ||
+    toId(raw?.data?._id) ||
+    toId(raw?.data?.id) ||
+    null
+  );
+}
+
+function extractUserIdFromMember(rawMember: any): string | null {
+  if (!rawMember) return null;
+  if (typeof rawMember === "string") return rawMember;
+  return (
+    toId(rawMember?.user) ||
+    toId(rawMember?.user?._id) ||
+    toId(rawMember?.user?.id) ||
+    null
+  );
+}
 
 export default function MyCommunitiesPage() {
+  const { user } = useUser();
   const [communities, setCommunities] = useState<ExploreCommunity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const currentUserId = toId((user as any)?._id) || toId((user as any)?.id);
 
   useEffect(() => {
     const fetchCommunities = async () => {
@@ -21,23 +52,54 @@ export default function MyCommunitiesPage() {
         const data: CommunitiesApiResponse = await response.json();
 
         if (data.success && data.data) {
-          // Map API response to ExploreCommunity format and filter for followed communities
+          const isMyCommunity = (raw: any) => {
+            if (!currentUserId) return false;
+            const ownerId = toId(raw?.owner) || toId(raw?.owner?._id);
+            if (ownerId && ownerId === currentUserId) return true;
+
+            const rawMembers = raw?.members || raw?.communityMembers || [];
+            if (Array.isArray(rawMembers)) {
+              return rawMembers.some(
+                (m: any) => extractUserIdFromMember(m) === currentUserId
+              );
+            }
+            return false;
+          };
+
+          const getSortDate = (raw: any) =>
+            Date.parse(raw?.updatedAt || raw?.createdAt || "") || 0;
+
+          const isOwnerCommunity = (raw: any) => {
+            if (!currentUserId) return false;
+            const ownerId = toId(raw?.owner) || toId(raw?.owner?._id);
+            return !!ownerId && ownerId === currentUserId;
+          };
+
           const mappedCommunities: ExploreCommunity[] = data.data
-            .map((community) => ({
-              _id: community._id,
-              name: community.name,
-              description: community.description,
-              category: community.category || "General",
-              cover:
-                community.profile?.coverPhoto || "/communities/default.jpg",
-              profile: community.profile,
-              memberCount: community.memberCount,
-              membersCount: community.memberCount,
-              memberAvatars: [],
-              isFollowing: true, // Only showing followed communities on this page
-              slug: community._id,
-            }))
-            .filter((c) => c.isFollowing);
+            .filter(isMyCommunity)
+            .sort((a: any, b: any) => {
+              const ownerDiff =
+                Number(isOwnerCommunity(b)) - Number(isOwnerCommunity(a));
+              if (ownerDiff !== 0) return ownerDiff;
+              return getSortDate(b) - getSortDate(a);
+            })
+            .map((community) => {
+              const id = extractCommunityId(community) || "";
+              return {
+                _id: id,
+                name: community.name,
+                description: community.description,
+                category: community.category || "General",
+                cover: community.profile?.coverPhoto || "/communities/default.jpg",
+                profile: community.profile,
+                memberCount: community.memberCount,
+                membersCount: community.memberCount,
+                memberAvatars: [],
+                isFollowing: true,
+                slug: id || undefined,
+              };
+            })
+            .filter((c) => !!c._id);
 
           setCommunities(mappedCommunities);
         } else {
@@ -52,7 +114,7 @@ export default function MyCommunitiesPage() {
     };
 
     fetchCommunities();
-  }, []);
+  }, [currentUserId]);
 
   const handleFollowToggle = (communityId: string, isFollowing: boolean) => {
     setCommunities((prev) =>

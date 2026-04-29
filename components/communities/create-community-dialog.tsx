@@ -159,12 +159,26 @@ export function CreateCommunityDialog({ trigger }: CreateCommunityDialogProps) {
       }
 
       // Parse successful response
-      const data: SingleCommunityApiResponse = await response.json();
+      const raw = await response.json();
+      const community: SingleCommunityApiResponse =
+        raw?.data || raw?.community || raw;
+      const communityId =
+        community?._id ||
+        (community as any)?.id ||
+        raw?._id ||
+        raw?.id ||
+        raw?.data?._id ||
+        raw?.data?.id;
+
+      if (!communityId) {
+        throw new Error("Community created, but no community id was returned");
+      }
 
       // Success - close dialog and navigate to community page
       setOpen(false);
       resetForm();
-      router.push(`/communities/${data._id}`);
+      router.push(`/communities/${communityId}`);
+      router.refresh();
     } catch (err) {
       console.error("Error creating community:", err);
       setError(

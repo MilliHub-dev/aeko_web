@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import type { SingleCommunityApiResponse } from "@/types/explore";
 
 interface CommunityProfileProps {
-  params: Promise<{ slug: string }>;
+  params: { slug: string };
 }
 
 export default function CommunityProfilePage({
@@ -32,11 +32,9 @@ export default function CommunityProfilePage({
   // Load community data and user
   useEffect(() => {
     checkCurrentUser();
-    params.then((p) => {
-      setSlug(p.slug);
-      fetchCommunity(p.slug);
-    });
-  }, [params]);
+    setSlug(params.slug);
+    fetchCommunity(params.slug);
+  }, [params.slug]);
 
   // Update isFollowing and isMember when community or user data changes
   useEffect(() => {

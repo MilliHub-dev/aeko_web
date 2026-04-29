@@ -11,10 +11,49 @@ import { CreateCommunityDialog } from "@/components/communities/create-community
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ExploreCommunity, CommunitiesApiResponse } from "@/types/explore";
+import { useUser } from "@/components/shared/user-context";
 
 const exploreFilters = ["For You", "DeFi", "NFTs", "Trading", "Technology"];
 
+type UiCommunity = ExploreCommunity & {
+  owner?: string;
+  moderators?: string[];
+  settings?: unknown;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+function toId(value: unknown): string | null {
+  if (typeof value === "string" && value.trim()) return value;
+  if (typeof value === "number") return String(value);
+  return null;
+}
+
+function extractCommunityId(raw: any): string | null {
+  return (
+    toId(raw?._id) ||
+    toId(raw?.id) ||
+    toId(raw?.communityId) ||
+    toId(raw?.data?._id) ||
+    toId(raw?.data?.id) ||
+    null
+  );
+}
+
+function extractUserIdFromMember(rawMember: any): string | null {
+  if (!rawMember) return null;
+  if (typeof rawMember === "string") return rawMember;
+  return (
+    toId(rawMember?.user) ||
+    toId(rawMember?.user?._id) ||
+    toId(rawMember?.user?.id) ||
+    null
+  );
+}
+
 export default function CommunitiesPage() {
+  const { user } = useUser();
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [primaryTab, setPrimaryTab] = useState<"my" | "explore">("my");
@@ -49,7 +88,7 @@ export default function CommunitiesPage() {
       if (communitiesData.success && Array.isArray(communitiesData.data)) {
         const mappedCommunities: ExploreCommunity[] = communitiesData.data.map(
           (community) => ({
-            _id: community._id,
+            _id: extractCommunityId(community) || "",
             name: community.name,
             description: community.description,
             category: community.category || "General",
@@ -59,10 +98,10 @@ export default function CommunitiesPage() {
             membersCount: community.memberCount,
             memberAvatars: [],
             isFollowing: false,
-            slug: community._id,
+            slug: extractCommunityId(community) || undefined,
           })
         );
-        setSearchCommunities(mappedCommunities);
+        setSearchCommunities(mappedCommunities.filter((c) => !!c._id));
       } else {
         setSearchCommunities([]);
       }
@@ -99,9 +138,9 @@ export default function CommunitiesPage() {
 
         if (data.success && data.data) {
           // Map API response to ExploreCommunity format
-          const mappedCommunities: ExploreCommunity[] = data.data.map(
+          const mappedCommunities: UiCommunity[] = data.data.map(
             (community) => ({
-              _id: community._id,
+              _id: extractCommunityId(community) || "",
               name: community.name,
               description: community.description,
               category: community.category || "General",
@@ -111,8 +150,8 @@ export default function CommunitiesPage() {
               memberCount: community.memberCount,
               membersCount: community.memberCount,
               memberAvatars: [], // Can be populated from members if needed
-              isFollowing: false, // Would need to check current user's membership
-              slug: community._id,
+              isFollowing: false,
+              slug: extractCommunityId(community) || undefined,
               owner: community.owner,
               moderators: community.moderators,
               settings: community.settings,
@@ -122,7 +161,7 @@ export default function CommunitiesPage() {
             })
           );
 
-          setCommunities(mappedCommunities);
+          setCommunities(mappedCommunities.filter((c) => !!c._id));
         } else {
           setError("Failed to load communities");
         }
@@ -169,9 +208,42 @@ export default function CommunitiesPage() {
 
   const showSearchOverlay = isSearchOpen && searchQuery.trim().length > 0;
 
-  // Separate communities by following status (would come from API in real implementation)
-  const myCommunities = communities.filter((c) => c.isFollowing);
-  const exploreCommunities = communities.filter((c) => !c.isFollowing);
+  const currentUserId = toId((user as any)?._id) || toId((user as any)?.id);
+
+  const isMyCommunity = (c: UiCommunity) => {
+    if (!currentUserId) return false;
+    const ownerId = toId((c as any).owner) || toId((c as any).owner?._id);
+    if (ownerId && ownerId === currentUserId) return true;
+
+    const rawMembers = (c as any).members || (c as any).communityMembers || [];
+    if (Array.isArray(rawMembers)) {
+      return rawMembers.some((m: any) => extractUserIdFromMember(m) === currentUserId);
+    }
+    return false;
+  };
+
+  const isOwnerCommunity = (c: UiCommunity) => {
+    if (!currentUserId) return false;
+    const ownerId = toId((c as any).owner) || toId((c as any).owner?._id);
+    return !!ownerId && ownerId === currentUserId;
+  };
+
+  const getSortDate = (c: UiCommunity) =>
+    Date.parse((c as any).updatedAt || (c as any).createdAt || "") || 0;
+
+  const myCommunities = (communities as UiCommunity[])
+    .filter(isMyCommunity)
+    .sort((a, b) => {
+      const ownerDiff = Number(isOwnerCommunity(b)) - Number(isOwnerCommunity(a));
+      if (ownerDiff !== 0) return ownerDiff;
+      return getSortDate(b) - getSortDate(a);
+    })
+    .map((c) => ({ ...c, isFollowing: true }));
+
+  const exploreCommunities = (communities as UiCommunity[])
+    .filter((c) => !isMyCommunity(c))
+    .sort((a, b) => getSortDate(b) - getSortDate(a))
+    .map((c) => ({ ...c, isFollowing: false }));
 
   const filteredExploreCommunities =
     exploreFilter === "For You"
