@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +18,7 @@ import { Switch } from "@/components/ui/switch";
 import { Plus, Loader2, X, Crown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { SingleCommunityApiResponse } from "@/types/explore";
+import { toast } from "sonner";
 
 interface CreateCommunityDialogProps {
   trigger?: React.ReactNode;
@@ -39,6 +40,12 @@ export function CreateCommunityDialog({ trigger }: CreateCommunityDialogProps) {
   const [price, setPrice] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null);
+  const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
 
   // Check for Golden Tick when dialog opens
   useEffect(() => {
@@ -91,7 +98,46 @@ export function CreateCommunityDialog({ trigger }: CreateCommunityDialogProps) {
     setPrice("");
     setTags([]);
     setTagInput("");
+    setAvatarFile(null);
+    setCoverFile(null);
+    setAvatarPreviewUrl(null);
+    setCoverPreviewUrl(null);
     setError(null);
+  };
+
+  const handleImageChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: "avatar" | "cover"
+  ) => {
+    const file = e.target.files?.[0] || null;
+    if (!file) return;
+    const previewUrl = URL.createObjectURL(file);
+    if (type === "avatar") {
+      setAvatarFile(file);
+      setAvatarPreviewUrl(previewUrl);
+    } else {
+      setCoverFile(file);
+      setCoverPreviewUrl(previewUrl);
+    }
+  };
+
+  const uploadCommunityPhoto = async (
+    communityId: string,
+    type: "avatar" | "cover",
+    file: File
+  ) => {
+    const formData = new FormData();
+    formData.append("type", type);
+    formData.append("photo", file);
+    const res = await fetch(`/api/community-profiles/${communityId}/upload-photo`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || err.error || `Failed to upload ${type}`);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -174,6 +220,21 @@ export function CreateCommunityDialog({ trigger }: CreateCommunityDialogProps) {
         throw new Error("Community created, but no community id was returned");
       }
 
+      try {
+        if (coverFile) {
+          await uploadCommunityPhoto(communityId, "cover", coverFile);
+        }
+        if (avatarFile) {
+          await uploadCommunityPhoto(communityId, "avatar", avatarFile);
+        }
+      } catch (uploadError) {
+        toast.error(
+          uploadError instanceof Error
+            ? uploadError.message
+            : "Failed to upload community photos"
+        );
+      }
+
       // Success - close dialog and navigate to community page
       setOpen(false);
       resetForm();
@@ -227,6 +288,68 @@ export function CreateCommunityDialog({ trigger }: CreateCommunityDialogProps) {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-4">
+              <div
+                className="relative h-32 w-full overflow-hidden rounded-xl border border-border/60 bg-muted/40 cursor-pointer"
+                onClick={() => coverInputRef.current?.click()}
+              >
+                {coverPreviewUrl ? (
+                  <img
+                    src={coverPreviewUrl}
+                    alt="Cover preview"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
+                    Add community banner
+                  </div>
+                )}
+              </div>
+              <Input
+                ref={coverInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handleImageChange(e, "cover")}
+                disabled={isLoading}
+              />
+
+              <div className="flex items-center gap-4">
+                <div
+                  className="relative h-16 w-16 overflow-hidden rounded-full border border-border/60 bg-muted/40 cursor-pointer"
+                  onClick={() => avatarInputRef.current?.click()}
+                >
+                  {avatarPreviewUrl ? (
+                    <img
+                      src={avatarPreviewUrl}
+                      alt="Avatar preview"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
+                      Add photo
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-foreground">
+                    Community profile picture
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Upload a logo/avatar and a banner image.
+                  </p>
+                </div>
+              </div>
+              <Input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handleImageChange(e, "avatar")}
+                disabled={isLoading}
+              />
+            </div>
+
             {/* Community Name */}
             <div className="space-y-2">
               <Label htmlFor="name">

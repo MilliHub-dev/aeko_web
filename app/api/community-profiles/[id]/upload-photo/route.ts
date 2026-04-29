@@ -12,20 +12,29 @@ export async function POST(
 
   try {
     const formData = await request.formData();
-    
-    // We need to forward the FormData to the backend
-    // Note: When using FormData with fetch, do NOT set Content-Type header manually
-    // The browser/fetch will set it with the boundary
-    
-    const res = await fetch(`${API_BASE_URL}/api/community-profiles/${id}/upload-photo`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token?.value}`,
-      },
-      body: formData,
-    });
 
-    const data = await res.json();
+    const tryEndpoint = async (endpoint: string) => {
+      return fetch(`${API_BASE_URL}${endpoint}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token?.value}`,
+        },
+        body: formData,
+      });
+    };
+
+    let res = await tryEndpoint(`/api/community-profiles/${id}/upload-photo`);
+    if (res.status === 404) {
+      res = await tryEndpoint(`/api/communities/${id}/upload-photo`);
+    }
+
+    const responseText = await res.text();
+    let data: any = null;
+    try {
+      data = responseText ? JSON.parse(responseText) : null;
+    } catch {
+      data = { success: res.ok, message: responseText };
+    }
 
     if (!res.ok) {
       return NextResponse.json(data, { status: res.status });

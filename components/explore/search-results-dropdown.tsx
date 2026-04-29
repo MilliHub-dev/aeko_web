@@ -8,6 +8,22 @@ import { cn } from "@/lib/utils";
 import type { SuggestedUser, ExploreCommunity } from "@/types/explore";
 import type { FeedPost } from "@/types/post";
 
+function toId(value: unknown): string | null {
+  if (typeof value === "string" && value.trim()) return value;
+  if (typeof value === "number") return String(value);
+  return null;
+}
+
+function getCommunityTargetId(community: ExploreCommunity): string | null {
+  return (
+    toId(community.slug) ||
+    toId(community._id) ||
+    toId((community as any).id) ||
+    toId((community as any).communityId) ||
+    null
+  );
+}
+
 interface SearchResultsDropdownProps {
   users: SuggestedUser[];
   communities: ExploreCommunity[];
@@ -169,11 +185,17 @@ export function SearchResultsDropdown({
                 Communities ({communities.length})
               </div>
               <div className="divide-y divide-border/30">
-                {communities.map((community, index) => (
-                  <Link
-                    key={`${community._id}-${index}`}
-                    href={`/communities/${community.slug || community._id}`}
-                    className="flex items-center gap-3 px-4 py-3 transition hover:bg-muted/50">
+                {communities
+                  .map((community) => ({
+                    community,
+                    targetId: getCommunityTargetId(community),
+                  }))
+                  .filter((x) => !!x.targetId)
+                  .map(({ community, targetId }, index) => (
+                    <Link
+                      key={`${targetId}-${index}`}
+                      href={`/communities/${targetId}`}
+                      className="flex items-center gap-3 px-4 py-3 transition hover:bg-muted/50">
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
                       <Users className="h-6 w-6 text-primary" />
                     </div>
@@ -193,8 +215,8 @@ export function SearchResultsDropdown({
                         {community.membersCount.toLocaleString()} members
                       </div>
                     )}
-                  </Link>
-                ))}
+                    </Link>
+                  ))}
               </div>
             </div>
           )}

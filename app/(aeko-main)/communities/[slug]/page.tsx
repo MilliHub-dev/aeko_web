@@ -96,9 +96,12 @@ export default function CommunityProfilePage({
       const action = isFollowing ? "unfollow" : "follow";
       console.log(`${action} community:`, community._id);
 
-      const res = await fetch(`/api/community-profiles/${community._id}/${action}`, {
-        method: "POST",
-      });
+      const endpoint =
+        action === "follow"
+          ? `/api/community-profiles/${community._id}/follow`
+          : `/api/community-profiles/${community._id}/unfollow`;
+
+      const res = await fetch(endpoint, { method: "POST" });
 
       if (!res.ok) {
         throw new Error(`Failed to ${action}`);

@@ -33,6 +33,23 @@ const discoverFilters = [
   "Communities",
 ];
 
+function toId(value: unknown): string | null {
+  if (typeof value === "string" && value.trim()) return value;
+  if (typeof value === "number") return String(value);
+  return null;
+}
+
+function extractCommunityId(raw: any): string | null {
+  return (
+    toId(raw?._id) ||
+    toId(raw?.id) ||
+    toId(raw?.communityId) ||
+    toId(raw?.data?._id) ||
+    toId(raw?.data?.id) ||
+    null
+  );
+}
+
 function mergeUniqueByKey<T>(
   currentItems: T[],
   nextItems: T[],
@@ -111,21 +128,34 @@ export default function ExplorePage() {
       }
 
       // Handle communities - API returns { success: true, communities: [...] }
-      if (
-        communitiesData.success &&
-        Array.isArray(communitiesData.communities)
-      ) {
-        setSearchCommunities(communitiesData.communities);
-      } else if (
-        communitiesData.success &&
-        Array.isArray(communitiesData.data)
-      ) {
-        setSearchCommunities(communitiesData.data);
-      } else if (Array.isArray(communitiesData)) {
-        setSearchCommunities(communitiesData);
-      } else {
-        setSearchCommunities([]);
-      }
+      const rawCommunities: any[] = Array.isArray(communitiesData?.communities)
+        ? communitiesData.communities
+        : Array.isArray(communitiesData?.data)
+          ? communitiesData.data
+          : Array.isArray(communitiesData)
+            ? communitiesData
+            : [];
+
+      const mappedCommunities = rawCommunities
+        .map<ExploreCommunity>((community: any) => {
+          const id = extractCommunityId(community);
+          return {
+            _id: id || "",
+            name: community.name,
+            description: community.description,
+            category: community.category || "General",
+            cover: community.profile?.coverPhoto || "/communities/default.jpg",
+            profile: community.profile,
+            memberCount: community.memberCount,
+            membersCount: community.memberCount,
+            memberAvatars: [],
+            isFollowing: false,
+            slug: id || undefined,
+          };
+        })
+        .filter((c) => !!c._id);
+
+      setSearchCommunities(mappedCommunities);
 
       // Handle posts
       if (postsData.posts && Array.isArray(postsData.posts)) {
