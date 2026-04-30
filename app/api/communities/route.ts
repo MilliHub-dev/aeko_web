@@ -44,18 +44,28 @@ export async function POST(request: NextRequest) {
   const cookieStore = await cookies();
   const token = cookieStore.get("token");
 
+  if (!token?.value) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
     const res = await fetch(`${API_BASE_URL}/api/communities`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token?.value}`,
+        Authorization: `Bearer ${token.value}`,
       },
       body: JSON.stringify(body),
     });
 
-    const data = await res.json();
+    const responseText = await res.text();
+    let data: any = null;
+    try {
+      data = responseText ? JSON.parse(responseText) : null;
+    } catch {
+      data = { message: responseText };
+    }
 
     if (!res.ok) {
       return NextResponse.json(data, { status: res.status });

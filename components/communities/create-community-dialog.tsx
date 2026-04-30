@@ -215,6 +215,20 @@ export function CreateCommunityDialog({ trigger }: CreateCommunityDialogProps) {
             errorData.error ||
             errorData?.details?.message ||
             errorMessage;
+
+          if (errorData?.details?.fieldErrors && typeof errorData.details.fieldErrors === "object") {
+            const entries = Object.entries(errorData.details.fieldErrors) as Array<
+              [string, string[]]
+            >;
+            const flat = entries
+              .flatMap(([field, messages]) =>
+                (messages || []).map((msg) => `${field}: ${msg}`)
+              )
+              .filter(Boolean);
+            if (flat.length > 0) {
+              errorMessage = flat.slice(0, 5).join(" • ");
+            }
+          }
         } catch {
           // If parsing fails, use status-based message
           errorMessage = `Failed to create community (${response.status})`;
