@@ -34,7 +34,12 @@ const discoverFilters = [
 ];
 
 function toId(value: unknown): string | null {
-  if (typeof value === "string" && value.trim()) return value;
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+    if (trimmed === "undefined" || trimmed === "null") return null;
+    return trimmed;
+  }
   if (typeof value === "number") return String(value);
   return null;
 }
