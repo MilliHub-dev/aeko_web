@@ -31,6 +31,7 @@ export function CreateCommunityDialog({ trigger }: CreateCommunityDialogProps) {
   const [isCheckingUser, setIsCheckingUser] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hasGoldenTick, setHasGoldenTick] = useState(false);
+  const [hasTwoFactor, setHasTwoFactor] = useState(false);
 
   // Form state
   const [name, setName] = useState("");
@@ -63,6 +64,7 @@ export function CreateCommunityDialog({ trigger }: CreateCommunityDialogProps) {
         // Check both direct property and nested user property
         const user = data.user || data;
         setHasGoldenTick(!!user?.goldenTick);
+        setHasTwoFactor(!!user?.twoFactorAuth?.isEnabled || !!user?.twoFactorEnabled);
       }
     } catch (err) {
       console.error("Failed to check user status:", err);
@@ -144,14 +146,28 @@ export function CreateCommunityDialog({ trigger }: CreateCommunityDialogProps) {
     e.preventDefault();
 
     if (!hasGoldenTick) return;
+    if (!hasTwoFactor) {
+      setError("Two-factor authentication (2FA) is required to create a community");
+      return;
+    }
 
     if (!name.trim()) {
       setError("Community name is required");
       return;
     }
 
+    if (name.trim().length < 3) {
+      setError("Community name must be at least 3 characters");
+      return;
+    }
+
     if (!description.trim()) {
       setError("Description is required");
+      return;
+    }
+
+    if (description.trim().length < 10) {
+      setError("Description must be at least 10 characters");
       return;
     }
 
@@ -194,7 +210,11 @@ export function CreateCommunityDialog({ trigger }: CreateCommunityDialogProps) {
         try {
           const errorData = await response.json();
           // Handle server error response format: { success: false, message: "..." }
-          errorMessage = errorData.message || errorData.error || errorMessage;
+          errorMessage =
+            errorData.message ||
+            errorData.error ||
+            errorData?.details?.message ||
+            errorMessage;
         } catch {
           // If parsing fails, use status-based message
           errorMessage = `Failed to create community (${response.status})`;
@@ -281,6 +301,19 @@ export function CreateCommunityDialog({ trigger }: CreateCommunityDialogProps) {
             <h3 className="mb-2 text-lg font-semibold">Verified Users Only</h3>
             <p className="mb-6 max-w-xs text-sm text-muted-foreground">
               Community creation is currently available only to users with a Golden Tick.
+            </p>
+            <Button onClick={() => setOpen(false)} variant="outline">
+              Close
+            </Button>
+          </div>
+        ) : !hasTwoFactor ? (
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <div className="mb-4 rounded-full bg-amber-100 p-4 dark:bg-amber-900/20">
+              <Crown className="h-10 w-10 text-amber-500" />
+            </div>
+            <h3 className="mb-2 text-lg font-semibold">2FA Required</h3>
+            <p className="mb-6 max-w-xs text-sm text-muted-foreground">
+              Enable two-factor authentication (2FA) to create a community.
             </p>
             <Button onClick={() => setOpen(false)} variant="outline">
               Close
