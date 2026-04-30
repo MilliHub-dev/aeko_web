@@ -144,7 +144,7 @@ export default function ExplorePage() {
             name: community.name,
             description: community.description,
             category: community.category || "General",
-            cover: community.profile?.coverPhoto || "/communities/default.jpg",
+            cover: community.profile?.coverPhoto || "/cover.png",
             profile: community.profile,
             memberCount: community.memberCount,
             membersCount: community.memberCount,

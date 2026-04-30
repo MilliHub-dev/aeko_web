@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { User } from "@/types/user";
 import { getProfile } from "@/lib/get-profile";
 
@@ -15,12 +15,21 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const retryCountRef = useRef(0);
 
   const fetchUser = async () => {
     try {
       setIsLoading(true);
       const profile = await getProfile();
-      setUser(profile);
+      setUser((prev) => profile ?? prev);
+      if (!profile && retryCountRef.current < 3) {
+        retryCountRef.current += 1;
+        setTimeout(() => {
+          void fetchUser();
+        }, 2000);
+      } else if (profile) {
+        retryCountRef.current = 0;
+      }
     } catch (error) {
       console.error("Failed to fetch user profile", error);
     } finally {

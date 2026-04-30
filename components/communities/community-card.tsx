@@ -14,6 +14,14 @@ interface CommunityCardProps {
   onFollowToggle?: (communityId: string, isFollowing: boolean) => void;
 }
 
+function normalizeId(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (trimmed === "undefined" || trimmed === "null") return null;
+  return trimmed;
+}
+
 export function CommunityCard({
   community,
   variant = "default",
@@ -27,12 +35,21 @@ export function CommunityCard({
     }
   };
 
+  const targetId =
+    normalizeId(community.slug) ||
+    normalizeId(community._id) ||
+    normalizeId((community as any).id) ||
+    normalizeId((community as any).communityId);
+
+  const Wrapper: any = targetId ? Link : "div";
+  const wrapperProps = targetId ? { href: `/communities/${targetId}` } : {};
+
   return (
-    <Link
-      href={`/communities/${community.slug || community._id}`}
+    <Wrapper
+      {...wrapperProps}
       className={cn(
         "group relative block overflow-hidden rounded-[28px] border border-border/50 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(244,248,247,0.88))] shadow-sm transition-all duration-300",
-        "hover:-translate-y-2 hover:shadow-xl hover:border-primary/30",
+        targetId ? "hover:-translate-y-2 hover:shadow-xl hover:border-primary/30" : "opacity-80",
         variant === "compact" && "rounded-[20px]"
       )}>
       <div className="relative aspect-[4/3]">
@@ -98,6 +115,6 @@ export function CommunityCard({
 
       {/* Desktop hover effect overlay */}
       <div className="absolute inset-0 bg-primary/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 hidden md:block pointer-events-none" />
-    </Link>
+    </Wrapper>
   );
 }

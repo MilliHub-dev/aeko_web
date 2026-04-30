@@ -109,6 +109,12 @@ export interface ExploreCommunity {
   isFollowing?: boolean;
   growth?: string; // e.g., "+6.2% weekly"
   slug?: string; // URL-friendly identifier
+  owner?: string | { _id?: string; id?: string };
+  moderators?: string[] | Pick<User, "_id" | "name" | "username" | "profilePicture">[];
+  settings?: unknown;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CommunityPost {

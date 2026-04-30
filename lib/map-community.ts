@@ -14,7 +14,7 @@ export function mapApiCommunityToExploreCommunity(
     name: apiCommunity.name,
     description: apiCommunity.description,
     category: apiCommunity.category || "General",
-    cover: apiCommunity.profile?.coverPhoto || "/communities/default.jpg",
+    cover: apiCommunity.profile?.coverPhoto || "/cover.png",
     profile: apiCommunity.profile,
     membersCount: apiCommunity.memberCount || 0,
     memberCount: apiCommunity.memberCount,

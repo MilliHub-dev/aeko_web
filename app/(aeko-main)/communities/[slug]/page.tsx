@@ -70,6 +70,10 @@ export default function CommunityProfilePage({
     setError(null);
 
     try {
+      const trimmed = (communityId || "").trim();
+      if (!trimmed || trimmed === "undefined" || trimmed === "null") {
+        throw new Error("Community not found");
+      }
       const response = await fetch(`/api/communities/${communityId}`);
 
       if (!response.ok) {
@@ -162,7 +166,7 @@ export default function CommunityProfilePage({
   }
 
   const coverImage =
-    community.profile?.coverPhoto || "/communities/default.jpg";
+    community.profile?.coverPhoto || "/cover.png";
   const category = "General"; // Can be added to API response
 
   return (

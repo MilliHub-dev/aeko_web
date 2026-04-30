@@ -30,6 +30,11 @@ function toId(value: unknown): string | null {
   return null;
 }
 
+function toIdList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.map((v) => toId(v)).filter((v): v is string => !!v);
+}
+
 function extractCommunityId(raw: any): string | null {
   return (
     toId(raw?._id) ||
@@ -53,7 +58,7 @@ function extractUserIdFromMember(rawMember: any): string | null {
 }
 
 export default function CommunitiesPage() {
-  const { user } = useUser();
+  const { user, isLoading: isUserLoading } = useUser();
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [primaryTab, setPrimaryTab] = useState<"my" | "explore">("my");
@@ -92,7 +97,7 @@ export default function CommunitiesPage() {
             name: community.name,
             description: community.description,
             category: community.category || "General",
-            cover: community.profile?.coverPhoto || "/communities/default.jpg",
+            cover: community.profile?.coverPhoto || "/cover.png",
             profile: community.profile,
             memberCount: community.memberCount,
             membersCount: community.memberCount,
@@ -145,7 +150,7 @@ export default function CommunitiesPage() {
               description: community.description,
               category: community.category || "General",
               cover:
-                community.profile?.coverPhoto || "/communities/default.jpg",
+                community.profile?.coverPhoto || "/cover.png",
               profile: community.profile,
               memberCount: community.memberCount,
               membersCount: community.memberCount,
@@ -176,6 +181,79 @@ export default function CommunitiesPage() {
 
     fetchCommunities();
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const ownedIds = new Set<string>(
+      [
+        ...toIdList((user as any)?.ownedCommunities),
+        ...toIdList((user as any)?.createdCommunities),
+        ...toIdList((user as any)?.communitiesOwned),
+      ]
+    );
+    if (ownedIds.size === 0) return;
+    if (isLoading) return;
+    if (error) return;
+
+    const existingIds = new Set(communities.map((c) => c._id));
+    const missing = Array.from(ownedIds).filter((id) => !existingIds.has(id));
+    if (missing.length === 0) return;
+
+    const fetchMissing = async () => {
+      try {
+        const results = await Promise.all(
+          missing.slice(0, 10).map(async (id) => {
+            const res = await fetch(`/api/communities/${id}`);
+            if (!res.ok) return null;
+            return res.json();
+          })
+        );
+
+        const normalized: UiCommunity[] = results
+          .map((raw: any) => raw?.data || raw?.community || raw)
+          .filter((c: any) => !!c)
+          .map((community: any) => {
+            const id = extractCommunityId(community) || "";
+            return {
+              _id: id,
+              name: community.name,
+              description: community.description,
+              category: community.category || "General",
+              cover: community.profile?.coverPhoto || "/cover.png",
+              profile: community.profile,
+              memberCount: community.memberCount,
+              membersCount: community.memberCount,
+              memberAvatars: [],
+              isFollowing: false,
+              slug: id || undefined,
+              owner: community.owner,
+              moderators: community.moderators,
+              settings: community.settings,
+              isActive: community.isActive,
+              createdAt: community.createdAt,
+              updatedAt: community.updatedAt,
+            } as UiCommunity;
+          })
+          .filter((c) => !!c._id);
+
+        if (normalized.length > 0) {
+          setCommunities((prev) => {
+            const merged = [...normalized, ...prev];
+            const seen = new Set<string>();
+            return merged.filter((c) => {
+              if (seen.has(c._id)) return false;
+              seen.add(c._id);
+              return true;
+            });
+          });
+        }
+      } catch {
+        return;
+      }
+    };
+
+    void fetchMissing();
+  }, [user, isLoading, error, communities]);
 
   const handleFollowToggle = (communityId: string, isFollowing: boolean) => {
     console.log(`Toggle follow for ${communityId}: ${isFollowing}`);
@@ -209,8 +287,34 @@ export default function CommunitiesPage() {
   const showSearchOverlay = isSearchOpen && searchQuery.trim().length > 0;
 
   const currentUserId = toId((user as any)?._id) || toId((user as any)?.id);
+  const ownedCommunityIds = new Set<string>(
+    [
+      ...toIdList((user as any)?.ownedCommunities),
+      ...toIdList((user as any)?.createdCommunities),
+      ...toIdList((user as any)?.communitiesOwned),
+    ]
+  );
+  const membershipCommunityIds = new Set<string>(
+    [
+      ...toIdList((user as any)?.communityMemberships),
+      ...toIdList((user as any)?.communities),
+      ...toIdList((user as any)?.communityMembers),
+    ]
+  );
+  const followingCommunityIds = new Set<string>(
+    [
+      ...toIdList((user as any)?.followingCommunities),
+      ...toIdList((user as any)?.followedCommunities),
+    ]
+  );
 
   const isMyCommunity = (c: UiCommunity) => {
+    const communityId = toId((c as any)?._id) || toId((c as any)?.id) || toId((c as any)?.slug);
+    if (communityId) {
+      if (ownedCommunityIds.has(communityId)) return true;
+      if (membershipCommunityIds.has(communityId)) return true;
+      if (followingCommunityIds.has(communityId)) return true;
+    }
     if (!currentUserId) return false;
     const ownerId = toId((c as any).owner) || toId((c as any).owner?._id);
     if (ownerId && ownerId === currentUserId) return true;
@@ -355,10 +459,10 @@ export default function CommunitiesPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <h2 className="text-lg font-semibold text-foreground">
-                        Communities you follow
+                        Your communities
                       </h2>
                       <p className="text-sm text-muted-foreground">
-                        Manage the circles you contribute to regularly.
+                        Communities you created, joined, or follow.
                       </p>
                     </div>
                     {myCommunities.length > 0 && (
@@ -369,7 +473,11 @@ export default function CommunitiesPage() {
                       </Link>
                     )}
                   </div>
-                  {myCommunities.length > 0 ? (
+                  {isUserLoading ? (
+                    <div className="flex items-center justify-center py-20">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    </div>
+                  ) : myCommunities.length > 0 ? (
                     <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
                       {myCommunities.map((community) => (
                       <CommunityCard

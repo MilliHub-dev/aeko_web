@@ -13,6 +13,11 @@ function toId(value: unknown): string | null {
   return null;
 }
 
+function toIdList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.map((v) => toId(v)).filter((v): v is string => !!v);
+}
+
 function extractCommunityId(raw: any): string | null {
   return (
     toId(raw?._id) ||
@@ -36,11 +41,31 @@ function extractUserIdFromMember(rawMember: any): string | null {
 }
 
 export default function MyCommunitiesPage() {
-  const { user } = useUser();
+  const { user, isLoading: isUserLoading } = useUser();
   const [communities, setCommunities] = useState<ExploreCommunity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const currentUserId = toId((user as any)?._id) || toId((user as any)?.id);
+  const ownedCommunityIds = new Set<string>(
+    [
+      ...toIdList((user as any)?.ownedCommunities),
+      ...toIdList((user as any)?.createdCommunities),
+      ...toIdList((user as any)?.communitiesOwned),
+    ]
+  );
+  const membershipCommunityIds = new Set<string>(
+    [
+      ...toIdList((user as any)?.communityMemberships),
+      ...toIdList((user as any)?.communities),
+      ...toIdList((user as any)?.communityMembers),
+    ]
+  );
+  const followingCommunityIds = new Set<string>(
+    [
+      ...toIdList((user as any)?.followingCommunities),
+      ...toIdList((user as any)?.followedCommunities),
+    ]
+  );
 
   useEffect(() => {
     const fetchCommunities = async () => {
@@ -53,6 +78,12 @@ export default function MyCommunitiesPage() {
 
         if (data.success && data.data) {
           const isMyCommunity = (raw: any) => {
+            const communityId = extractCommunityId(raw);
+            if (communityId) {
+              if (ownedCommunityIds.has(communityId)) return true;
+              if (membershipCommunityIds.has(communityId)) return true;
+              if (followingCommunityIds.has(communityId)) return true;
+            }
             if (!currentUserId) return false;
             const ownerId = toId(raw?.owner) || toId(raw?.owner?._id);
             if (ownerId && ownerId === currentUserId) return true;
@@ -90,7 +121,7 @@ export default function MyCommunitiesPage() {
                 name: community.name,
                 description: community.description,
                 category: community.category || "General",
-                cover: community.profile?.coverPhoto || "/communities/default.jpg",
+                cover: community.profile?.coverPhoto || "/cover.png",
                 profile: community.profile,
                 memberCount: community.memberCount,
                 membersCount: community.memberCount,
@@ -114,7 +145,7 @@ export default function MyCommunitiesPage() {
     };
 
     fetchCommunities();
-  }, [currentUserId]);
+  }, [currentUserId, isUserLoading]);
 
   const handleFollowToggle = (communityId: string, isFollowing: boolean) => {
     setCommunities((prev) =>
