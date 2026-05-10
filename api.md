@@ -1,6 +1,6 @@
 # Aeko Backend API Documentation
 
-Base URL: `https://dev.aeko.social`
+Base URL: `https://dev.aeko.online`
 
 Version: 2.0.0
 Description: 

@@ -8,6 +8,6 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
       },
     ],
-    sitemap: "https://aeko.social/sitemap.xml",
+    sitemap: "https://aeko.online/sitemap.xml",
   };
 }

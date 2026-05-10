@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 		template: "%s | Aeko Social"
 	},
 	description: "Discover creators, live streams, and communities on Aeko and explore unlimited blockchain and web3 features.",
-	metadataBase: new URL("https://aeko.social"),
+	metadataBase: new URL("https://aeko.online"),
 	keywords: [
 		"aeko",
 		"social media",
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
 	openGraph: {
 		title: "Aeko",
 		description: "Discover creators, live streams, and communities on Aeko and explore unlimited blockchain and web3 features..",
-		url: "https://aeko.social",
+		url: "https://aeko.online",
 		siteName: "Aeko",
 		images: [{ url: "/aeko-logo.png", width: 1200, height: 630, alt: "Aeko" }],
 		type: "website"
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
 		}
 	},
 	alternates: {
-		canonical: "https://aeko.social"
+		canonical: "https://aeko.online"
 	},
 	icons: {
 		icon: "/icon.jpg",
