@@ -26,7 +26,7 @@ const LandingHeader = () => {
 					Sign up
 				</Link>
 				<Link
-					href="https://chain.aeko.social"
+					href="https://chain.aeko.online"
 					className="btn-glass"
 				>
 					Aeko Chain
