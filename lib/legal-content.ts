@@ -228,3 +228,79 @@ export const TERMS_SECTIONS: LegalSection[] = [
     ],
   },
 ];
+
+/**
+ * Child safety (CSAE) standards, required by Google Play for social apps.
+ *
+ * Linked from the Play Console, so it must stay public and at a stable URL
+ * (`/child-safety`). Only states what the product actually does: in-app
+ * reporting on profiles, posts, comments, stories and communities, blocking,
+ * and removal/banning by moderators. There is no automated image scanning, so
+ * none is claimed.
+ */
+export const CHILD_SAFETY_LAST_UPDATED = "14 September 2026";
+
+/** The designated child safety point of contact. Must be a monitored inbox. */
+export const CHILD_SAFETY_CONTACT_EMAIL = "aeko.social@gmail.com";
+
+export const CHILD_SAFETY_SECTIONS: LegalSection[] = [
+  {
+    title: "1. Our commitment",
+    body: [
+      `${SERVICE_NAME}, operated by ${OPERATOR}, has zero tolerance for child sexual abuse and exploitation (CSAE). This applies everywhere on ${SERVICE_NAME}: profiles, posts, comments, stories, reels, direct messages, live streams and communities.`,
+      "Any content or behaviour that sexually exploits, abuses or endangers children is prohibited, and we act on it as a priority.",
+    ],
+  },
+  {
+    title: "2. What is prohibited",
+    body: [
+      "Child sexual abuse material (CSAM) of any kind, including images, video, text, drawings, and AI-generated or manipulated content that depicts or sexualises a minor.",
+      "Sexualising minors, including sexual comments about children or content that presents children in a sexual way.",
+      "Grooming: building a relationship with a minor for the purpose of sexual contact or exploitation, online or offline.",
+      "Sextortion: threatening or coercing a minor, or anyone, using sexual images of a minor.",
+      "Soliciting, sharing, trading, linking to or requesting sexual content involving minors, or trying to move a minor to another platform for that purpose.",
+      "Trafficking, advertising or offering minors for sexual purposes.",
+    ],
+  },
+  {
+    title: "3. Minimum age",
+    body: [
+      `You must be at least 13 years old to use ${SERVICE_NAME}. Accounts we find to belong to children under 13 are removed. If you believe a child under 13 is using ${SERVICE_NAME}, please report it using the contact below.`,
+    ],
+  },
+  {
+    title: "4. How to report",
+    body: [
+      "In the app, use Report on any profile, post, comment, story or community, and block any account that contacts you. Reports are confidential.",
+      `You can also email our child safety contact at ${CHILD_SAFETY_CONTACT_EMAIL}. Please include the username or link involved, but do not send us any abusive images or videos.`,
+      "If a child is in immediate danger, contact your local police or emergency services first. You can also report suspected child sexual exploitation to the National Center for Missing & Exploited Children (NCMEC) at report.cybertip.org, or to the relevant authority in your country.",
+    ],
+  },
+  {
+    title: "5. What we do when we find it",
+    body: [
+      "We review reports involving child safety as a priority.",
+      "We remove content that violates these standards and permanently ban the accounts responsible.",
+      "Where we become aware of apparent child sexual abuse material, we report it to NCMEC and/or the appropriate law enforcement authority, and preserve relevant information as required by law.",
+      "We cooperate with law enforcement in investigations of child sexual abuse and exploitation, in response to valid legal requests.",
+    ],
+  },
+  {
+    title: "6. Compliance with the law",
+    body: [
+      `${OPERATOR} complies with applicable child safety laws and regulations in the regions where ${SERVICE_NAME} is available, including obligations to report child sexual abuse material to the appropriate authorities.`,
+    ],
+  },
+  {
+    title: "7. Child safety point of contact",
+    body: [
+      `Our designated contact for child safety matters, including questions about these standards and our CSAM prevention practices, can be reached at ${CHILD_SAFETY_CONTACT_EMAIL}.`,
+    ],
+  },
+  {
+    title: "8. Changes to these standards",
+    body: [
+      "We will update this page when our practices change and revise the date above.",
+    ],
+  },
+];

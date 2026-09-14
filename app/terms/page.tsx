@@ -55,12 +55,18 @@ export default function TermsOfServicePage() {
         ))}
       </div>
 
-      <footer className="mt-14 border-t pt-6">
+      <footer className="mt-14 flex flex-wrap gap-6 border-t pt-6">
         <Link
           href="/privacy"
           className="text-sm text-muted-foreground hover:text-foreground"
         >
           Privacy Policy →
+        </Link>
+        <Link
+          href="/child-safety"
+          className="text-sm text-muted-foreground hover:text-foreground"
+        >
+          Child Safety Standards →
         </Link>
       </footer>
     </main>
