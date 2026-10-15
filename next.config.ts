@@ -14,6 +14,13 @@ const nextConfig: NextConfig = {
         pathname: "/**",
       },
       {
+        // Backend-served media (/uploads) on the app API host.
+        protocol: "https",
+        hostname: "backend.aeko.online",
+        port: "",
+        pathname: "/**",
+      },
+      {
         protocol: "https",
         hostname: "dev.aeko.social",
         port: "",
