@@ -1,3 +1,5 @@
+import type { Sound } from "./sound";
+
 export type Story = {
 	id: string; // Unique identifier
 	userId: string; // Link to the user
@@ -10,6 +12,9 @@ export type Story = {
 	seen: boolean; // Has the current user seen it?
 	backgroundColor?: string;
 	font?: string;
+	/** Music on an image or text story. */
+	sound?: Sound | null;
+	soundStartMs?: number | null;
 };
 
 export type UserStoryGroup = {

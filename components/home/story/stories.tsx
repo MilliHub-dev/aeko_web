@@ -16,7 +16,10 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Type, Loader2, Check } from "lucide-react";
+import { Type, Loader2, Check, Music } from "lucide-react";
+import { MusicPickerDialog } from "@/components/sound/music-picker-dialog";
+import { SoundChip } from "@/components/sound/sound-chip";
+import type { SoundSelection } from "@/types/sound";
 
 /**
  * Stories sidebar
@@ -67,6 +70,8 @@ export function Stories() {
 
   const [mediaPreview, setMediaPreview] = useState<{ url: string; type: "image" | "video"; file: File } | null>(null);
   const [mediaDescription, setMediaDescription] = useState("");
+  const [storySound, setStorySound] = useState<SoundSelection | null>(null);
+  const [musicOpen, setMusicOpen] = useState(false);
 
   // Fetch active statuses (stories) from the backend API.
   const fetchStories = useCallback(async () => {
@@ -159,6 +164,8 @@ export function Stories() {
               seen: false,
               backgroundColor: status.backgroundColor,
               font: status.font,
+              sound: status.sound ?? null,
+              soundStartMs: status.soundStartMs ?? null,
            });
         });
 
@@ -205,6 +212,7 @@ export function Stories() {
       const url = URL.createObjectURL(file);
       setMediaPreview({ url, type, file });
       setMediaDescription("");
+      setStorySound(null);
       
       // Reset input so same file can be selected again if needed
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -224,6 +232,10 @@ export function Stories() {
       formData.append("mediaType", mediaPreview.type);
       if (mediaDescription.trim()) {
         formData.append("caption", mediaDescription.trim());
+      }
+      if (mediaPreview.type === "image" && storySound) {
+        formData.append("soundId", storySound.sound.id);
+        formData.append("soundStartMs", String(storySound.startMs));
       }
 
       const res = await fetch("/api/status", {
@@ -255,6 +267,8 @@ export function Stories() {
               mediaUrl: status.media ?? "",
               content: status.content,
               mediaType: (status.type === "video" ? "video" : "image") as "video" | "image",
+              sound: status.sound ?? null,
+              soundStartMs: status.soundStartMs ?? null,
               postedAt: status.createdAt ?? new Date().toISOString(),
               expiresAt: status.expiresAt ?? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
               seen: false,
@@ -578,6 +592,17 @@ export function Stories() {
               onChange={(e) => setMediaDescription(e.target.value)}
               maxLength={200}
             />
+            {mediaPreview?.type === "image" && (
+              <div className="flex flex-wrap items-center gap-2">
+                <Button type="button" variant="outline" size="sm" className="rounded-full" onClick={() => setMusicOpen(true)}>
+                  <Music className="mr-1 h-4 w-4" />
+                  {storySound ? "Change music" : "Add music"}
+                </Button>
+                {storySound && (
+                  <SoundChip sound={storySound.sound} link={false} variant="light" onRemove={() => setStorySound(null)} />
+                )}
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setMediaPreview(null)}>
@@ -590,6 +615,8 @@ export function Stories() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <MusicPickerDialog open={musicOpen} onOpenChange={setMusicOpen} onSelect={setStorySound} initial={storySound} />
     </>
   );
 }

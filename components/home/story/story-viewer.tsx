@@ -23,6 +23,8 @@ import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useStoriesStore } from "@/features/stories/stores";
 import { useUser } from "@/components/shared/user-context";
 import { toast } from "sonner";
+import { SoundChip } from "@/components/sound/sound-chip";
+import { useSoundPlayback } from "@/hooks/use-sound-playback";
 
 interface StoryViewerProps {
   userStories: UserStoryGroup;
@@ -57,6 +59,15 @@ const StoryViewer = ({ userStories, storyId, prevUser, nextUser }: StoryViewerPr
 
   const currentStoryIndex = userStories.stories.findIndex((s) => s.id === storyId);
   const currentStory = userStories.stories[currentStoryIndex];
+
+  // Music on an image/text story: plays for the story's duration and holds
+  // while the viewer is paused (hold-to-pause, dialogs).
+  const storySound = currentStory?.mediaType === "video" ? null : (currentStory?.sound ?? null);
+  useSoundPlayback({
+    src: storySound?.audioUrl,
+    startMs: currentStory?.soundStartMs ?? 0,
+    active: Boolean(storySound) && !isPaused,
+  });
   
   const isOwner = user && (user._id === userStories.userId || user.id === userStories.userId);
 
@@ -555,6 +566,12 @@ const StoryViewer = ({ userStories, storyId, prevUser, nextUser }: StoryViewerPr
                 />
               )}
             </div>
+
+            {storySound ? (
+              <div className="absolute bottom-24 left-3 z-30 sm:left-4" onClick={(e) => e.stopPropagation()}>
+                <SoundChip sound={storySound} />
+              </div>
+            ) : null}
 
             {/* Caption/Description Overlay */}
             {(!isText && currentStory.content) && (

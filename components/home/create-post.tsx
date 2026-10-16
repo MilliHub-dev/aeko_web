@@ -19,6 +19,7 @@ import {
   Loader2,
   Lock,
   MapPin,
+  Music,
   Palette,
   Plus,
   RotateCw,
@@ -59,6 +60,9 @@ import { useMobile } from "@/hooks/use-mobile";
 import { PostType } from "@/types/post";
 import { useUser } from "@/components/shared/user-context";
 import { UserSelector } from "./post/user-selector";
+import { MusicPickerDialog } from "@/components/sound/music-picker-dialog";
+import { SoundChip } from "@/components/sound/sound-chip";
+import type { Sound, SoundSelection } from "@/types/sound";
 import { toast } from "sonner";
 
 interface ImageEdits {
@@ -101,6 +105,8 @@ interface CreatePostProps {
     hashtags: string[];
   }) => void;
   trigger?: React.ReactNode;
+  /** Preselected track, e.g. from a sound page's "Use this sound". */
+  initialSound?: Sound | null;
 }
 
 const DEFAULT_IMAGE_EDITS: ImageEdits = {
@@ -333,12 +339,16 @@ async function trimVideoFile(file: File, startTime: number, endTime: number) {
   });
 }
 
-export function CreatePost({ onPost, trigger }: CreatePostProps) {
+export function CreatePost({ onPost, trigger, initialSound = null }: CreatePostProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [content, setContent] = useState("");
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [postType, setPostType] = useState<PostType>("text");
+  const [sound, setSound] = useState<SoundSelection | null>(
+    initialSound ? { sound: initialSound, startMs: 0 } : null,
+  );
+  const [musicOpen, setMusicOpen] = useState(false);
   const [privacy, setPrivacy] = useState<"public" | "followers" | "select_users" | "only_me">("public");
   const [location, setLocation] = useState("");
   const [showLocationInput, setShowLocationInput] = useState(false);
@@ -383,6 +393,7 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
       return [];
     });
     setPostType("text");
+    setSound(initialSound ? { sound: initialSound, startMs: 0 } : null);
     setSelectedUsers([]);
     setLocation("");
     setShowLocationInput(false);
@@ -628,6 +639,11 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
       mediaItems.forEach((item) => {
         formData.append("media", getMediaFile(item));
       });
+      // Photos only; a video carries its own audio.
+      if (postType === "image" && sound) {
+        formData.append("soundId", sound.sound.id);
+        formData.append("soundStartMs", String(sound.startMs));
+      }
 
       const response = await fetch("/api/posts/create", {
         method: "POST",
@@ -1067,6 +1083,12 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
                   </div>
                 </div>
 
+                {sound && postType === "image" && (
+                  <div className="pt-3">
+                    <SoundChip sound={sound.sound} link={false} variant="light" onRemove={() => setSound(null)} />
+                  </div>
+                )}
+
                 <div className={cn("flex items-center justify-between gap-3 pt-4", isMobile && "sticky bottom-0 bg-background/95")}>
                   <div className="flex flex-wrap items-center gap-1">
                     <input
@@ -1089,6 +1111,23 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
                     >
                       <LucideImage className="h-5 w-5" />
                     </Button>
+
+                    {postType === "image" && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className={cn(
+                          "h-9 w-9 rounded-full text-primary hover:bg-primary/10 hover:text-primary",
+                          sound && "bg-primary/10",
+                        )}
+                        disabled={isLoading}
+                        title={sound ? "Change music" : "Add music"}
+                        onClick={() => setMusicOpen(true)}
+                      >
+                        <Music className="h-5 w-5" />
+                      </Button>
+                    )}
 
                     <Button
                       type="button"
@@ -1427,6 +1466,8 @@ export function CreatePost({ onPost, trigger }: CreatePostProps) {
           </div>
         </DialogContent>
       </Dialog>
+
+      <MusicPickerDialog open={musicOpen} onOpenChange={setMusicOpen} onSelect={setSound} initial={sound} />
     </>
   );
 }

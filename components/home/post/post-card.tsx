@@ -16,6 +16,8 @@ import { useUser } from "@/components/shared/user-context";
 import { Heart } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useState } from "react";
+import { SoundChip } from "@/components/sound/sound-chip";
+import { useSoundPlayback } from "@/hooks/use-sound-playback";
 
 const PostCard = ({ isActive, ...post }: FeedPost & { isActive?: boolean }) => {
   // Sync post data with store
@@ -71,6 +73,16 @@ const PostCard = ({ isActive, ...post }: FeedPost & { isActive?: boolean }) => {
 
   const { videoRef, progress, isPlaying, isMuted, toggleMute, togglePlaying } =
     useVideoControls();
+
+  // Photo + music: the track plays while the card is the active one, using
+  // the header's mute toggle, and restarts from its offset each time.
+  const sound = currentPost.type === "image" ? (currentPost.sound ?? null) : null;
+  useSoundPlayback({
+    src: sound?.audioUrl,
+    startMs: currentPost.soundStartMs ?? 0,
+    active: Boolean(isActive) && Boolean(sound),
+    muted: isMuted,
+  });
 
   // Handle video playback based on active state
   useEffect(() => {
@@ -161,6 +173,7 @@ const PostCard = ({ isActive, ...post }: FeedPost & { isActive?: boolean }) => {
         isHovered={showOverlay}
         isMuted={isMuted}
         toggleMute={toggleMute}
+        hasSound={Boolean(sound)}
         views={currentPost.views}
       />
       <PostMedia
@@ -173,6 +186,12 @@ const PostCard = ({ isActive, ...post }: FeedPost & { isActive?: boolean }) => {
         progress={progress}
       />
       
+      {sound ? (
+        <div className="absolute bottom-28 left-3 z-30">
+          <SoundChip sound={sound} />
+        </div>
+      ) : null}
+
       {/* Post Actions Integration */}
       <PostActions
         postId={currentPost._id}

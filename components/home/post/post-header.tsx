@@ -55,6 +55,8 @@ interface PostHeaderProps {
 	isHovered?: boolean;
 	isMuted?: boolean;
 	toggleMute?: () => void;
+	/** A photo post with music shows the same mute control as a video. */
+	hasSound?: boolean;
 	views?: number;
     isAd?: boolean;
     targetUrl?: string;
@@ -71,6 +73,7 @@ const PostHeader = ({
 	isHovered = false,
 	isMuted = false,
 	toggleMute,
+	hasSound = false,
 	views = 0,
     isAd,
     targetUrl
@@ -274,7 +277,7 @@ const PostHeader = ({
 				)}
 
 				{/* Volume Control */}
-				{type === "video" && (
+				{(type === "video" || hasSound) && (
 					<Button
 						className={clsx(
 							buttonBg,

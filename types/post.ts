@@ -2,6 +2,8 @@ import { Comment } from "./comment";
 import { TransferHistory } from "./transfer";
 import { User } from "./user";
 
+import type { Sound } from "./sound";
+
 export type PostType = "text" | "image" | "video";
 
 export interface Engagement {
@@ -52,6 +54,9 @@ export interface Post {
   engagement: Engagement;
   createdAt: string; // ISO date-time
   updatedAt: string; // ISO date-time
+  /** Music on a photo post; the client plays it while the post is on screen. */
+  sound?: Sound | null;
+  soundStartMs?: number | null;
 }
 
 export interface FeedPost extends Pick<
@@ -74,6 +79,8 @@ export interface FeedPost extends Pick<
   | "transferHistory"
   | "createdAt"
   | "updatedAt"
+  | "sound"
+  | "soundStartMs"
 > {
   ad: Ad;
   isAd?: boolean;
