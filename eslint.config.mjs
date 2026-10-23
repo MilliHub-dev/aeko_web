@@ -1,26 +1,21 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
+import { defineConfig, globalIgnores } from "eslint/config";
+import nextVitals from "eslint-config-next/core-web-vitals";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+// Next 16 dropped `next lint`; this is the equivalent flat config.
+export default defineConfig([
+  globalIgnores([".next/**", "node_modules/**", "public/**"]),
+  ...nextVitals,
   {
     rules: {
-      // Convert all errors to warnings to prevent build failures
-      // This allows builds to complete even with ESLint issues
-      '@typescript-eslint/no-unused-vars': 'warn',
-      '@typescript-eslint/no-explicit-any': 'warn',
-      'react-hooks/exhaustive-deps': 'warn',
-      '@next/next/no-img-element': 'warn',
+      // The React-compiler lint rules landed with eslint-config-next 16.4 and
+      // flag ~70 long-standing effect/ref patterns in this codebase. They are
+      // worth fixing file by file, not as a gate, so they warn for now.
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/refs": "warn",
+      "react-hooks/immutability": "warn",
+      "react-hooks/static-components": "warn",
+      "react-hooks/purity": "warn",
+      "react/no-unescaped-entities": "warn",
     },
   },
-];
-
-export default eslintConfig;
+]);

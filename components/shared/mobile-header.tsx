@@ -3,11 +3,9 @@
 import {
   Bell,
   Menu,
-  Scan,
   Settings,
   Search,
   UserPlus,
-  ChevronDown,
 } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { Button } from "../ui/button";
@@ -46,18 +44,6 @@ const MobileHeader = () => {
   const isExplore = path == "/explore";
 
   const renderLeft = () => {
-    if (isWallet) {
-      return (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="rounded-full bg-secondary hover:bg-primary hover:text-secondary h-15 w-15 md:h-13 md:w-13"
-          aria-label="Scan">
-          <Scan className="size-6" />
-        </Button>
-      );
-    }
-
     if (isLiveStream) return;
     return (
       <Button
@@ -72,14 +58,7 @@ const MobileHeader = () => {
   };
 
   const renderCenter = () => {
-    if (isWallet) {
-      return (
-        <div className="flex items-center gap-2">
-          <h1 className="text-xl font-bold">Aeko wallet</h1>
-          <ChevronDown className="size-5" />
-        </div>
-      );
-    }
+    if (isWallet) return <h1 className="text-3xl font-bold">Wallet</h1>;
     if (isHome) {
       return (
         <div className="flex items-center justify-center">

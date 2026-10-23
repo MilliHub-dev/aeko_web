@@ -7,13 +7,13 @@ import { API_BASE_URL } from "@/lib/config";
  * Proxies the request to the external backend, preserving authentication
  * and forwarding any request body (if supplied).
  */
-export async function POST(request: NextRequest, { params }: { params: { postId: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ postId: string }> }) {
   try {
     // Retrieve the user's auth token from cookies
     const cookieStore = await cookies();
     const token = cookieStore.get("token");
 
-    const { postId } = params;
+    const { postId } = await params;
 
     // Preserve the original request body (if any)
     const rawBody = await request.text();

@@ -327,6 +327,7 @@ async function trimVideoFile(file: File, startTime: number, endTime: number) {
         started = true;
 
         try {
+          if (!recorder) throw new Error("Recorder was not initialised");
           recorder.start();
           await video.play();
         } catch (error) {

@@ -20,6 +20,7 @@ import {
   Loader2,
   Settings,
   ChevronUp,
+  X,
 } from "lucide-react";
 import { createLivestream, uploadThumbnail } from "@/lib/livestream-service";
 import type { LivestreamCreateData } from "@/types/livestream";

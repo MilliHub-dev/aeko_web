@@ -2,7 +2,8 @@ import type {
   LivestreamCreateData,
   LivestreamResponse,
 } from "@/types/livestream";
-// Use local API proxy instead of direct backend URL to avoid CORS
+// Use local API proxy instead of direct backend URL to avoid CORS. The proxy
+// attaches the session from the httpOnly cookie, which this code cannot read.
 const API_BASE = "/api";
 
 /**
@@ -11,16 +12,11 @@ const API_BASE = "/api";
 export async function createLivestream(
   data: LivestreamCreateData
 ): Promise<LivestreamResponse> {
-  const token = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("token="))
-    ?.split("=")[1];
 
   const response = await fetch(`${API_BASE}/livestream/create`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(data),
   });
@@ -40,10 +36,6 @@ export async function uploadThumbnail(
   streamId: string,
   file: File
 ): Promise<void> {
-  const token = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("token="))
-    ?.split("=")[1];
 
   const formData = new FormData();
   formData.append("thumbnail", file);
@@ -51,7 +43,6 @@ export async function uploadThumbnail(
   const response = await fetch(`${API_BASE}/livestream/${streamId}/thumbnail`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${token}`,
     },
     body: formData,
   });
@@ -66,16 +57,11 @@ export async function uploadThumbnail(
  * Start a livestream
  */
 export async function startLivestream(streamId: string): Promise<void> {
-  const token = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("token="))
-    ?.split("=")[1];
 
   const response = await fetch(`${API_BASE}/livestream/${streamId}/start`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
   });
 
@@ -89,16 +75,11 @@ export async function startLivestream(streamId: string): Promise<void> {
  * End a livestream
  */
 export async function endLivestream(streamId: string): Promise<LivestreamResponse> {
-  const token = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("token="))
-    ?.split("=")[1];
 
   const response = await fetch(`${API_BASE}/livestream/${streamId}/end`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
   });
 
@@ -111,16 +92,11 @@ export async function endLivestream(streamId: string): Promise<LivestreamRespons
 }
 
 export async function inviteCoHost(streamId: string, userId: string) {
-  const token = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("token="))
-    ?.split("=")[1];
 
   const response = await fetch(`${API_BASE}/livestream/${streamId}/co-hosts/invite`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ userId }),
   });
@@ -134,16 +110,11 @@ export async function inviteCoHost(streamId: string, userId: string) {
 }
 
 export async function inviteGuest(streamId: string, userId: string) {
-  const token = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("token="))
-    ?.split("=")[1];
 
   const response = await fetch(`${API_BASE}/livestream/${streamId}/guests/invite`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ userId }),
   });
@@ -157,16 +128,11 @@ export async function inviteGuest(streamId: string, userId: string) {
 }
 
 export async function acceptCoHostInvite(streamId: string) {
-  const token = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("token="))
-    ?.split("=")[1];
 
   const response = await fetch(`${API_BASE}/livestream/${streamId}/co-hosts/accept`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
   });
 
@@ -179,16 +145,11 @@ export async function acceptCoHostInvite(streamId: string) {
 }
 
 export async function acceptGuestInvite(streamId: string) {
-  const token = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("token="))
-    ?.split("=")[1];
 
   const response = await fetch(`${API_BASE}/livestream/${streamId}/guests/accept`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
   });
 

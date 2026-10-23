@@ -131,31 +131,8 @@ export function LeftSidebar() {
                 <div className="space-y-2">
                   {mainLinks.map((route) => {
                     const Icon = route.icon;
-                    const active = pathname.startsWith(route.path) && route.path !== "/wallet";
+                    const active = pathname.startsWith(route.path);
                     
-                    if (route.path === "/wallet") {
-                      return (
-                        <div
-                          key={route.path}
-                          className={navItem({
-                            active: false,
-                            className: "opacity-60 cursor-not-allowed"
-                          })}>
-                          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-muted text-primary transition">
-                            <Icon className="h-4 w-4" />
-                          </span>
-                          <div className="flex min-w-0 flex-col">
-                            <span className="truncate text-lg">{route.name}</span>
-                          </div>
-                          {(route as any).badge && (
-                            <span className="ml-auto rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
-                              {(route as any).badge}
-                            </span>
-                          )}
-                        </div>
-                      );
-                    }
-
                     return (
                       <Link
                         key={route.path}
@@ -190,7 +167,7 @@ export function LeftSidebar() {
                 <div className="space-y-2">
                   {secondaryLinks.map((route) => {
                     const Icon = route.icon;
-                    const active = pathname.startsWith(route.path) && route.path !== "/wallet";
+                    const active = pathname.startsWith(route.path);
                     
                     if (route.path === "/wallet") {
                       return (

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://dev.aeko.social";
+import { API_BASE_URL } from "@/lib/config";
 
 export async function POST(
   request: NextRequest,

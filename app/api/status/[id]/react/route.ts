@@ -7,11 +7,11 @@ import { API_BASE_URL } from "@/lib/config";
  * POST /api/status/{id}/react
  * Proxies the reaction request to the external backend.
  */
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get("token");
-    const statusId = params.id;
+    const statusId = (await params).id;
     const body: ReactToStatusRequest = await request.json();
 
     // Basic validation – the external service will also validate.

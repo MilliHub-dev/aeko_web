@@ -113,12 +113,9 @@ const StoryViewer = ({ userStories, storyId, prevUser, nextUser }: StoryViewerPr
     
     setIsResharing(true);
     try {
-        const res = await fetch(`/api/status/${currentStory.id}/reshare`, { 
-            method: 'POST',
-            headers: {
-              "Authorization": `Bearer ${document.cookie.replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1")}`
-            }
-        });
+        // The /api proxy attaches the session from the httpOnly cookie; it is
+        // not readable from document.cookie, so no header is sent here.
+        const res = await fetch(`/api/status/${currentStory.id}/reshare`, { method: "POST" });
         const data = await res.json();
         
         if (res.ok) {

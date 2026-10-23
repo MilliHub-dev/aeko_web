@@ -223,7 +223,6 @@ export function MobileMenuDrawer() {
       label: "Aeko Wallet", 
       href: "/wallet", 
       icon: WalletOutline,
-      badge: "Coming Soon" 
     },
     { label: "Profile", href: "/profile", icon: User },
     { label: "Settings", href: "/settings", icon: SettingsIcon },
@@ -290,7 +289,7 @@ export function MobileMenuDrawer() {
                 <div className="flex items-center gap-8 text-center text-sm">
                   <div>
                     <p className="font-semibold">
-                      {user?.postsCount ?? user?.postCount ?? user?.posts?.length ?? 0}
+                      {user?.postsCount ?? user?.postsCount ?? user?.posts?.length ?? 0}
                     </p>
                     <p className="text-muted-foreground">Posts</p>
                   </div>
@@ -309,23 +308,7 @@ export function MobileMenuDrawer() {
                 </div>
               </div>
               <nav className="flex flex-col gap-4 py-6">
-                {items.map(({ label, href, icon: Icon, badge }) => {
-                  if (href === "/wallet") {
-                    return (
-                      <div
-                        key={label}
-                        className="flex items-center gap-3 rounded-lg px-2 py-3 text-lg opacity-60 cursor-not-allowed">
-                        <Icon className="shrink-0" size={22} />
-                        <span>{label}</span>
-                        {badge && (
-                          <span className="ml-auto rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
-                            {badge}
-                          </span>
-                        )}
-                      </div>
-                    );
-                  }
-
+                {items.map(({ label, href, icon: Icon }) => {
                   return (
                     <Link
                       key={label}
@@ -336,11 +319,6 @@ export function MobileMenuDrawer() {
                       <span>{label}</span>
                       {href === "/messages" && hasUnreadMessages && (
                         <span className="ml-auto h-2.5 w-2.5 rounded-full bg-primary" />
-                      )}
-                      {badge && (
-                        <span className="ml-auto rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
-                          {badge}
-                        </span>
                       )}
                     </Link>
                   );

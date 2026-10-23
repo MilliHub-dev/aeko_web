@@ -3,7 +3,7 @@ import { useEffect, useRef, RefObject } from "react";
 /**
  * Hook to trap focus within a container element
  */
-export function useFocusTrap(isActive: boolean): RefObject<HTMLDivElement> {
+export function useFocusTrap(isActive: boolean): RefObject<HTMLDivElement | null> {
 	const containerRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {

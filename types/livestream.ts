@@ -22,9 +22,13 @@ export interface LivestreamResponse {
   data?: {
     streamId?: string;
     _id?: string;
+    chatId?: string;
     stream?: {
       id?: string;
       _id?: string;
+      chatId?: string;
+      hostName?: string;
+      hostProfilePicture?: string;
       title: string;
       description: string;
       category: string;

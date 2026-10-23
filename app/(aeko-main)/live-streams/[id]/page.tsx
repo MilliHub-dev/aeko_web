@@ -793,7 +793,7 @@ export default function LiveStreamPage({ params }: LiveStreamPageProps) {
 
                       {stream.tags.length > 0 && (
                         <div className="flex flex-wrap gap-2">
-                          {stream.tags.map((tag) => (
+                          {stream.tags.map((tag: string) => (
                             <Badge
                               key={tag}
                               variant="outline"
@@ -1069,7 +1069,7 @@ export default function LiveStreamPage({ params }: LiveStreamPageProps) {
                       </div>
                       <p className="mt-2 text-sm leading-6 text-muted-foreground">
                         {stream.tags.length > 0
-                          ? stream.tags.map((tag) => `#${tag}`).join(" • ")
+                          ? stream.tags.map((tag: string) => `#${tag}`).join(" • ")
                           : "No topic tags added yet for this stream."}
                       </p>
                     </div>

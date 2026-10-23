@@ -59,7 +59,7 @@ function ViralPostCard({ post }: { post: FeedPost }) {
 
   return (
     <Link
-      href={`/home/post/${post._id}`}
+      href={`/${post.user?.username ?? ""}/posts/${post._id}`}
       className="group relative aspect-[9/16] overflow-hidden rounded-[24px] bg-black/5 shadow-lg transition hover:-translate-y-1 hover:shadow-2xl">
       {post.type !== "text" && (
         <>

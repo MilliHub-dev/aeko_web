@@ -14,6 +14,8 @@ export default async function ProfilePage() {
   let user: User | null = await getProfile();
 
   if (user) {
+    // Narrowed copy: `user` is reassigned below, which loses the null check.
+    let profile: User = user;
     try {
       const cookieStore = await cookies();
       const token = cookieStore.get("token");
@@ -26,7 +28,7 @@ export default async function ProfilePage() {
         headers["Authorization"] = `Bearer ${token.value}`;
       }
 
-      const res = await fetch(`${API_BASE_URL}/api/users/${user._id || user.id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/users/${profile._id || profile.id}`, {
         headers,
         cache: "no-store",
       });
@@ -39,7 +41,7 @@ export default async function ProfilePage() {
           detailedUser.coverPicture = detailedUser.coverPic;
         }
         // Merge detailed stats into the user object
-        user = { ...user, ...detailedUser };
+        profile = { ...profile, ...detailedUser };
       } else {
         console.error(`Failed to fetch detailed stats: ${res.status}`);
       }
@@ -47,7 +49,7 @@ export default async function ProfilePage() {
       // Likes on profile should represent likes received on the user's posts,
       // not the count of posts this user has liked.
       const userPostsRes = await fetch(
-        `${API_BASE_URL}/api/posts/user/${user._id || user.id}?page=1&limit=100`,
+        `${API_BASE_URL}/api/posts/user/${profile._id || profile.id}?page=1&limit=100`,
         {
           headers,
           cache: "no-store",
@@ -69,14 +71,12 @@ export default async function ProfilePage() {
           return total + postLikes;
         }, 0);
 
-        user = {
-          ...user,
-          likesCount: likesReceived,
-        };
+        profile = { ...profile, likesCount: likesReceived };
       }
     } catch (error) {
       console.error("Failed to fetch detailed user stats:", error);
     }
+    user = profile;
   }
 
   if (!user) {

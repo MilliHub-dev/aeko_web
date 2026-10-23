@@ -57,7 +57,6 @@ export const sidebarRoutes = [
     name: "Aeko Wallet",
     path: "/wallet",
     icon: WalletOutline,
-    badge: "Coming Soon",
   },
   // {
   //   name: "NFT Marketplace",
