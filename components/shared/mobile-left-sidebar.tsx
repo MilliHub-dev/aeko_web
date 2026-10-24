@@ -27,7 +27,7 @@ export function MobileLeftSidebar() {
 
   return (
     <aside className="sticky top-0 hidden h-screen w-full shrink-0 md:flex xl:hidden border-r">
-      <div className="relative flex h-full w-full flex-col items-center overflow-hidden rounded-[32px] bg-card pb-4 text-muted-foreground">
+      <div className="relative flex h-full w-full flex-col items-center overflow-y-auto overscroll-contain no-scrollbar rounded-[32px] bg-card pb-4 text-muted-foreground">
         <div className="flex h-20 w-full items-center justify-center border-b px-4">
           <Avatar className="h-16 w-16 ">
             <AvatarImage src={user?.profilePicture || user?.avatar} alt="User Avatar" />

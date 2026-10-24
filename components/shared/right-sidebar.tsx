@@ -13,7 +13,7 @@ import { SearchResultsDropdown } from "@/components/explore/search-results-dropd
 import type { SuggestedUser, ExploreCommunity } from "@/types/explore";
 import type { FeedPost } from "@/types/post";
 import { useOnClickOutside } from "@/hooks/use-on-click-outside";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useFollowUser } from "@/features/profile/hooks/use-follow-user";
 import { useUserRelationsStore } from "@/features/profile/stores/user-relations-store";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -273,8 +273,6 @@ export function RightSidebar() {
   const { users: rawSuggestedUsers } = useSuggestedUsers();
   const following = useUserRelationsStore((state) => state.following);
   const router = useRouter();
-  const pathname = usePathname();
-  const lockSidebarScroll = pathname === "/home";
   
   // Search state
   const [searchQuery, setSearchQuery] = useState("");
@@ -409,15 +407,11 @@ export function RightSidebar() {
 
   return (
     <aside
-      className={`sticky top-0 hidden h-screen w-full shrink-0 border-l xl:flex ${
-        lockSidebarScroll ? "overflow-hidden" : ""
-      }`}
+      className="sticky top-0 hidden h-screen w-full shrink-0 border-l xl:flex"
     >
       <div className="flex h-full w-full flex-col gap-6 overflow-hidden border-none">
         <div
-          className={`flex-1 space-y-6 px-6 py-6 ${
-            lockSidebarScroll ? "overflow-hidden" : "overflow-y-auto"
-          }`}
+          className="flex-1 space-y-6 px-6 py-6 overflow-y-auto overscroll-contain no-scrollbar"
         >
           {/* Search Bar */}
           <div className="relative" ref={searchContainerRef}>

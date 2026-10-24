@@ -38,7 +38,6 @@ export function LeftSidebar() {
   const chats = useChatStore((state) => state.chats);
   const fetchChats = useChatStore((state) => state.fetchChats);
   const hasUnreadMessages = chats.some((chat) => (chat.unreadCount || 0) > 0);
-  const lockSidebarScroll = pathname === "/home";
 
   const { mainLinks, secondaryLinks } = useMemo(() => {
     return {
@@ -53,9 +52,7 @@ export function LeftSidebar() {
 
   return (
     <aside
-      className={`sticky top-0 hidden h-screen w-full shrink-0 border-r xl:flex ${
-        lockSidebarScroll ? "overflow-hidden" : "overflow-y-auto"
-      }`}
+      className="sticky top-0 hidden h-screen w-full shrink-0 border-r xl:flex overflow-y-auto overscroll-contain no-scrollbar"
     >
       <div className="relative flex min-h-full w-full flex-col bg-card space-y-4 p-6">
         <div className="space-y-4">
