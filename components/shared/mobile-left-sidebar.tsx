@@ -44,18 +44,7 @@ export function MobileLeftSidebar() {
         <nav className="mt-6 flex flex-1 flex-col items-center gap-4">
           {sidebarRoutes.map((route) => {
             const Icon = route.icon;
-            const active = pathname.startsWith(route.path) && route.path !== "/wallet";
-            
-            if (route.path === "/wallet") {
-              return (
-                <div
-                  key={route.path}
-                  aria-label={route.name}
-                  className="group relative flex h-14 w-14 items-center justify-center rounded-2xl transition opacity-60 cursor-not-allowed">
-                  <Icon className="h-6 w-6" />
-                </div>
-              );
-            }
+            const active = pathname.startsWith(route.path);
 
             return (
               <Link

@@ -58,7 +58,7 @@ const MobileHeader = () => {
   };
 
   const renderCenter = () => {
-    if (isWallet) return <h1 className="text-3xl font-bold">Wallet</h1>;
+    if (isWallet) return <h1 className="truncate text-2xl font-bold sm:text-3xl">Wallet</h1>;
     if (isHome) {
       return (
         <div className="flex items-center justify-center">
@@ -75,7 +75,7 @@ const MobileHeader = () => {
     }
     if (isProfile) return;
     if (isLiveStream) return;
-    return <h1 className="text-3xl font-bold">{routeName}</h1>;
+    return <h1 className="truncate text-2xl font-bold sm:text-3xl">{routeName}</h1>;
   };
 
   const renderRight = () => {
@@ -120,7 +120,7 @@ const MobileHeader = () => {
     }
     if (isProfile) return;
     return (
-      <div className="flex justify-center items-center space-x-4">
+      <div className="flex shrink-0 justify-center items-center gap-3">
         <Link
           href="/notifications"
           className="rounded-full bg-secondary hover:bg-primary hover:text-secondary h-15 w-15 md:h-13 md:w-13 flex justify-center items-center">
@@ -156,7 +156,7 @@ const MobileHeader = () => {
         {renderLeft()}
 
         {/* Center Logo/Title */}
-        <div className="shrink-0">{renderCenter()}</div>
+        <div className="min-w-0 px-2">{renderCenter()}</div>
 
         {/* Right Icons */}
         {renderRight()}

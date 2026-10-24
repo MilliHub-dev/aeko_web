@@ -54,14 +54,14 @@ export function BaseLayout({ children }: BaseLayoutProps) {
           >
           {showMobileHeader && <MobileHeader />}
           <div
-            className={`xl:px-0 grid min-h-[100dvh] items-start ${gridColsClass} ${
+            className={`xl:px-0 grid w-full max-w-full min-h-[100dvh] items-start ${gridColsClass} ${
               shouldLockDesktopShell ? "md:h-[100dvh]" : ""
             }`}
           >
             <MobileLeftSidebar />
             <LeftSidebar />
             <main
-              className={`relative ${
+              className={`relative min-w-0 max-w-full ${
                 showMobileHeader ? "pt-24 md:pt-0" : ""
               } ${shouldLockDesktopShell ? "md:h-[100dvh] md:overflow-y-auto" : ""}`}
             >

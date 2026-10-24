@@ -109,7 +109,7 @@ export function PostDetailText({ post }: PostDetailTextProps) {
       {/* Post Content */}
       <div className="space-y-3">
         {post.text && (
-          <p className="text-base leading-relaxed whitespace-pre-wrap">
+          <p className="text-base leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
             {post.text}
           </p>
         )}

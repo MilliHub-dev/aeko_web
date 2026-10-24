@@ -424,7 +424,7 @@ export function Stories() {
 
   return (
     <>
-      <div className="flex w-full overflow-x-auto pb-4 pt-2 scrollbar-none md:pb-6">
+      <div className="flex w-full min-w-0 max-w-full overflow-x-auto pb-4 pt-2 scrollbar-none md:pb-6">
         <div className="flex gap-4 px-4">
           {/* Add Story Button */}
           <AddStoryButton />

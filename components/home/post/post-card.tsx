@@ -187,7 +187,7 @@ const PostCard = ({ isActive, ...post }: FeedPost & { isActive?: boolean }) => {
       />
       
       {sound ? (
-        <div className="absolute bottom-28 left-3 z-30">
+        <div className="absolute bottom-28 left-3 right-3 z-30 flex">
           <SoundChip sound={sound} />
         </div>
       ) : null}

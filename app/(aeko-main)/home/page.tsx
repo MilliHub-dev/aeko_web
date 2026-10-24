@@ -128,7 +128,7 @@ export default function Home() {
 
   return (
     <div 
-      className="flex flex-col min-h-[100dvh]"
+      className="flex flex-col min-h-[100dvh] w-full min-w-0 max-w-full"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
@@ -136,7 +136,7 @@ export default function Home() {
       <ClientPostsFetcher />
 
       {/* Header Section */}
-      <div className="flex-none w-full md:max-w-2xl mx-auto bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 border-b border-border/40">
+      <div className="flex-none w-full min-w-0 max-w-full md:max-w-2xl mx-auto bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 border-b border-border/40">
         <Stories />
         
         {/* Tab Switcher */}

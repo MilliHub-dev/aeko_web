@@ -237,7 +237,7 @@ const PostText = ({
   return (
     <div className={clsx("flex flex-col gap-4 py-6", className)}>
       <div className="relative">
-        <p className="text-xl md:text-3xl leading-relaxed whitespace-pre-wrap">
+        <p className="text-xl md:text-3xl leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
           {renderFormattedText(displayContent)}
         </p>
 
@@ -256,7 +256,7 @@ const PostText = ({
           {hashtags.map((tag, i) => (
             <span
               key={i}
-              className="text-primary hover:underline cursor-pointer text-lg">
+              className="text-primary hover:underline cursor-pointer text-lg break-all">
               #{tag}
             </span>
           ))}
@@ -268,7 +268,7 @@ const PostText = ({
           {taggedUsers.map((tagUser, i) => (
             <span
               key={i}
-              className="text-primary hover:underline cursor-pointer text-lg">
+              className="text-primary hover:underline cursor-pointer text-lg break-all">
               @{tagUser}
             </span>
           ))}

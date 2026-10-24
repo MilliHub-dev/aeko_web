@@ -8,8 +8,8 @@ export const LAYOUT_CONSTANTS = {
   MAX_WIDTH_AUTH: "max-w-xl lg:max-w-7xl 2xl:max-w-[1600px]",
 
   // Grid column configurations
-  GRID_COLS_SIMPLE: "md:grid-cols-[5.625rem_1fr] xl:grid-cols-[24rem_1fr]",
-  GRID_COLS_FULL: "md:grid-cols-[5.625rem_1fr] xl:grid-cols-[24rem_minmax(0,1fr)_24rem]",
+  GRID_COLS_SIMPLE: "grid-cols-[minmax(0,1fr)] md:grid-cols-[5.625rem_minmax(0,1fr)] xl:grid-cols-[24rem_minmax(0,1fr)]",
+  GRID_COLS_FULL: "grid-cols-[minmax(0,1fr)] md:grid-cols-[5.625rem_minmax(0,1fr)] xl:grid-cols-[24rem_minmax(0,1fr)_24rem]",
 
   // Standard padding
   PADDING_X: "px-6 sm:px-8 lg:px-12",

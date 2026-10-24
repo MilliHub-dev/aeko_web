@@ -89,7 +89,7 @@ const PostModal = ({
 									<div className="flex-1 overflow-y-auto p-4 space-y-6">
 										{/* Caption */}
 										<div>
-											<p className="text-sm md:text-base leading-relaxed mb-2">
+											<p className="text-sm md:text-base leading-relaxed mb-2 break-words [overflow-wrap:anywhere]">
 												{post.text}
 											</p>
 										</div>
