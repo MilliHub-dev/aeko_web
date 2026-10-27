@@ -16,6 +16,7 @@ function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
   const userId = searchParams.get("userId");
+  const emailSent = searchParams.get("sent") !== "0";
   const [state, formAction, isPending] = useActionState(
     verifyEmailAction,
     initialState
@@ -115,6 +116,11 @@ function VerifyEmailContent() {
           <p className="text-red-400 text-sm">{state.message}</p>
         )}
 
+        {!emailSent && !resendMessage && (
+          <p className="text-amber-300 text-sm">
+            We couldn&apos;t send your code. Tap “Resend code” to try again.
+          </p>
+        )}
         {resendMessage && (
           <p className="text-green-400 text-sm">{resendMessage}</p>
         )}

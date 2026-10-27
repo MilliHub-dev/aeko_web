@@ -154,6 +154,7 @@ export async function signupAction(
   }
 
   let userId: string | undefined;
+  let emailSent = true;
 
   try {
     const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
@@ -189,6 +190,8 @@ export async function signupAction(
     }
 
     userId = data.userId;
+    // 201 with emailSent:false means the account exists but the code never left the server.
+    emailSent = data.emailSent !== false;
 
     // Auto-login after successful signup
     if (data.token) {
@@ -207,7 +210,7 @@ export async function signupAction(
   redirect(
     `/verify-email?email=${encodeURIComponent(
       email as string
-    )}&userId=${encodeURIComponent(userId || "")}`
+    )}&userId=${encodeURIComponent(userId || "")}${emailSent ? "" : "&sent=0"}`
   );
 }
 
